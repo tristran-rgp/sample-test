@@ -2441,6 +2441,104 @@
     .bottom-bar .val { color: #fff; font-variant-numeric: tabular-nums; }
     .bottom-bar .win-slot { color: var(--green); }
     .bottom-bar .bal-before { color: #aab4c0; }
+    .bottom-bar .win-block {
+      display: inline-flex; align-items: center; gap: 4px;
+      cursor: pointer; user-select: none;
+      padding: 2px 6px; border-radius: 6px;
+      transition: background .15s;
+    }
+    .bottom-bar .win-block:hover { background: rgba(0,255,136,.08); }
+    .bottom-bar .win-explain-btn {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 1px solid rgba(0,255,136,.45);
+      background: rgba(0,20,30,.6); color: var(--green);
+      font-size: .85rem; line-height: 1; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 0;
+    }
+    .bottom-bar .win-explain-btn:hover {
+      background: rgba(0,255,136,.2);
+      box-shadow: 0 0 8px rgba(0,255,136,.35);
+    }
+    /* ── Win explain panel (zoomable) ── */
+    #modalWinExplain .modal { max-width: min(720px, 96vw); width: 100%; }
+    #modalWinExplain .wx-toolbar {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      margin-bottom: 12px;
+    }
+    #modalWinExplain .wx-toolbar .btn-sm {
+      padding: 4px 10px; font-size: .75rem; border-radius: 6px;
+      border: 1px solid rgba(0,240,255,.35); background: rgba(0,20,40,.7);
+      color: var(--cyan, #00f0ff); cursor: pointer;
+    }
+    #modalWinExplain .wx-toolbar .btn-sm:hover { background: rgba(0,240,255,.15); }
+    #modalWinExplain .wx-zoom-label { color: #888; font-size: .75rem; min-width: 48px; }
+    #modalWinExplain .wx-scroll {
+      max-height: min(70vh, 640px); overflow: auto;
+      border: 1px solid rgba(0,240,255,.15); border-radius: 10px;
+      padding: 12px; background: rgba(0,0,0,.25);
+    }
+    #modalWinExplain .wx-zoom-stage {
+      transform-origin: top left;
+      transition: transform .15s ease;
+    }
+    #modalWinExplain .wx-summary {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px; margin-bottom: 14px;
+    }
+    #modalWinExplain .wx-card {
+      background: rgba(0,30,50,.55); border: 1px solid rgba(0,240,255,.18);
+      border-radius: 8px; padding: 8px 10px;
+    }
+    #modalWinExplain .wx-card .k { display: block; color: #888; font-size: .7rem; margin-bottom: 2px; }
+    #modalWinExplain .wx-card .v { color: #fff; font-weight: 700; font-variant-numeric: tabular-nums; }
+    #modalWinExplain .wx-card .v.green { color: var(--green); }
+    #modalWinExplain .wx-formula {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: .78rem; color: #cde; background: rgba(0,0,0,.35);
+      border-left: 3px solid var(--green); padding: 8px 10px; border-radius: 0 8px 8px 0;
+      margin: 8px 0 14px; line-height: 1.55; white-space: pre-wrap;
+    }
+    #modalWinExplain .wx-section-title {
+      color: var(--cyan, #00f0ff); font-size: .8rem; font-weight: 700;
+      margin: 12px 0 8px; letter-spacing: .04em;
+    }
+    #modalWinExplain .wx-way {
+      border: 1px solid rgba(255,255,255,.08); border-radius: 8px;
+      padding: 10px; margin-bottom: 8px; background: rgba(0,15,25,.5);
+    }
+    #modalWinExplain .wx-way-head {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      margin-bottom: 6px; font-size: .85rem;
+    }
+    #modalWinExplain .wx-way-head img {
+      width: 32px; height: 32px; object-fit: contain;
+      filter: drop-shadow(0 0 4px rgba(0,255,136,.4));
+    }
+    #modalWinExplain .wx-way .wx-math {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: .74rem; color: #9fd; line-height: 1.5;
+    }
+    #modalWinExplain .wx-mini-grid {
+      display: grid; grid-template-columns: repeat(5, 36px); gap: 3px;
+      justify-content: start; margin: 8px 0 4px;
+    }
+    #modalWinExplain .wx-mini-cell {
+      width: 36px; height: 36px; border-radius: 4px;
+      background: #0a1520; border: 1px solid #1a3040;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    #modalWinExplain .wx-mini-cell img { width: 30px; height: 30px; object-fit: contain; }
+    #modalWinExplain .wx-mini-cell.hit {
+      border-color: #00ff88; box-shadow: 0 0 8px rgba(0,255,136,.55);
+      background: rgba(0,80,40,.35);
+    }
+    #modalWinExplain .wx-mini-cell.hit-rtl {
+      border-color: #00f0ff; box-shadow: 0 0 8px rgba(0,240,255,.5);
+    }
+    #modalWinExplain .wx-empty { color: #888; font-size: .85rem; padding: 20px 8px; text-align: center; }
+    #modalWinExplain .wx-note { color: #8899aa; font-size: .72rem; margin-top: 10px; line-height: 1.45; }
 
     /* Shared modal / overlay styles */
     .btn {
@@ -3223,13 +3321,38 @@
 
   <div class="bottom-bar">
     <div><span class="label">BET</span><span class="val" id="betAmount">$1.00</span></div>
-    <div><span class="label">WIN</span><span class="val win-slot" id="headerWin">0.00</span></div>
+    <div class="win-block" title="Bấm để xem cách tính win">
+      <span class="label">WIN</span>
+      <span class="val win-slot" id="headerWin">0.00</span>
+      <button type="button" class="win-explain-btn" id="btnWinExplain" title="Giải thích win spin vừa rồi">⌕</button>
+    </div>
     <div><span class="label">BALANCE BEFORE</span><span class="val bal-before" id="balanceBeforeDisplay">10,000.00 ₫</span></div>
     <div><span class="label">BALANCE</span><span class="val" id="balanceDisplay">10,000.00 ₫</span></div>
   </div>
 </div>
 
 <!-- Modals -->
+<div class="modal-overlay" id="modalWinExplain">
+  <div class="modal">
+    <h2>WIN BREAKDOWN · Spin vừa rồi</h2>
+    <div class="wx-toolbar">
+      <button type="button" class="btn-sm" id="wxZoomOut" title="Thu nhỏ">−</button>
+      <span class="wx-zoom-label" id="wxZoomLabel">100%</span>
+      <button type="button" class="btn-sm" id="wxZoomIn" title="Phóng to">+</button>
+      <button type="button" class="btn-sm" id="wxZoomReset">Reset</button>
+      <button type="button" class="btn-sm" id="wxHighlightGrid" title="Highlight ô thắng trên lưới chính">Highlight lưới</button>
+    </div>
+    <div class="wx-scroll" id="wxScroll">
+      <div class="wx-zoom-stage" id="wxZoomStage">
+        <div id="winExplainBody" class="wx-empty">Chưa có spin — quay một ván rồi mở lại.</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="closeWinExplain">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modalBet">
   <div class="modal">
     <h2>SELECT BET LEVEL</h2>
@@ -4131,6 +4254,8 @@ const state = {
   grid: [],
   cellMeta: [],
   lastWin: 0,
+  /** Breakdown win spin vừa rồi (panel giải thích) */
+  lastSpinExplain: null,
   sessionWin: 0,
   // Free spins
   inFreeSpins: false,
@@ -5277,6 +5402,271 @@ function cellsForWin(w) {
   return cells;
 }
 
+// ─── Win explain (breakdown spin vừa rồi) ─────────────────────
+let _wxZoom = 1;
+
+function countsPerReelFromPositions(positions, length, direction) {
+  const counts = Array(REELS).fill(0);
+  if (!Array.isArray(positions)) return counts;
+  for (const p of positions) {
+    const c = Array.isArray(p) ? Number(p[0]) : Number(p.c);
+    if (c >= 0 && c < REELS) counts[c] += 1;
+  }
+  // Chuỗi LTR: reel 0..length-1; RTL: (REELS-1) xuống
+  const chain = [];
+  for (let i = 0; i < length; i++) {
+    const c = direction === 'rtl' ? (REELS - 1 - i) : i;
+    chain.push(Math.max(1, counts[c] || 0));
+  }
+  return chain;
+}
+
+function waysProduct(chainCounts) {
+  return (chainCounts || []).reduce((a, b) => a * Math.max(0, b), 1) || 0;
+}
+
+/**
+ * Lưu snapshot giải thích win cho spin vừa settle.
+ * @param {object} opts
+ */
+function recordSpinWinExplain(opts = {}) {
+  const bet = Number(opts.bet ?? state.bet) || 0;
+  const totalWin = Number(opts.totalWin ?? state.lastWin) || 0;
+  const winsIn = Array.isArray(opts.wins) ? opts.wins : [];
+  const screen = opts.screen || null;
+  // Snapshot grid text keys if no screen
+  let gridSnap = null;
+  if (Array.isArray(screen) && screen.length === REELS) {
+    gridSnap = screen.map(col => (Array.isArray(col) ? col.map(id => SYM_MAP[id] || id) : []));
+  } else if (state.grid?.length) {
+    gridSnap = state.grid.map(col => col.map(s => s));
+  }
+
+  const globalMult = Math.max(1, Number(opts.globalMultiplier ?? state.globalMultiplier) || 1);
+  const featureNames = (opts.featureNames || (state.triggeredFeatures || []).map(f => f.name || f.id)).filter(Boolean);
+
+  const lines = winsIn.map((w, idx) => {
+    const sym = w.sym || 'A';
+    const length = Number(w.length) || 3;
+    const dir = w.direction === 'rtl' ? 'rtl' : 'ltr';
+    const payMult = Number(SYMBOLS[sym]?.pays?.[length]) || 0;
+    let chainCounts = Array.isArray(w.reelPositions) && w.reelPositions.length
+      ? w.reelPositions.map(Number)
+      : countsPerReelFromPositions(w.positions, length, dir);
+    // Offline calcWays already has winCount
+    let ways = Number(w.winCount);
+    if (!Number.isFinite(ways) || ways <= 0) ways = waysProduct(chainCounts);
+    const cellMult = Number(w.symMult || w.cellMult) || 1;
+    const rawServerWin = Number(w.win) || 0;
+    // Công thức base (chưa Bandwidth global — server có thể đã nhân sẵn vào win)
+    const baseLine = ways * payMult * bet * cellMult;
+    const positions = Array.isArray(w.positions)
+      ? w.positions.map(p => (Array.isArray(p) ? [p[0], p[1]] : [p.c, p.r]))
+      : cellsForWin(w).map(k => k.split(',').map(Number));
+
+    return {
+      idx: idx + 1,
+      sym,
+      name: SYMBOLS[sym]?.name || sym,
+      img: SYMBOLS[sym]?.img || '',
+      length,
+      direction: dir,
+      chainCounts,
+      ways,
+      payMult,
+      bet,
+      cellMult,
+      baseLine,
+      win: rawServerWin,
+      positions,
+    };
+  });
+
+  const sumLines = lines.reduce((s, L) => s + (L.win || 0), 0);
+  const jp = opts.progressiveJackpot || null;
+  const jpWin = jp && (jp.isTriggered === true || jp.isTriggered === 'true' || jp.tier)
+    ? (parseFloat(jp.win) || 0)
+    : 0;
+
+  state.lastSpinExplain = {
+    at: Date.now(),
+    source: opts.source || 'local',
+    bet,
+    totalWin,
+    balanceBefore: Number(opts.balanceBefore ?? state.balanceBefore) || 0,
+    balanceAfter: Number(opts.balanceAfter ?? state.balance) || 0,
+    thisMode: opts.thisMode || (state.inFreeSpins ? 'free' : 'base'),
+    globalMult,
+    featureNames,
+    maxWinReached: !!opts.maxWinReached,
+    spinId: opts.spinId || '',
+    roundId: opts.roundId || '',
+    gridSnap,
+    lines,
+    sumLines,
+    jpWin,
+    jpTier: jp?.tier || jp?.tierName || '',
+    note: opts.note || '',
+  };
+  // Nút có badge nhẹ khi có win
+  const btn = document.getElementById('btnWinExplain');
+  if (btn) btn.style.opacity = totalWin > 0 ? '1' : '0.55';
+}
+
+function setWinExplainZoom(z) {
+  _wxZoom = Math.min(1.8, Math.max(0.7, z));
+  const stage = document.getElementById('wxZoomStage');
+  const lab = document.getElementById('wxZoomLabel');
+  if (stage) stage.style.transform = `scale(${_wxZoom})`;
+  if (lab) lab.textContent = `${Math.round(_wxZoom * 100)}%`;
+}
+
+function renderWinExplainBody() {
+  const body = document.getElementById('winExplainBody');
+  if (!body) return;
+  const ex = state.lastSpinExplain;
+  if (!ex) {
+    body.className = 'wx-empty';
+    body.innerHTML = 'Chưa có spin — quay một ván rồi mở lại.';
+    return;
+  }
+  body.className = '';
+
+  const modeLabel = ex.thisMode === 'free' ? 'Free Spin' : 'Base';
+  const cards = `
+    <div class="wx-summary">
+      <div class="wx-card"><span class="k">BET</span><span class="v">${fmtBalance(ex.bet)}</span></div>
+      <div class="wx-card"><span class="k">TOTAL WIN</span><span class="v green">${fmtBalance(ex.totalWin)}</span></div>
+      <div class="wx-card"><span class="k">BALANCE BEFORE</span><span class="v">${fmtBalance(ex.balanceBefore)}</span></div>
+      <div class="wx-card"><span class="k">BALANCE AFTER</span><span class="v">${fmtBalance(ex.balanceAfter)}</span></div>
+      <div class="wx-card"><span class="k">MODE</span><span class="v">${modeLabel}</span></div>
+      <div class="wx-card"><span class="k">WAYS / LINES</span><span class="v">${ex.lines.length}</span></div>
+    </div>`;
+
+  let formulaTop = `Tổng win spin = Σ (từng way)`;
+  if (ex.globalMult > 1) {
+    formulaTop += `\nBandwidth / global mult hiển thị: ×${ex.globalMult} (server thường đã nhân sẵn trong từng win)`;
+  }
+  if (ex.jpWin > 0) {
+    formulaTop += `\n+ Jackpot ${ex.jpTier || ''} = ${fmtBalance(ex.jpWin)}`;
+  }
+  if (ex.maxWinReached) formulaTop += `\n⚠ maxWinReached — có thể đã cap`;
+  formulaTop += `\nΣ wins[] server = ${fmtBalance(ex.sumLines)}  ·  round.totalWin = ${fmtBalance(ex.totalWin)}`;
+
+  // Mini grid 5×3 (row-major visual: row r, col c)
+  let mini = '';
+  if (ex.gridSnap) {
+    const hit = new Set();
+    const hitRtl = new Set();
+    for (const L of ex.lines) {
+      for (const [c, r] of L.positions || []) {
+        (L.direction === 'rtl' ? hitRtl : hit).add(`${c},${r}`);
+      }
+    }
+    mini = `<div class="wx-section-title">LƯỚI PAYOUT (cột →)</div><div class="wx-mini-grid">`;
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < REELS; c++) {
+        const key = `${c},${r}`;
+        const sym = ex.gridSnap[c]?.[r] || '';
+        const img = SYMBOLS[sym]?.img || '';
+        const cls = hitRtl.has(key) ? 'wx-mini-cell hit-rtl' : (hit.has(key) ? 'wx-mini-cell hit' : 'wx-mini-cell');
+        mini += `<div class="${cls}" title="col ${c}, row ${r}: ${sym}">${
+          img ? `<img src="${img}" alt="${sym}">` : `<span style="font-size:.65rem;color:#666">${sym || '·'}</span>`
+        }</div>`;
+      }
+    }
+    mini += `</div>
+      <div class="wx-note">Viền xanh = ô tham gia way LTR · viền cyan = RTL (Bypass). Mỗi ô đếm 1 lần trên reel → nhân ways.</div>`;
+  }
+
+  let feats = '';
+  if (ex.featureNames?.length) {
+    feats = `<div class="wx-section-title">MINI-FEATURES SPIN NÀY</div>
+      <div style="font-size:.8rem;color:#bcd;margin-bottom:8px">${ex.featureNames.map(n => `• ${n}`).join('<br>')}</div>`;
+  }
+
+  let linesHtml = `<div class="wx-section-title">TỪNG WAY WIN (243-ways)</div>`;
+  if (!ex.lines.length) {
+    linesHtml += `<div class="wx-empty" style="padding:12px">Không có way win (totalWin có thể từ jackpot / scatter).</div>`;
+  } else {
+    linesHtml += ex.lines.map(L => {
+      const chainStr = L.chainCounts.join(' × ');
+      const dirLabel = L.direction === 'rtl' ? 'RTL' : 'LTR';
+      return `<div class="wx-way">
+        <div class="wx-way-head">
+          ${L.img ? `<img src="${L.img}" alt="">` : ''}
+          <strong>#${L.idx} ${L.name}</strong>
+          <span style="color:#888">(${L.sym})</span>
+          <span style="color:var(--cyan,#00f0ff)">${dirLabel}</span>
+          <span style="color:var(--green);margin-left:auto;font-weight:800">${fmtBalance(L.win)}</span>
+        </div>
+        <div class="wx-math">
+chuỗi: <strong>${L.length}</strong>-of-a-kind
+  ·  ô/reel: [${chainStr}]  →  ways = <strong>${L.ways}</strong>
+paytable[${L.length}] = <strong>${L.payMult}</strong>× bet
+  ·  bet = ${fmtBalance(L.bet)}
+${L.cellMult > 1 ? `cell / overclock mult = ×${L.cellMult}\n` : ''}công thức ước lượng:
+  ways × pay × bet${L.cellMult > 1 ? ' × cellMult' : ''}
+  = ${L.ways} × ${L.payMult} × ${L.bet}${L.cellMult > 1 ? ` × ${L.cellMult}` : ''}
+  = <strong>${fmtBalance(L.baseLine)}</strong>
+win server (đã gồm mult nếu có): <strong>${fmtBalance(L.win)}</strong>
+${Math.abs(L.baseLine - L.win) > 0.02 * Math.max(1, L.bet)
+  ? `Δ so estimate: ${fmtBalance(L.win - L.baseLine)} (Bandwidth / cap / rounding)`
+  : '≈ khớp paytable × ways × bet'}
+positions [col,row]: ${JSON.stringify(L.positions)}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  const meta = (ex.spinId || ex.roundId)
+    ? `<div class="wx-note">spinId: ${ex.spinId || '—'} · roundId: ${ex.roundId || '—'} · source: ${ex.source}</div>`
+    : `<div class="wx-note">source: ${ex.source}</div>`;
+
+  body.innerHTML = cards
+    + `<div class="wx-formula">${formulaTop}</div>`
+    + mini
+    + feats
+    + linesHtml
+    + meta
+    + `<div class="wx-note">243-ways: từ trái→phải (hoặc phải→trái nếu Bypass), mỗi reel có N ô symbol/wild → nhân N. Không dùng payline cố định. Wild (11) thay cho symbol đang tính.</div>`;
+}
+
+function openWinExplain() {
+  renderWinExplainBody();
+  setWinExplainZoom(_wxZoom || 1);
+  openModal('modalWinExplain');
+}
+
+function highlightExplainOnMainGrid() {
+  const ex = state.lastSpinExplain;
+  if (!ex?.lines?.length) {
+    showToast('Không có ô win để highlight', '#ff8800');
+    return;
+  }
+  const all = [];
+  for (const L of ex.lines) {
+    for (const [c, r] of L.positions || []) {
+      const k = `${c},${r}`;
+      if (!all.includes(k)) all.push(k);
+    }
+  }
+  closeModal('modalWinExplain');
+  renderGrid(all);
+  document.querySelectorAll('#reelsGrid .cell').forEach(el => {
+    const k = `${el.dataset.reel},${el.dataset.row}`;
+    el.classList.toggle('win', all.includes(k));
+    el.classList.toggle('win-ltr', all.includes(k));
+  });
+  showToast(`Highlight ${all.length} ô thắng`, '#00ff88');
+  setTimeout(() => {
+    document.querySelectorAll('#reelsGrid .cell').forEach(el => {
+      el.classList.remove('win', 'win-ltr', 'win-rtl');
+    });
+    renderGrid();
+  }, 4500);
+}
+
 async function animateWinWays(wins, total) {
   const wrap = document.getElementById('reelsWrapper');
   wrap?.classList.add('dim-win');
@@ -5930,6 +6320,20 @@ async function doSpin(forcedScatters = 0) {
   state.lastWin = finalWin;
   state.balance += finalWin;
 
+  recordSpinWinExplain({
+    source: 'local',
+    bet: state.bet,
+    totalWin: finalWin,
+    wins,
+    balanceBefore: state.balanceBefore,
+    balanceAfter: state.balance,
+    thisMode: state.inFreeSpins ? 'free' : 'base',
+    globalMultiplier: state.globalMultiplier,
+    maxWinReached: capped,
+    featureNames: (features || []).map(f => f.name || f.id),
+    note: jackpotWin > 0 ? `local jackpot +${jackpotWin}` : '',
+  });
+
   if (state.inFreeSpins) {
     state.fsSessionWin += finalWin;
     state.fsRemaining--;
@@ -6157,6 +6561,19 @@ function initUI() {
     openModal('modalBet');
   });
   document.getElementById('closeBet').addEventListener('click', () => closeModal('modalBet'));
+  document.getElementById('btnWinExplain')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openWinExplain();
+  });
+  document.querySelector('.bottom-bar .win-block')?.addEventListener('click', () => openWinExplain());
+  document.getElementById('closeWinExplain')?.addEventListener('click', () => closeModal('modalWinExplain'));
+  document.getElementById('modalWinExplain')?.addEventListener('click', (e) => {
+    if (e.target.id === 'modalWinExplain') closeModal('modalWinExplain');
+  });
+  document.getElementById('wxZoomIn')?.addEventListener('click', () => setWinExplainZoom(_wxZoom + 0.1));
+  document.getElementById('wxZoomOut')?.addEventListener('click', () => setWinExplainZoom(_wxZoom - 0.1));
+  document.getElementById('wxZoomReset')?.addEventListener('click', () => setWinExplainZoom(1));
+  document.getElementById('wxHighlightGrid')?.addEventListener('click', () => highlightExplainOnMainGrid());
   document.getElementById('btnMenu').addEventListener('click', () => openModal('modalMenu'));
   document.getElementById('closeMenu').addEventListener('click', () => closeModal('modalMenu'));
   document.getElementById('menuPaytable').addEventListener('click', () => { closeModal('modalMenu'); openModal('modalPaytable'); });
@@ -10259,7 +10676,7 @@ async function doOnlineSpin(opts = {}) {
   const {
     screen, baseScreen, featureSteps, splitCounts, featObjs, wins, totalWin,
     maxWinReached, control, payload, cellMultipliers, activeIds,
-    progressiveJackpot, roundId, spinId,
+    progressiveJackpot, roundId, spinId, thisMode,
   } = parsed;
 
   // Feature meter: active (FS persistent) + spin features
@@ -10361,6 +10778,24 @@ async function doOnlineSpin(opts = {}) {
     }
 
     state.lastWin = totalWin;
+
+    recordSpinWinExplain({
+      source: isBuy ? `online-buy:${buyFeature}` : 'online',
+      bet,
+      totalWin,
+      wins,
+      screen,
+      balanceBefore: state.balanceBefore,
+      balanceAfter: state.balance,
+      thisMode: thisMode || (wasInFS || state.inFreeSpins ? 'free' : 'base'),
+      globalMultiplier: state.globalMultiplier,
+      maxWinReached,
+      featureNames: (featObjs || []).map(f => f.name || f.id),
+      progressiveJackpot: progressiveJackpot,
+      spinId,
+      roundId,
+    });
+
     // Không set headerWin = total trước ticker — để cộng tiền nhìn thấy
     document.getElementById('headerWin').textContent = totalWin > 0 ? '0.00' : '0.00';
 
