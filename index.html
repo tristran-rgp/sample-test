@@ -2440,6 +2440,7 @@
     .bottom-bar .label { color: #888; font-weight: 600; margin-right: 6px; font-size: .75rem; }
     .bottom-bar .val { color: #fff; font-variant-numeric: tabular-nums; }
     .bottom-bar .win-slot { color: var(--green); }
+    .bottom-bar .bal-before { color: #aab4c0; }
 
     /* Shared modal / overlay styles */
     .btn {
@@ -3223,7 +3224,8 @@
   <div class="bottom-bar">
     <div><span class="label">BET</span><span class="val" id="betAmount">$1.00</span></div>
     <div><span class="label">WIN</span><span class="val win-slot" id="headerWin">0.00</span></div>
-    <div><span class="label">BALANCE</span><span class="val" id="balanceDisplay">0010000.00</span></div>
+    <div><span class="label">BALANCE BEFORE</span><span class="val bal-before" id="balanceBeforeDisplay">10,000.00 ₫</span></div>
+    <div><span class="label">BALANCE</span><span class="val" id="balanceDisplay">10,000.00 ₫</span></div>
   </div>
 </div>
 
@@ -4112,6 +4114,8 @@ const REEL_STRIPS = [
 // ─── State ───────────────────────────────────────────────────
 const state = {
   balance: 10000,
+  /** Số dư chụp lúc bắt đầu spin (trước debit/win) — giữ đến spin kế */
+  balanceBefore: 10000,
   bet: 1.00,
   betIdx: 4,
   spinning: false,
@@ -5114,11 +5118,18 @@ function renderFeatureMeter(activeIds = []) {
 }
 
 function updateUI() {
+  const beforeEl = document.getElementById('balanceBeforeDisplay');
+  if (beforeEl) beforeEl.textContent = fmtBalance(state.balanceBefore);
   document.getElementById('balanceDisplay').textContent = fmtBalance(state.balance);
   document.getElementById('betAmount').textContent = fmt(state.bet);
   document.getElementById('headerWin').textContent = state.lastWin.toFixed(2);
   const mult = Math.max(1, state.globalMultiplier || 1);
   document.getElementById('multDisplay').textContent = String(mult).padStart(2, '0');
+}
+
+/** Chụp số dư sau trừ bet/phí, trước khi credit win (spin đang chờ kết quả). */
+function captureBalanceBefore() {
+  state.balanceBefore = Number(state.balance) || 0;
 }
 
 function setInfoBar(mode, text) {
@@ -5837,6 +5848,8 @@ async function doSpin(forcedScatters = 0) {
     state.balance -= cost;
     state.txnId = genTxnId();
   }
+  // Snapshot sau trừ bet — BEFORE = số dư khi spin đang chờ kết quả win/lose
+  captureBalanceBefore();
 
   state.spinning = true;
   state.lastWin = 0;
@@ -6741,7 +6754,7 @@ function applyServerScreen(screen, splitCounts) {
   return true;
 }
 
-function applyOnlineBalance(payload) {
+function applyOnlineBalance(payload, { syncBefore = false } = {}) {
   const raw =
     payload?.data?.control?.balance ??
     payload?.control?.balance ??
@@ -6751,6 +6764,8 @@ function applyOnlineBalance(payload) {
   if (Number.isNaN(bal)) return false;
   onlineBalance = bal;
   state.balance = bal;
+  // JOIN / last-session: BEFORE = balance hiện tại (chưa có spin pending)
+  if (syncBefore) state.balanceBefore = bal;
   updateUI();
   return true;
 }
@@ -6930,7 +6945,7 @@ function parseOnlineRound(payload) {
  */
 function restoreOnlineSessionFromPayload(payload, { autoContinueFs = false } = {}) {
   if (!payload) return;
-  applyOnlineBalance(payload);
+  applyOnlineBalance(payload, { syncBefore: true });
   const parsed = parseOnlineRound(payload);
   if (parsed.screen) {
     applyServerScreen(parsed.screen, parsed.splitCounts);
@@ -10083,7 +10098,7 @@ function handleWSMessage(msg) {
         break;
 
       case '1503': // GET_BALANCE
-        applyOnlineBalance(payload);
+        applyOnlineBalance(payload, { syncBefore: !state.spinning });
         break;
 
       case '1501': // BUY_FEATURE — FS / scatter / 3 / 12 → full spin result
@@ -10116,7 +10131,7 @@ function handleWSMessage(msg) {
         break;
 
       case '1531': // BALANCE_UPDATED push
-        applyOnlineBalance(payload);
+        applyOnlineBalance(payload, { syncBefore: !state.spinning });
         break;
     }
   }
@@ -10129,7 +10144,8 @@ function handleSpinResponse(payload) {
     return;
   }
 
-  applyOnlineBalance(payload);
+  // Không sync BEFORE — giữ snapshot lúc bấm spin (trước kết quả)
+  applyOnlineBalance(payload, { syncBefore: false });
   pendingSpinData = { payload, ...parsed };
 
   if (pendingSpinResolve) {
@@ -10187,7 +10203,6 @@ async function doOnlineSpin(opts = {}) {
     }
     if (hint > 0) {
       state.balance -= hint;
-      updateUI();
     }
     showToast(`BUY_FEATURE ${buyFeature} — ${hint ? fmt(hint) : 'server cost'}`, '#aa44ff');
   } else if (!state.inFreeSpins) {
@@ -10200,8 +10215,11 @@ async function doOnlineSpin(opts = {}) {
       return;
     }
     state.balance -= cost;
-    updateUI();
   }
+
+  // Snapshot sau trừ bet/phí — BEFORE = số dư khi đang chờ kết quả win/lose
+  captureBalanceBefore();
+  updateUI();
 
   pendingSpinData = null;
   if (isBuy) {
