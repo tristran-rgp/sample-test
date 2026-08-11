@@ -4162,12 +4162,13 @@ function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
 function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function fmt(n) { return '$' + Number(n || 0).toFixed(2); }
 function fmtBalance(n) {
-  // Giữ style pad 7 chữ số (0010000.50), nhưng KHÔNG làm tròn phần thập phân về .00
+  // Định dạng VND: dấu phẩy hàng nghìn, giữ 2 số thập phân + ký hiệu ₫
   const fixed = Number(n || 0).toFixed(2);
   const [intPart, decPart] = fixed.split('.');
   const sign = intPart.startsWith('-') ? '-' : '';
   const digits = sign ? intPart.slice(1) : intPart;
-  return sign + digits.padStart(7, '0') + '.' + decPart;
+  const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return sign + grouped + '.' + decPart + ' ₫';
 }
 function sleep(ms) { return new Promise(r => setTimeout(r, state.fastSpin ? ms * 0.3 : ms)); }
 function sleepRaw(ms) { return new Promise(r => setTimeout(r, ms)); }
