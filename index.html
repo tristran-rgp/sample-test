@@ -2504,41 +2504,140 @@
       margin: 12px 0 8px; letter-spacing: .04em;
     }
     #modalWinExplain .wx-way {
-      border: 1px solid rgba(255,255,255,.08); border-radius: 8px;
-      padding: 10px; margin-bottom: 8px; background: rgba(0,15,25,.5);
+      border: 1px solid rgba(0,255,136,.18);
+      border-radius: 12px;
+      padding: 0;
+      margin-bottom: 12px;
+      background: linear-gradient(165deg, rgba(0,28,40,.85), rgba(0,12,20,.92));
+      overflow: hidden;
+      box-shadow: 0 4px 18px rgba(0,0,0,.35);
     }
     #modalWinExplain .wx-way-head {
-      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
-      margin-bottom: 6px; font-size: .85rem;
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      padding: 12px 14px;
+      background: rgba(0,40,55,.55);
+      border-bottom: 1px solid rgba(0,255,136,.12);
+      font-size: .88rem;
     }
     #modalWinExplain .wx-way-head img {
-      width: 32px; height: 32px; object-fit: contain;
-      filter: drop-shadow(0 0 4px rgba(0,255,136,.4));
+      width: 40px; height: 40px; object-fit: contain;
+      filter: drop-shadow(0 0 8px rgba(0,255,136,.55));
+      background: rgba(0,0,0,.35); border-radius: 8px; padding: 2px;
     }
-    #modalWinExplain .wx-way .wx-math {
+    #modalWinExplain .wx-way-title { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    #modalWinExplain .wx-way-title strong { color: #fff; font-size: .95rem; }
+    #modalWinExplain .wx-way-title .sub { color: #8aa; font-size: .72rem; }
+    #modalWinExplain .wx-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px; border-radius: 999px; font-size: .68rem; font-weight: 700;
+      letter-spacing: .02em; white-space: nowrap;
+    }
+    #modalWinExplain .wx-pill.dir-ltr { background: rgba(0,255,136,.15); color: #00ff88; border: 1px solid rgba(0,255,136,.35); }
+    #modalWinExplain .wx-pill.dir-rtl { background: rgba(0,240,255,.12); color: #00f0ff; border: 1px solid rgba(0,240,255,.35); }
+    #modalWinExplain .wx-pill.oak { background: rgba(255,200,80,.12); color: #ffc850; border: 1px solid rgba(255,200,80,.35); }
+    #modalWinExplain .wx-pill.ok { background: rgba(0,255,136,.18); color: #00ff88; border: 1px solid rgba(0,255,136,.4); }
+    #modalWinExplain .wx-pill.warn { background: rgba(255,136,0,.15); color: #ff8800; border: 1px solid rgba(255,136,0,.4); }
+    #modalWinExplain .wx-way-amount {
+      margin-left: auto; color: #00ff88; font-weight: 900; font-size: 1.15rem;
+      font-variant-numeric: tabular-nums; text-shadow: 0 0 12px rgba(0,255,136,.35);
+    }
+    #modalWinExplain .wx-way-body { padding: 12px 14px 14px; }
+    #modalWinExplain .wx-steps {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    #modalWinExplain .wx-step {
+      display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start;
+    }
+    #modalWinExplain .wx-step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .72rem; font-weight: 800; color: #001820;
+      background: linear-gradient(135deg, #00f0ff, #00ff88);
+      box-shadow: 0 0 10px rgba(0,255,136,.35);
+    }
+    #modalWinExplain .wx-step-body { min-width: 0; }
+    #modalWinExplain .wx-step-label {
+      font-size: .68rem; font-weight: 700; color: #7a9; letter-spacing: .06em;
+      text-transform: uppercase; margin-bottom: 4px;
+    }
+    #modalWinExplain .wx-step-text { font-size: .8rem; color: #d8e8f0; line-height: 1.45; }
+    #modalWinExplain .wx-reel-row {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px;
+    }
+    #modalWinExplain .wx-reel-chip {
+      min-width: 44px; padding: 6px 8px; border-radius: 8px; text-align: center;
+      background: rgba(0,0,0,.4); border: 1px solid rgba(0,240,255,.2);
+    }
+    #modalWinExplain .wx-reel-chip .rk { display: block; font-size: .62rem; color: #789; margin-bottom: 2px; }
+    #modalWinExplain .wx-reel-chip .rv { font-size: .95rem; font-weight: 800; color: #00f0ff; font-variant-numeric: tabular-nums; }
+    #modalWinExplain .wx-op { color: #667; font-weight: 700; font-size: .9rem; }
+    #modalWinExplain .wx-ways-result {
+      margin-left: 4px; padding: 6px 12px; border-radius: 8px;
+      background: rgba(0,255,136,.12); border: 1px solid rgba(0,255,136,.35);
+      color: #00ff88; font-weight: 800; font-size: .95rem;
+    }
+    #modalWinExplain .wx-pay-row {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;
+    }
+    #modalWinExplain .wx-pay-chip {
+      padding: 5px 10px; border-radius: 8px; font-size: .75rem;
+      background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.08); color: #9ab;
+    }
+    #modalWinExplain .wx-pay-chip.active {
+      background: rgba(255,200,80,.12); border-color: rgba(255,200,80,.45); color: #ffc850; font-weight: 800;
+    }
+    #modalWinExplain .wx-eq {
+      margin-top: 4px; padding: 10px 12px; border-radius: 10px;
+      background: rgba(0,0,0,.45); border: 1px solid rgba(0,255,136,.2);
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: .74rem; color: #9fd; line-height: 1.5;
+      font-size: .78rem; color: #b8e8d0; line-height: 1.65;
+    }
+    #modalWinExplain .wx-eq .hl { color: #00ff88; font-weight: 800; }
+    #modalWinExplain .wx-eq .dim { color: #6a8898; }
+    #modalWinExplain .wx-pos-list {
+      display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;
+    }
+    #modalWinExplain .wx-pos {
+      font-family: ui-monospace, Menlo, monospace; font-size: .68rem;
+      padding: 3px 7px; border-radius: 6px;
+      background: rgba(0,240,255,.08); border: 1px solid rgba(0,240,255,.22); color: #9de;
+    }
+    #modalWinExplain .wx-match {
+      display: flex; align-items: center; gap: 8px; margin-top: 10px;
+      padding: 8px 12px; border-radius: 10px; font-size: .8rem; font-weight: 700;
+    }
+    #modalWinExplain .wx-match.ok {
+      background: rgba(0,255,136,.1); border: 1px solid rgba(0,255,136,.35); color: #00ff88;
+    }
+    #modalWinExplain .wx-match.bad {
+      background: rgba(255,136,0,.1); border: 1px solid rgba(255,136,0,.35); color: #ffaa44;
     }
     #modalWinExplain .wx-mini-grid {
-      display: grid; grid-template-columns: repeat(5, 36px); gap: 3px;
+      display: grid; grid-template-columns: repeat(5, 40px); gap: 4px;
       justify-content: start; margin: 8px 0 4px;
     }
     #modalWinExplain .wx-mini-cell {
-      width: 36px; height: 36px; border-radius: 4px;
+      width: 40px; height: 40px; border-radius: 6px;
       background: #0a1520; border: 1px solid #1a3040;
       display: flex; align-items: center; justify-content: center;
       position: relative; overflow: hidden;
     }
-    #modalWinExplain .wx-mini-cell img { width: 30px; height: 30px; object-fit: contain; }
+    #modalWinExplain .wx-mini-cell img { width: 32px; height: 32px; object-fit: contain; }
     #modalWinExplain .wx-mini-cell.hit {
-      border-color: #00ff88; box-shadow: 0 0 8px rgba(0,255,136,.55);
+      border-color: #00ff88; box-shadow: 0 0 10px rgba(0,255,136,.55);
       background: rgba(0,80,40,.35);
     }
     #modalWinExplain .wx-mini-cell.hit-rtl {
-      border-color: #00f0ff; box-shadow: 0 0 8px rgba(0,240,255,.5);
+      border-color: #00f0ff; box-shadow: 0 0 10px rgba(0,240,255,.5);
     }
     #modalWinExplain .wx-empty { color: #888; font-size: .85rem; padding: 20px 8px; text-align: center; }
     #modalWinExplain .wx-note { color: #8899aa; font-size: .72rem; margin-top: 10px; line-height: 1.45; }
+    #modalWinExplain .wx-kv-grid {
+      display: grid; grid-template-columns: auto 1fr; gap: 4px 12px;
+      font-size: .78rem; margin: 0;
+    }
+    #modalWinExplain .wx-kv-grid dt { color: #789; }
+    #modalWinExplain .wx-kv-grid dd { color: #def; margin: 0; font-variant-numeric: tabular-nums; }
 
     /* Shared modal / overlay styles */
     .btn {
@@ -3334,7 +3433,7 @@
 <!-- Modals -->
 <div class="modal-overlay" id="modalWinExplain">
   <div class="modal">
-    <h2>WIN BREAKDOWN · Spin vừa rồi</h2>
+    <h2>WIN BREAKDOWN · từ IN SPIN gần nhất</h2>
     <div class="wx-toolbar">
       <button type="button" class="btn-sm" id="wxZoomOut" title="Thu nhỏ">−</button>
       <span class="wx-zoom-label" id="wxZoomLabel">100%</span>
@@ -4256,6 +4355,12 @@ const state = {
   lastWin: 0,
   /** Breakdown win spin vừa rồi (panel giải thích) */
   lastSpinExplain: null,
+  /**
+   * Frame WS IN gần nhất cho SPIN/BUY (cmd 1500/1501).
+   * Panel giải thích win **bắt buộc** parse từ đây — không suy từ UI local.
+   * Shape: { t, cmd, frame, payload, balanceBefore }
+   */
+  lastInSpin: null,
   sessionWin: 0,
   // Free spins
   inFreeSpins: false,
@@ -4298,6 +4403,18 @@ function fmtBalance(n) {
   const digits = sign ? intPart.slice(1) : intPart;
   const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return sign + grouped + '.' + decPart + ' ₫';
+}
+/**
+ * Pay mult theo of-a-kind (3/4/5).
+ * Client SYMBOLS[k].pays = [0, 0, p3, p4, p5]  → index = length - 1
+ * (tooltip cũng slice(2) map thành "3:","4:","5:").
+ * Không dùng pays[length] — với length=5 sẽ ra undefined.
+ */
+function getSymbolPayMult(sym, length) {
+  const pays = SYMBOLS[sym]?.pays;
+  if (!pays || length < 3) return 0;
+  const v = pays[length - 1];
+  return Number(v) || 0;
 }
 function sleep(ms) { return new Promise(r => setTimeout(r, state.fastSpin ? ms * 0.3 : ms)); }
 function sleepRaw(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -4830,7 +4947,7 @@ function calcWays(direction = 'ltr') {
 
     if (length >= 3) {
       const winCount = counts.reduce((a, b) => a * b, 1);
-      const cx = SYMBOLS[sym].pays[length];
+      const cx = getSymbolPayMult(sym, length);
       let win = winCount * cx * state.bet;
 
       // Per-symbol multipliers from overclock
@@ -5426,91 +5543,292 @@ function waysProduct(chainCounts) {
 }
 
 /**
- * Lưu snapshot giải thích win cho spin vừa settle.
+ * Lưu frame IN SPIN/BUY gần nhất (cmd 1500 / 1501).
+ * @param {any} frame full WS message (thường [5, { cmd, c, data }])
+ * @param {object} [payload] game payload nếu đã bóc
+ */
+function captureLastInSpin(frame, payload) {
+  let pl = payload;
+  let cmd = '';
+  if (!pl && Array.isArray(frame) && (frame[0] === 5 || frame[0] === '5') && frame[1] && typeof frame[1] === 'object') {
+    pl = frame[1];
+  }
+  if (!pl && frame && typeof frame === 'object' && !Array.isArray(frame) && frame.data) {
+    pl = frame;
+  }
+  if (!pl || typeof pl !== 'object') return false;
+  cmd = String(pl.cmd ?? '');
+  if (cmd !== '1500' && cmd !== '1501') return false;
+  // Deep clone để panel không bị mutate sau này
+  let frameCopy = null;
+  let payloadCopy = null;
+  try {
+    frameCopy = JSON.parse(JSON.stringify(frame));
+    payloadCopy = JSON.parse(JSON.stringify(pl));
+  } catch (_) {
+    payloadCopy = pl;
+    frameCopy = frame;
+  }
+  state.lastInSpin = {
+    t: Date.now(),
+    cmd,
+    frame: frameCopy,
+    payload: payloadCopy,
+    // BEFORE đã trừ bet (snapshot lúc bấm spin) — không có trong IN, gắn kèm FE
+    balanceBefore: Number(state.balanceBefore) || 0,
+  };
+  // Build explain ngay từ IN
+  buildWinExplainFromLastInSpin();
+  return true;
+}
+
+/**
+ * Tìm IN SPIN mới nhất trong WS traffic log (cmd 1500/1501).
+ */
+function findLatestInSpinFromTraffic() {
+  const items = typeof wsTrafficState !== 'undefined' ? wsTrafficState.items : null;
+  if (!Array.isArray(items) || !items.length) return null;
+  for (let i = items.length - 1; i >= 0; i--) {
+    const it = items[i];
+    if (it.dir !== 'in') continue;
+    if (it.cmd !== '1500' && it.cmd !== '1501') continue;
+    if (it.data != null) return it.data;
+    // Fallback: parse text JSON
+    if (typeof it.text === 'string') {
+      try { return JSON.parse(it.text); } catch (_) { /* ignore */ }
+    }
+  }
+  return null;
+}
+
+/**
+ * Parse payload IN → breakdown win. Nguồn duy nhất cho online = stages[0].wins + totalWin.
+ */
+function buildWinExplainFromInPayload(payload, meta = {}) {
+  if (!payload || typeof payload !== 'object') return null;
+  const parsed = parseOnlineRound(payload);
+  const round = parsed.round || payload?.data?.round || {};
+  const stage = parsed.stage || {};
+  const bet = parseFloat(round.totalBet ?? payload?.data?.round?.totalBet ?? state.bet) || 0;
+  const totalWin = Number(parsed.totalWin) || 0;
+  const balAfter = parseFloat(
+    parsed.control?.balance ??
+      payload?.data?.control?.balance ??
+      state.balance
+  );
+  const rawWins = Array.isArray(stage.wins) ? stage.wins : [];
+  // Ưu tiên raw server wins (symbol id, occurs, positions, win string)
+  const winsIn = rawWins.length
+    ? rawWins.map(w => ({
+        sym: SYM_MAP[w.symbol] || String(w.symbol),
+        symbolId: w.symbol,
+        length: Number(w.occurs) || 3,
+        win: parseFloat(w.win) || 0,
+        direction: String(w.type || '').includes('rtl') ? 'rtl' : 'ltr',
+        type: w.type || 'way',
+        positions: Array.isArray(w.positions) ? w.positions : null,
+        payline: w.payline,
+      }))
+    : (parsed.wins || []);
+
+  const screen = parsed.screen;
+  let gridSnap = null;
+  if (Array.isArray(screen) && screen.length === REELS) {
+    gridSnap = screen.map(col => (Array.isArray(col) ? col.map(id => SYM_MAP[id] || id) : []));
+  }
+
+  const featuresObj = parsed.result?.features || payload?.data?.round?.result?.features || {};
+  const featureNames = []
+    .concat(featuresObj.spinFeatures || [])
+    .concat((parsed.featObjs || []).map(f => f.name || f.id));
+  // unique
+  const featUnique = [...new Set(featureNames.filter(Boolean))];
+
+  // Bandwidth: nếu có trong featureSteps
+  let bandwidthMult = 1;
+  const steps = parsed.featureSteps || [];
+  for (const st of steps) {
+    const n = String(st?.name || '');
+    if (/bandwidth/i.test(n) && st.multiplier != null) {
+      bandwidthMult = Math.max(bandwidthMult, Number(st.multiplier) || 1);
+    }
+  }
+  if (state.globalMultiplier > 1) {
+    bandwidthMult = Math.max(bandwidthMult, state.globalMultiplier);
+  }
+
+  const lines = winsIn.map((w, idx) => {
+    const sym = w.sym || SYM_MAP[w.symbolId] || 'A';
+    const length = Number(w.length) || 3;
+    const dir = w.direction === 'rtl' ? 'rtl' : 'ltr';
+    const payMult = getSymbolPayMult(sym, length);
+    const chainCounts = countsPerReelFromPositions(w.positions, length, dir);
+    const ways = waysProduct(chainCounts);
+    const rawServerWin = Number(w.win) || 0;
+    const baseLine = ways * payMult * bet;
+    const positions = Array.isArray(w.positions)
+      ? w.positions.map(p => (Array.isArray(p) ? [Number(p[0]), Number(p[1])] : [p.c, p.r]))
+      : [];
+
+    return {
+      idx: idx + 1,
+      sym,
+      symbolId: w.symbolId != null ? w.symbolId : null,
+      name: SYMBOLS[sym]?.name || sym,
+      img: SYMBOLS[sym]?.img || '',
+      length,
+      direction: dir,
+      type: w.type || 'way',
+      chainCounts,
+      ways,
+      payMult,
+      bet,
+      cellMult: 1,
+      baseLine,
+      win: rawServerWin,
+      positions,
+      payline: w.payline,
+      raw: w,
+    };
+  });
+
+  const sumLines = lines.reduce((s, L) => s + (L.win || 0), 0);
+  const jp = parsed.progressiveJackpot || null;
+  const jpWin = jp && (jp.isTriggered === true || jp.isTriggered === 'true' || jp.tier)
+    ? (parseFloat(jp.win) || 0)
+    : 0;
+
+  // Stage totalWin string from IN
+  const stageTotalWin = parseFloat(stage.totalWin) || totalWin;
+
+  return {
+    at: meta.t || Date.now(),
+    source: meta.source || `IN ${meta.cmd || payload.cmd || 'SPIN'}`,
+    cmd: String(meta.cmd || payload.cmd || ''),
+    bet,
+    totalWin,
+    stageTotalWin,
+    balanceBefore: Number(meta.balanceBefore ?? state.balanceBefore) || 0,
+    balanceAfter: Number.isFinite(balAfter) ? balAfter : Number(state.balance) || 0,
+    thisMode: parsed.thisMode || 'base',
+    nextMode: parsed.nextMode || '',
+    globalMult: bandwidthMult,
+    featureNames: featUnique,
+    maxWinReached: !!parsed.maxWinReached,
+    spinId: parsed.spinId || '',
+    roundId: parsed.roundId || '',
+    gridSnap,
+    lines,
+    sumLines,
+    jpWin,
+    jpTier: jp?.tier || jp?.tierName || '',
+    note: meta.note || '',
+    // Giữ raw để panel trích đoạn JSON
+    rawWins,
+    rawTotalWin: round.totalWin ?? stage.totalWin,
+    rawTotalBet: round.totalBet,
+    rawScreen: screen,
+    rawFeatures: {
+      spinFeatures: featuresObj.spinFeatures || null,
+      activeFeatures: featuresObj.activeFeatures || null,
+      maxWinReached: featuresObj.maxWinReached || false,
+      progressiveJackpot: jp,
+    },
+  };
+}
+
+/** Build/update state.lastSpinExplain từ state.lastInSpin (IN SPIN gần nhất). */
+function buildWinExplainFromLastInSpin() {
+  // Fallback: lấy từ traffic nếu capture lúc message miss
+  if (!state.lastInSpin?.payload) {
+    const fromTraffic = findLatestInSpinFromTraffic();
+    if (fromTraffic) {
+      captureLastInSpin(fromTraffic);
+    }
+  }
+  const rec = state.lastInSpin;
+  if (!rec?.payload) {
+    state.lastSpinExplain = null;
+    return null;
+  }
+  const ex = buildWinExplainFromInPayload(rec.payload, {
+    t: rec.t,
+    cmd: rec.cmd,
+    source: `IN SPIN cmd ${rec.cmd}`,
+    balanceBefore: rec.balanceBefore,
+  });
+  state.lastSpinExplain = ex;
+  const btn = document.getElementById('btnWinExplain');
+  if (btn) btn.style.opacity = ex && ex.totalWin > 0 ? '1' : '0.55';
+  return ex;
+}
+
+/**
+ * Fallback local (offline demo) — chỉ khi không có IN SPIN.
  * @param {object} opts
  */
-function recordSpinWinExplain(opts = {}) {
+function recordSpinWinExplainLocal(opts = {}) {
+  if (state.lastInSpin?.payload) {
+    // Online đã có IN — không ghi đè bằng local estimate
+    return buildWinExplainFromLastInSpin();
+  }
   const bet = Number(opts.bet ?? state.bet) || 0;
   const totalWin = Number(opts.totalWin ?? state.lastWin) || 0;
   const winsIn = Array.isArray(opts.wins) ? opts.wins : [];
   const screen = opts.screen || null;
-  // Snapshot grid text keys if no screen
   let gridSnap = null;
   if (Array.isArray(screen) && screen.length === REELS) {
     gridSnap = screen.map(col => (Array.isArray(col) ? col.map(id => SYM_MAP[id] || id) : []));
   } else if (state.grid?.length) {
     gridSnap = state.grid.map(col => col.map(s => s));
   }
-
-  const globalMult = Math.max(1, Number(opts.globalMultiplier ?? state.globalMultiplier) || 1);
-  const featureNames = (opts.featureNames || (state.triggeredFeatures || []).map(f => f.name || f.id)).filter(Boolean);
-
   const lines = winsIn.map((w, idx) => {
     const sym = w.sym || 'A';
     const length = Number(w.length) || 3;
     const dir = w.direction === 'rtl' ? 'rtl' : 'ltr';
-    const payMult = Number(SYMBOLS[sym]?.pays?.[length]) || 0;
+    const payMult = getSymbolPayMult(sym, length);
     let chainCounts = Array.isArray(w.reelPositions) && w.reelPositions.length
       ? w.reelPositions.map(Number)
       : countsPerReelFromPositions(w.positions, length, dir);
-    // Offline calcWays already has winCount
     let ways = Number(w.winCount);
     if (!Number.isFinite(ways) || ways <= 0) ways = waysProduct(chainCounts);
-    const cellMult = Number(w.symMult || w.cellMult) || 1;
     const rawServerWin = Number(w.win) || 0;
-    // Công thức base (chưa Bandwidth global — server có thể đã nhân sẵn vào win)
-    const baseLine = ways * payMult * bet * cellMult;
+    const baseLine = ways * payMult * bet;
     const positions = Array.isArray(w.positions)
       ? w.positions.map(p => (Array.isArray(p) ? [p[0], p[1]] : [p.c, p.r]))
       : cellsForWin(w).map(k => k.split(',').map(Number));
-
     return {
-      idx: idx + 1,
-      sym,
-      name: SYMBOLS[sym]?.name || sym,
-      img: SYMBOLS[sym]?.img || '',
-      length,
-      direction: dir,
-      chainCounts,
-      ways,
-      payMult,
-      bet,
-      cellMult,
-      baseLine,
-      win: rawServerWin,
-      positions,
+      idx: idx + 1, sym, name: SYMBOLS[sym]?.name || sym, img: SYMBOLS[sym]?.img || '',
+      length, direction: dir, chainCounts, ways, payMult, bet, cellMult: 1,
+      baseLine, win: rawServerWin, positions,
     };
   });
-
-  const sumLines = lines.reduce((s, L) => s + (L.win || 0), 0);
-  const jp = opts.progressiveJackpot || null;
-  const jpWin = jp && (jp.isTriggered === true || jp.isTriggered === 'true' || jp.tier)
-    ? (parseFloat(jp.win) || 0)
-    : 0;
-
   state.lastSpinExplain = {
     at: Date.now(),
-    source: opts.source || 'local',
+    source: 'local (no IN SPIN)',
+    cmd: '',
     bet,
     totalWin,
+    stageTotalWin: totalWin,
     balanceBefore: Number(opts.balanceBefore ?? state.balanceBefore) || 0,
     balanceAfter: Number(opts.balanceAfter ?? state.balance) || 0,
-    thisMode: opts.thisMode || (state.inFreeSpins ? 'free' : 'base'),
-    globalMult,
-    featureNames,
+    thisMode: opts.thisMode || 'base',
+    globalMult: Math.max(1, Number(opts.globalMultiplier) || 1),
+    featureNames: opts.featureNames || [],
     maxWinReached: !!opts.maxWinReached,
-    spinId: opts.spinId || '',
-    roundId: opts.roundId || '',
+    spinId: '',
+    roundId: '',
     gridSnap,
     lines,
-    sumLines,
-    jpWin,
-    jpTier: jp?.tier || jp?.tierName || '',
-    note: opts.note || '',
+    sumLines: lines.reduce((s, L) => s + L.win, 0),
+    jpWin: 0,
+    jpTier: '',
+    note: 'Offline/demo — không có frame IN',
+    rawWins: [],
+    rawTotalWin: totalWin,
+    rawTotalBet: bet,
   };
-  // Nút có badge nhẹ khi có win
-  const btn = document.getElementById('btnWinExplain');
-  if (btn) btn.style.opacity = totalWin > 0 ? '1' : '0.55';
+  return state.lastSpinExplain;
 }
 
 function setWinExplainZoom(z) {
@@ -5524,34 +5842,43 @@ function setWinExplainZoom(z) {
 function renderWinExplainBody() {
   const body = document.getElementById('winExplainBody');
   if (!body) return;
+  // Luôn rebuild từ IN SPIN gần nhất trước khi vẽ
+  buildWinExplainFromLastInSpin();
   const ex = state.lastSpinExplain;
   if (!ex) {
     body.className = 'wx-empty';
-    body.innerHTML = 'Chưa có spin — quay một ván rồi mở lại.';
+    body.innerHTML = 'Chưa có <strong>IN SPIN</strong> (cmd 1500/1501).<br>Connect &amp; spin — panel này đọc thắng từ frame nhận về, không tự tính local.';
     return;
   }
   body.className = '';
 
   const modeLabel = ex.thisMode === 'free' ? 'Free Spin' : 'Base';
+  const srcBadge = String(ex.source || '').startsWith('IN')
+    ? `<span style="color:#00ff88">● ${ex.source}</span>`
+    : `<span style="color:#ff8800">○ ${ex.source}</span>`;
   const cards = `
     <div class="wx-summary">
-      <div class="wx-card"><span class="k">BET</span><span class="v">${fmtBalance(ex.bet)}</span></div>
-      <div class="wx-card"><span class="k">TOTAL WIN</span><span class="v green">${fmtBalance(ex.totalWin)}</span></div>
+      <div class="wx-card"><span class="k">NGUỒN</span><span class="v" style="font-size:.75rem">${srcBadge}</span></div>
+      <div class="wx-card"><span class="k">BET (IN totalBet)</span><span class="v">${fmtBalance(ex.bet)}</span></div>
+      <div class="wx-card"><span class="k">TOTAL WIN (IN)</span><span class="v green">${fmtBalance(ex.totalWin)}</span></div>
       <div class="wx-card"><span class="k">BALANCE BEFORE</span><span class="v">${fmtBalance(ex.balanceBefore)}</span></div>
-      <div class="wx-card"><span class="k">BALANCE AFTER</span><span class="v">${fmtBalance(ex.balanceAfter)}</span></div>
+      <div class="wx-card"><span class="k">BALANCE AFTER (IN)</span><span class="v">${fmtBalance(ex.balanceAfter)}</span></div>
       <div class="wx-card"><span class="k">MODE</span><span class="v">${modeLabel}</span></div>
-      <div class="wx-card"><span class="k">WAYS / LINES</span><span class="v">${ex.lines.length}</span></div>
+      <div class="wx-card"><span class="k">stages[0].wins</span><span class="v">${ex.lines.length}</span></div>
     </div>`;
 
-  let formulaTop = `Tổng win spin = Σ (từng way)`;
+  let formulaTop = `Nguồn: ${ex.source}\n`;
+  formulaTop += `round.totalBet (IN) = ${ex.rawTotalBet ?? ex.bet}\n`;
+  formulaTop += `round.totalWin (IN) = ${ex.rawTotalWin ?? ex.totalWin}\n`;
+  formulaTop += `Σ stages[0].wins[].win = ${fmtBalance(ex.sumLines)}\n`;
+  formulaTop += `stages[0].totalWin = ${fmtBalance(ex.stageTotalWin ?? ex.totalWin)}`;
   if (ex.globalMult > 1) {
-    formulaTop += `\nBandwidth / global mult hiển thị: ×${ex.globalMult} (server thường đã nhân sẵn trong từng win)`;
+    formulaTop += `\nBandwidth / mult (từ featureSteps hoặc UI) ×${ex.globalMult} — win IN thường đã nhân sẵn`;
   }
   if (ex.jpWin > 0) {
-    formulaTop += `\n+ Jackpot ${ex.jpTier || ''} = ${fmtBalance(ex.jpWin)}`;
+    formulaTop += `\n+ progressiveJackpot.win = ${fmtBalance(ex.jpWin)} (tier ${ex.jpTier || '?'})`;
   }
-  if (ex.maxWinReached) formulaTop += `\n⚠ maxWinReached — có thể đã cap`;
-  formulaTop += `\nΣ wins[] server = ${fmtBalance(ex.sumLines)}  ·  round.totalWin = ${fmtBalance(ex.totalWin)}`;
+  if (ex.maxWinReached) formulaTop += `\n⚠ features.maxWinReached = true`;
 
   // Mini grid 5×3 (row-major visual: row r, col c)
   let mini = '';
@@ -5585,54 +5912,130 @@ function renderWinExplainBody() {
       <div style="font-size:.8rem;color:#bcd;margin-bottom:8px">${ex.featureNames.map(n => `• ${n}`).join('<br>')}</div>`;
   }
 
-  let linesHtml = `<div class="wx-section-title">TỪNG WAY WIN (243-ways)</div>`;
+  let linesHtml = `<div class="wx-section-title">TỪNG WAY — stages[0].wins (từ IN)</div>`;
   if (!ex.lines.length) {
-    linesHtml += `<div class="wx-empty" style="padding:12px">Không có way win (totalWin có thể từ jackpot / scatter).</div>`;
+    linesHtml += `<div class="wx-empty" style="padding:12px">IN không có stages[0].wins (totalWin có thể từ jackpot / không trúng ways).</div>`;
   } else {
     linesHtml += ex.lines.map(L => {
-      const chainStr = L.chainCounts.join(' × ');
       const dirLabel = L.direction === 'rtl' ? 'RTL' : 'LTR';
+      const dirCls = L.direction === 'rtl' ? 'dir-rtl' : 'dir-ltr';
+      const sid = L.symbolId != null ? L.symbolId : '—';
+      const p3 = getSymbolPayMult(L.sym, 3);
+      const p4 = getSymbolPayMult(L.sym, 4);
+      const p5 = getSymbolPayMult(L.sym, 5);
+      const matched = Math.abs(L.baseLine - L.win) <= 0.02 * Math.max(1, L.bet);
+      const chain = L.chainCounts || [];
+      const reelChips = chain.map((n, i) => {
+        const reel = L.direction === 'rtl' ? (REELS - 1 - i) : i;
+        return `<div class="wx-reel-chip"><span class="rk">Reel ${reel}</span><span class="rv">${n}</span></div>`;
+      }).join('<span class="wx-op">×</span>');
+      const posChips = (L.positions || []).map(([c, r]) =>
+        `<span class="wx-pos">[${c},${r}]</span>`
+      ).join('');
       return `<div class="wx-way">
         <div class="wx-way-head">
           ${L.img ? `<img src="${L.img}" alt="">` : ''}
-          <strong>#${L.idx} ${L.name}</strong>
-          <span style="color:#888">(${L.sym})</span>
-          <span style="color:var(--cyan,#00f0ff)">${dirLabel}</span>
-          <span style="color:var(--green);margin-left:auto;font-weight:800">${fmtBalance(L.win)}</span>
+          <div class="wx-way-title">
+            <strong>#${L.idx} · ${L.name}</strong>
+            <span class="sub">Symbol ${L.sym} · id ${sid} · type ${L.type || 'way'}</span>
+          </div>
+          <span class="wx-pill ${dirCls}">${dirLabel}</span>
+          <span class="wx-pill oak">${L.length}-of-a-kind</span>
+          <span class="wx-way-amount">${fmtBalance(L.win)}</span>
         </div>
-        <div class="wx-math">
-chuỗi: <strong>${L.length}</strong>-of-a-kind
-  ·  ô/reel: [${chainStr}]  →  ways = <strong>${L.ways}</strong>
-paytable[${L.length}] = <strong>${L.payMult}</strong>× bet
-  ·  bet = ${fmtBalance(L.bet)}
-${L.cellMult > 1 ? `cell / overclock mult = ×${L.cellMult}\n` : ''}công thức ước lượng:
-  ways × pay × bet${L.cellMult > 1 ? ' × cellMult' : ''}
-  = ${L.ways} × ${L.payMult} × ${L.bet}${L.cellMult > 1 ? ` × ${L.cellMult}` : ''}
-  = <strong>${fmtBalance(L.baseLine)}</strong>
-win server (đã gồm mult nếu có): <strong>${fmtBalance(L.win)}</strong>
-${Math.abs(L.baseLine - L.win) > 0.02 * Math.max(1, L.bet)
-  ? `Δ so estimate: ${fmtBalance(L.win - L.baseLine)} (Bandwidth / cap / rounding)`
-  : '≈ khớp paytable × ways × bet'}
-positions [col,row]: ${JSON.stringify(L.positions)}
+        <div class="wx-way-body">
+          <div class="wx-steps">
+            <div class="wx-step">
+              <div class="wx-step-num">1</div>
+              <div class="wx-step-body">
+                <div class="wx-step-label">Ô thắng (IN positions)</div>
+                <div class="wx-step-text">Tọa độ <code>[cột, hàng]</code> server gửi:</div>
+                <div class="wx-pos-list">${posChips || '<span class="wx-note">—</span>'}</div>
+              </div>
+            </div>
+            <div class="wx-step">
+              <div class="wx-step-num">2</div>
+              <div class="wx-step-body">
+                <div class="wx-step-label">Đếm ô mỗi reel → số ways</div>
+                <div class="wx-step-text">Mỗi reel nhân số ô khớp symbol / wild:</div>
+                <div class="wx-reel-row">
+                  ${reelChips}
+                  <span class="wx-op">=</span>
+                  <span class="wx-ways-result">${L.ways} ways</span>
+                </div>
+              </div>
+            </div>
+            <div class="wx-step">
+              <div class="wx-step-num">3</div>
+              <div class="wx-step-body">
+                <div class="wx-step-label">Paytable symbol ${L.sym} (${L.name})</div>
+                <div class="wx-pay-row">
+                  <span class="wx-pay-chip${L.length === 3 ? ' active' : ''}">3-oak ×${p3}</span>
+                  <span class="wx-pay-chip${L.length === 4 ? ' active' : ''}">4-oak ×${p4}</span>
+                  <span class="wx-pay-chip${L.length === 5 ? ' active' : ''}">5-oak ×${p5}</span>
+                </div>
+                <div class="wx-step-text" style="margin-top:6px">Đang dùng: <strong style="color:#ffc850">${L.length}-oak = ${L.payMult}× totalBet</strong></div>
+              </div>
+            </div>
+            <div class="wx-step">
+              <div class="wx-step-num">4</div>
+              <div class="wx-step-body">
+                <div class="wx-step-label">Công thức tiền</div>
+                <div class="wx-eq">
+                  <span class="dim">ways × pay × totalBet</span><br>
+                  = <span class="hl">${L.ways}</span> × <span class="hl">${L.payMult}</span> × <span class="hl">${L.bet}</span><br>
+                  = <span class="hl">${fmtBalance(L.baseLine)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="wx-match ${matched ? 'ok' : 'bad'}">
+            ${matched
+              ? `✓ Khớp IN · wins[].win = ${fmtBalance(L.win)}`
+              : `△ Chênh IN · tính ${fmtBalance(L.baseLine)} vs wins[].win ${fmtBalance(L.win)} (Δ ${fmtBalance(L.win - L.baseLine)}) — Bandwidth / mult / cap`}
+          </div>
         </div>
       </div>`;
     }).join('');
   }
 
-  const meta = (ex.spinId || ex.roundId)
-    ? `<div class="wx-note">spinId: ${ex.spinId || '—'} · roundId: ${ex.roundId || '—'} · source: ${ex.source}</div>`
-    : `<div class="wx-note">source: ${ex.source}</div>`;
+  let rawJson = '';
+  if (ex.rawWins && ex.rawWins.length) {
+    try {
+      rawJson = `<div class="wx-section-title">RAW stages[0].wins (IN)</div>
+        <pre class="wx-formula" style="max-height:180px;overflow:auto;font-size:.68rem">${
+          escapeHtmlWx(JSON.stringify(ex.rawWins, null, 2))
+        }</pre>`;
+    } catch (_) { /* ignore */ }
+  }
+
+  const meta = `<div class="wx-note">spinId: ${ex.spinId || '—'} · roundId: ${ex.roundId || '—'} · ${ex.source}
+${state.lastInSpin?.t ? `· IN @ ${new Date(state.lastInSpin.t).toLocaleTimeString()}` : ''}</div>`;
 
   body.innerHTML = cards
     + `<div class="wx-formula">${formulaTop}</div>`
     + mini
     + feats
     + linesHtml
+    + rawJson
     + meta
-    + `<div class="wx-note">243-ways: từ trái→phải (hoặc phải→trái nếu Bypass), mỗi reel có N ô symbol/wild → nhân N. Không dùng payline cố định. Wild (11) thay cho symbol đang tính.</div>`;
+    + `<div class="wx-note">Giải thích bám <strong>IN SPIN</strong> (WS frame nhận). Công thức ways chỉ để hiểu <em>vì sao</em> server trả wins[].win — số tiền authoritative là field trong IN.</div>`;
+}
+
+function escapeHtmlWx(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 function openWinExplain() {
+  // Ưu tiên IN SPIN; nếu miss capture thì quét traffic
+  if (!state.lastInSpin?.payload) {
+    const frame = findLatestInSpinFromTraffic();
+    if (frame) captureLastInSpin(frame);
+  }
+  buildWinExplainFromLastInSpin();
   renderWinExplainBody();
   setWinExplainZoom(_wxZoom || 1);
   openModal('modalWinExplain');
@@ -6320,8 +6723,8 @@ async function doSpin(forcedScatters = 0) {
   state.lastWin = finalWin;
   state.balance += finalWin;
 
-  recordSpinWinExplain({
-    source: 'local',
+  // Offline only — online dùng captureLastInSpin từ frame IN
+  recordSpinWinExplainLocal({
     bet: state.bet,
     totalWin: finalWin,
     wins,
@@ -6331,7 +6734,6 @@ async function doSpin(forcedScatters = 0) {
     globalMultiplier: state.globalMultiplier,
     maxWinReached: capped,
     featureNames: (features || []).map(f => f.name || f.id),
-    note: jackpotWin > 0 ? `local jackpot +${jackpotWin}` : '',
   });
 
   if (state.inFreeSpins) {
@@ -10411,6 +10813,15 @@ function connectWS() {
     try {
       const msg = JSON.parse(e.data);
       try { logWsTraffic('in', msg); } catch (_) {}
+      // Bắt IN SPIN sớm (frame [5,{cmd:1500|1501,...}]) cho win explain
+      try {
+        if (Array.isArray(msg) && (msg[0] === 5 || msg[0] === '5') && msg[1] && typeof msg[1] === 'object') {
+          const c = String(msg[1].cmd ?? '');
+          if (c === '1500' || c === '1501') captureLastInSpin(msg, msg[1]);
+        } else if (msg && typeof msg === 'object' && (String(msg.cmd) === '1500' || String(msg.cmd) === '1501')) {
+          captureLastInSpin(msg, msg);
+        }
+      } catch (_) { /* ignore */ }
       handleWSMessage(msg);
     } catch (_) {
       // binary / non-JSON
@@ -10560,6 +10971,9 @@ function handleSpinResponse(payload) {
     if (pendingSpinResolve) { pendingSpinResolve(false); pendingSpinResolve = null; }
     return;
   }
+
+  // Lưu IN SPIN làm nguồn authoritative cho panel giải thích win
+  captureLastInSpin(payload, payload);
 
   // Không sync BEFORE — giữ snapshot lúc bấm spin (trước kết quả)
   applyOnlineBalance(payload, { syncBefore: false });
@@ -10779,22 +11193,9 @@ async function doOnlineSpin(opts = {}) {
 
     state.lastWin = totalWin;
 
-    recordSpinWinExplain({
-      source: isBuy ? `online-buy:${buyFeature}` : 'online',
-      bet,
-      totalWin,
-      wins,
-      screen,
-      balanceBefore: state.balanceBefore,
-      balanceAfter: state.balance,
-      thisMode: thisMode || (wasInFS || state.inFreeSpins ? 'free' : 'base'),
-      globalMultiplier: state.globalMultiplier,
-      maxWinReached,
-      featureNames: (featObjs || []).map(f => f.name || f.id),
-      progressiveJackpot: progressiveJackpot,
-      spinId,
-      roundId,
-    });
+    // Breakdown win: chỉ từ IN payload (đã capture ở handleWSMessage / handleSpinResponse)
+    if (payload) captureLastInSpin(payload, payload);
+    else buildWinExplainFromLastInSpin();
 
     // Không set headerWin = total trước ticker — để cộng tiền nhìn thấy
     document.getElementById('headerWin').textContent = totalWin > 0 ? '0.00' : '0.00';
@@ -11658,6 +12059,7 @@ function logWsTraffic(dir, data, note) {
     cmd: meta.cmd,
     label: meta.label + (note ? ' · ' + note : ''),
     err: dir === 'err' || meta.err,
+    data, // raw frame — dùng cho win explain (IN SPIN)
     text: formatWsTrafficPayload(data),
   };
   wsTrafficState.items.push(item);
