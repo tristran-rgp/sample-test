@@ -5390,7 +5390,8 @@ function showSymTooltip(sym, el) {
   const s = SYMBOLS[sym];
   if (!s) return;
   const tip = document.getElementById('symTooltip');
-  const pays = s.pays.slice(2).map((p, i) => `${i + 3}: ${fmt(p * state.bet)}`).join(' | ');
+  // GDD paytable = multipliers of totalBet (not cash). Show raw Cx like 0.75 / 1.00 / 1.50.
+  const pays = s.pays.slice(2).map((p, i) => `${i + 3}: ${Number(p).toFixed(2)}x`).join(' | ');
   tip.innerHTML = `<div style="display:flex;align-items:center;gap:8px"><img src="${s.img}" style="width:40px;height:40px;object-fit:contain" alt=""><strong>${s.name}</strong></div><br>${pays || 'Special symbol'}`;
   const rect = el.getBoundingClientRect();
   tip.style.left = Math.min(rect.right + 8, window.innerWidth - 200) + 'px';
