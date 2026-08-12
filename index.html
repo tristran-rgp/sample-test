@@ -3097,29 +3097,113 @@
 
     #winOverlay {
       position: fixed; inset: 0; z-index: 500;
-      display: none; align-items: center; justify-content: center;
-      flex-direction: column; gap: 10px;
+      display: none;
       pointer-events: none;
-      background: radial-gradient(ellipse at center, rgba(0,0,0,.55) 0%, rgba(0,0,0,.2) 55%, transparent 75%);
+      /* dim full screen; nội dung căn theo #reelsWrapper (JS) */
+      background:
+        radial-gradient(ellipse at center, rgba(0, 18, 28, .55) 0%, rgba(0, 0, 0, .35) 55%, rgba(0, 0, 0, .12) 80%, transparent 92%);
     }
-    #winOverlay.show { display: flex; }
-    .win-text {
-      font-size: clamp(2rem, 7vw, 3.4rem); font-weight: 900; letter-spacing: 4px;
-      animation: winPop .55s cubic-bezier(.2,1.2,.3,1);
-      text-shadow: 0 0 40px currentColor, 0 4px 0 rgba(0,0,0,.45);
+    #winOverlay.show { display: block; }
+    /* Stage được JS pin đúng bounding box reels grid */
+    .win-fx-stage {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      width: min(92vw, 640px);
+      height: min(70vh, 420px);
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 10px;
+      box-sizing: border-box;
+      filter: drop-shadow(0 0 36px rgba(0, 240, 255, .28));
+      pointer-events: none;
+    }
+    /* animation-sequence.png — 6×6 sheet (643×406 / frame); cover khung grid */
+    .win-seq-sprite {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('assert/art-new/animation-pack/animation-sequence.png');
+      background-repeat: no-repeat;
+      background-size: 600% 600%;
+      background-position: 0% 0%;
+      image-rendering: auto;
+      border-radius: inherit;
+      animation: winSeqIn .35s cubic-bezier(.2, 1.15, .3, 1) both;
+    }
+    .win-fx-copy {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 92%;
+      max-width: 100%;
+      pointer-events: none;
+      z-index: 2;
       text-align: center;
     }
-    .win-amount-fx {
-      font-size: clamp(1.4rem, 4vw, 2.2rem);
-      font-weight: 800;
-      color: #fff;
-      text-shadow: 0 0 18px rgba(0,255,136,.8), 0 2px 6px #000;
-      animation: winPop .55s cubic-bezier(.2,1.2,.3,1) .08s both;
+    .win-text {
+      font-size: clamp(2.4rem, 9vw, 4.2rem);
+      font-weight: 900;
+      letter-spacing: 6px;
+      line-height: 1;
+      color: #ffd84a;
+      animation: winPop .55s cubic-bezier(.2,1.2,.3,1);
+      text-shadow:
+        0 0 8px rgba(255, 220, 80, .95),
+        0 0 28px rgba(255, 180, 0, .85),
+        0 0 56px rgba(255, 140, 0, .55),
+        0 4px 0 rgba(0, 0, 0, .55);
+      text-align: center;
+      -webkit-text-stroke: 1px rgba(120, 70, 0, .35);
     }
-    .win-big { color: #00e5ff; }
-    .win-mega { color: #c44dff; }
-    .win-legendary { color: #ff9a1a; }
+    .win-amount-fx {
+      font-size: clamp(1.6rem, 6vw, 2.8rem);
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: #ffe566;
+      font-variant-numeric: tabular-nums;
+      text-shadow:
+        0 0 10px rgba(255, 230, 100, .95),
+        0 0 26px rgba(255, 200, 40, .8),
+        0 0 48px rgba(0, 255, 200, .35),
+        0 3px 0 rgba(0, 0, 0, .5);
+      animation: winPop .55s cubic-bezier(.2,1.2,.3,1) .08s both, winAmountSparkle 1.1s ease-in-out infinite;
+    }
+    .win-amount-fx.sparkle-done {
+      animation: winPop .55s cubic-bezier(.2,1.2,.3,1) both, winAmountSparkle 1.1s ease-in-out infinite;
+    }
+    .win-text.win-big,
+    .win-amount-fx.win-big { color: #00e5ff; text-shadow: 0 0 18px rgba(0, 229, 255, .95), 0 0 40px rgba(0, 180, 255, .55), 0 3px 0 #000; -webkit-text-stroke: 0; }
+    .win-text.win-mega,
+    .win-amount-fx.win-mega { color: #e070ff; text-shadow: 0 0 18px rgba(196, 77, 255, .95), 0 0 42px rgba(160, 40, 255, .55), 0 3px 0 #000; -webkit-text-stroke: 0; }
+    .win-text.win-legendary,
+    .win-amount-fx.win-legendary { color: #ff9a1a; text-shadow: 0 0 20px rgba(255, 154, 26, .95), 0 0 48px rgba(255, 120, 0, .6), 0 3px 0 #000; -webkit-text-stroke: 0; }
     @keyframes winPop { 0%{transform:scale(.35);opacity:0} 60%{transform:scale(1.12)} 100%{transform:scale(1);opacity:1} }
+    @keyframes winSeqIn { 0%{transform:scale(.88);opacity:0} 100%{transform:scale(1);opacity:1} }
+    @keyframes winAmountSparkle {
+      0%, 100% {
+        filter: brightness(1) drop-shadow(0 0 6px rgba(255, 220, 80, .55));
+        opacity: 1;
+      }
+      40% {
+        filter: brightness(1.4) drop-shadow(0 0 18px rgba(255, 255, 180, 1));
+        opacity: 1;
+      }
+      70% {
+        filter: brightness(1.15) drop-shadow(0 0 12px rgba(0, 255, 200, .55));
+        opacity: .96;
+      }
+    }
 
     #featToast {
       position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
@@ -3743,8 +3827,13 @@
 </div>
 
 <div id="winOverlay">
-  <div class="win-text" id="winText"></div>
-  <div class="win-amount-fx" id="winAmountFx"></div>
+  <div class="win-fx-stage">
+    <div class="win-seq-sprite" id="winSeqSprite" aria-hidden="true"></div>
+    <div class="win-fx-copy">
+      <div class="win-text" id="winText">WIN</div>
+      <div class="win-amount-fx" id="winAmountFx">$0.00</div>
+    </div>
+  </div>
 </div>
 <div id="featToast"></div>
 <div id="symTooltip"></div>
@@ -4070,6 +4159,11 @@ function preloadSpritePack() {
       pre.src = SPRITE_PACK_BASE + cfg.file;
     } catch (_) { /* ignore */ }
   }
+  // Win celebration sequence (mọi win > 0)
+  try {
+    const winSeq = new Image();
+    winSeq.src = SPRITE_PACK_BASE + 'animation-sequence.png';
+  } catch (_) { /* ignore */ }
 }
 
 /** Create a symbol visual (.sym-img img or sprite div) with optional FX preset. */
@@ -4861,6 +4955,7 @@ async function settleAfterSpinPresentation({
 
     // Dọn class/animation còn sót — tránh spin sau cắt ngang
     document.getElementById('winOverlay')?.classList.remove('show');
+    clearWinFxPosition();
     const wrap = document.getElementById('reelsWrapper');
     wrap?.classList.remove('dim-win', 'tease-dim');
     document.querySelectorAll('.win-float').forEach(el => el.remove());
@@ -5444,46 +5539,168 @@ async function runMoneyTicker(from, to, {
   return end;
 }
 
-async function playWinEffect(total) {
-  const threshold = (base) => base * (state.bet / REF_BET);
-  // Overlay Big/Mega/Legendary — hold ngắn hơn, ticker tiền nhanh
-  const hold = state.fastSpin ? 700 : 1600;
-  const tiers = [
-    { name: 'LEGENDARY WIN', cls: 'win-legendary', min: threshold(100), hold },
-    { name: 'MEGA WIN', cls: 'win-mega', min: threshold(40), hold },
-    { name: 'BIG WIN', cls: 'win-big', min: threshold(20), hold },
-  ];
-  const tier = tiers.find(t => total >= t.min);
-  if (!tier) return false;
+/**
+ * Win celebration overlay — mọi spin win > 0.
+ * animation-sequence.png (6×6) + chữ WIN + số tiền $0.00 → total (đếm nhanh, lấp lánh).
+ * Big/Mega/Legendary: giữ class màu (GDD threshold), label luôn "WIN".
+ * Vị trí: neo đúng giữa khung symbol grid (#reelsWrapper), không căn viewport.
+ */
+const WIN_SEQ = {
+  cols: 6,
+  rows: 6,
+  frames: 36,
+  fps: 14,
+  file: 'animation-sequence.png',
+};
 
-  if (tier.cls === 'win-legendary' || tier.cls === 'win-mega') sfx('jackpot', { gain: 1.15, force: true });
-  else sfx('bigwin', { gain: 1.1, force: true });
+/** Pin .win-fx-stage lên bounding box reels (grid symbol). */
+function positionWinFxToReels() {
+  const stage = document.querySelector('#winOverlay .win-fx-stage');
+  const target =
+    document.getElementById('reelsWrapper') ||
+    document.getElementById('reelsGrid');
+  if (!stage || !target) return;
+  const r = target.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  stage.style.left = `${r.left}px`;
+  stage.style.top = `${r.top}px`;
+  stage.style.width = `${r.width}px`;
+  stage.style.height = `${r.height}px`;
+  stage.style.transform = 'none';
+  stage.style.maxWidth = 'none';
+  stage.style.maxHeight = 'none';
+}
+
+function clearWinFxPosition() {
+  const stage = document.querySelector('#winOverlay .win-fx-stage');
+  if (!stage) return;
+  stage.style.left = '';
+  stage.style.top = '';
+  stage.style.width = '';
+  stage.style.height = '';
+  stage.style.transform = '';
+  stage.style.maxWidth = '';
+  stage.style.maxHeight = '';
+}
+
+function setWinSeqFrame(el, frame) {
+  if (!el) return;
+  const f = ((frame % WIN_SEQ.frames) + WIN_SEQ.frames) % WIN_SEQ.frames;
+  const c = f % WIN_SEQ.cols;
+  const r = Math.floor(f / WIN_SEQ.cols) % WIN_SEQ.rows;
+  const x = WIN_SEQ.cols <= 1 ? 0 : (c / (WIN_SEQ.cols - 1)) * 100;
+  const y = WIN_SEQ.rows <= 1 ? 0 : (r / (WIN_SEQ.rows - 1)) * 100;
+  el.style.backgroundPosition = `${x}% ${y}%`;
+}
+
+/** Play win sequence once (or until skip). Returns when sheet finishes. */
+function playWinSequenceOnce(el, { fps, onFrame } = {}) {
+  const rate = fps || (state.fastSpin ? 22 : WIN_SEQ.fps);
+  const interval = 1000 / rate;
+  return new Promise(resolve => {
+    let frame = 0;
+    let last = performance.now();
+    setWinSeqFrame(el, 0);
+    onFrame?.(0);
+    const tick = (now) => {
+      if (isVfxSkip && isVfxSkip()) {
+        setWinSeqFrame(el, WIN_SEQ.frames - 1);
+        resolve();
+        return;
+      }
+      if (now - last >= interval) {
+        const steps = Math.max(1, Math.floor((now - last) / interval));
+        last += steps * interval;
+        frame += steps;
+        if (frame >= WIN_SEQ.frames) {
+          setWinSeqFrame(el, WIN_SEQ.frames - 1);
+          onFrame?.(WIN_SEQ.frames - 1);
+          resolve();
+          return;
+        }
+        setWinSeqFrame(el, frame);
+        onFrame?.(frame);
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
+async function playWinEffect(total) {
+  const amount = Number(total) || 0;
+  if (amount <= 0) return false;
+
+  const threshold = (base) => base * (state.bet / REF_BET);
+  const tierCls =
+    amount >= threshold(100) ? 'win-legendary'
+      : amount >= threshold(40) ? 'win-mega'
+        : amount >= threshold(20) ? 'win-big'
+          : '';
+
+  if (tierCls === 'win-legendary' || tierCls === 'win-mega') {
+    sfx('jackpot', { gain: 1.15, force: true });
+  } else if (tierCls === 'win-big') {
+    sfx('bigwin', { gain: 1.1, force: true });
+  } else {
+    sfx('win', { gain: 1.05, force: true });
+  }
 
   const overlay = document.getElementById('winOverlay');
   const text = document.getElementById('winText');
-  const amount = document.getElementById('winAmountFx');
-  text.className = 'win-text ' + tier.cls;
-  text.textContent = tier.name;
+  const amountEl = document.getElementById('winAmountFx');
+  const seqEl = document.getElementById('winSeqSprite');
+  if (!overlay || !text || !amountEl) return false;
+
+  text.className = 'win-text' + (tierCls ? ' ' + tierCls : '');
+  text.textContent = 'WIN';
+  amountEl.className = 'win-amount-fx' + (tierCls ? ' ' + tierCls : '');
+  amountEl.textContent = fmt(0);
+  setWinSeqFrame(seqEl, 0);
+
+  // Neo đúng khung symbol grid trước khi show
+  positionWinFxToReels();
   overlay.classList.add('show');
+  // layout pass — re-measure sau show (scroll/reflow)
+  requestAnimationFrame(() => positionWinFxToReels());
+  const onWinFxResize = () => positionWinFxToReels();
+  window.addEventListener('resize', onWinFxResize);
   shakeScreen();
 
-  // Overlay amount đếm nhanh; header WIN giữ total (đã cộng ở animateWinWays/tickerWin)
-  document.getElementById('headerWin').textContent = total.toFixed(2);
-  const tickDur = state.fastSpin ? 140 : 280;
-  await runMoneyTicker(0, total, {
-    durationMs: tickDur,
-    onTick: (val) => {
-      amount.textContent = fmt(val);
-    },
-  });
-  amount.textContent = fmt(total);
-  // Giữ overlay ngắn sau khi đếm xong
-  await sleepRaw(state.fastSpin ? 180 : 400);
+  // Header giữ total (đã ticker ở animateWinWays); overlay đếm lại 0 → total
+  document.getElementById('headerWin').textContent = amount.toFixed(2);
 
-  overlay.classList.remove('show');
-  text.textContent = '';
-  amount.textContent = '';
-  await sleepRaw(state.fastSpin ? 80 : 120);
+  // Đếm tiền 0→total (hơi chậm hơn để dễ đọc; vẫn song song animation sequence)
+  const tickDur = state.fastSpin ? 380 : 820;
+  try {
+    const animP = playWinSequenceOnce(seqEl, {
+      fps: state.fastSpin ? 24 : WIN_SEQ.fps,
+    });
+    const moneyP = runMoneyTicker(0, amount, {
+      durationMs: tickDur,
+      onTick: (val) => {
+        amountEl.textContent = fmt(val);
+      },
+    }).then(() => {
+      amountEl.textContent = fmt(amount);
+      amountEl.classList.add('sparkle-done');
+    });
+
+    await Promise.all([animP, moneyP]);
+
+    // Giữ một nhịp ngắn sau khi đếm/anim xong
+    await sleepRaw(state.fastSpin ? 140 : 320);
+  } finally {
+    window.removeEventListener('resize', onWinFxResize);
+    overlay.classList.remove('show');
+    clearWinFxPosition();
+    text.textContent = 'WIN';
+    text.className = 'win-text';
+    amountEl.textContent = '';
+    amountEl.className = 'win-amount-fx';
+    setWinSeqFrame(seqEl, 0);
+  }
+  await sleepRaw(state.fastSpin ? 60 : 100);
   return true;
 }
 
