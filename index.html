@@ -3816,7 +3816,7 @@
     }
   </style>
 </head>
-<body>
+<body class="pack-art-new">
 
   <!-- Ambient cyber stage (behind UI) -->
   <div id="bgScene" aria-hidden="true">
@@ -4080,7 +4080,7 @@
     <div style="display:flex;flex-direction:column;gap:8px">
       <button class="btn" id="menuPaytable">📋 Paytable</button>
       <button class="btn" id="menuRules">📖 Game Rules</button>
-      <button class="btn" id="menuSymbolPack" title="Đổi bộ symbol art">🎨 Symbols: Classic</button>
+      <button class="btn" id="menuSymbolPack" title="Đổi bộ symbol art">🎨 Symbols: Art New</button>
       <button class="btn" id="menuSound">🔊 Sound: ON</button>
       <button class="btn" id="menuMusic">🎵 Music: ON</button>
       <button class="btn" id="menuHistory">📜 History</button>
@@ -4478,7 +4478,7 @@ const SYMBOL_PACKS = {
   classic: { id: 'classic', label: 'Classic', base: ASSET },
   artNew:  { id: 'artNew',  label: 'Art New', base: ASSET + 'art-new/' },
 };
-const DEFAULT_SYMBOL_PACK = 'classic';
+const DEFAULT_SYMBOL_PACK = 'artNew';
 
 const SYMBOLS = {
   A: { img: ASSET + 'A.png', name: 'Master Hacker', type: 'high', pays: [0,0,0.75,1.00,1.50] },
