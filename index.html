@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>ZERO DAY — Cyberpunk Slot</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  <script>
+    window.__ZD_WEBP = false;
+    try {
+      var _c = document.createElement('canvas');
+      _c.width = _c.height = 1;
+      window.__ZD_WEBP = _c.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+    } catch (e) { /* keep false → PNG */ }
+    if (window.__ZD_WEBP) document.documentElement.classList.add('webp');
+  </script>
   <style>
     :root {
       --bg: #0a0e18;
@@ -1239,31 +1248,52 @@
     /* Art New animation-pack sheets (6×6) — frame via --sp-{SYM}-fx/fy */
     .sym-sprite-W {
       background-image: url('assert/art-new/animation-pack/wild-sprite.png');
+      background-image: image-set(
+        url('assert/art-new/animation-pack/wild-sprite.webp') type('image/webp'),
+        url('assert/art-new/animation-pack/wild-sprite.png') type('image/png'));
       background-position: var(--sp-W-fx, 0%) var(--sp-W-fy, 0%);
     }
     .sym-sprite-A {
       background-image: url('assert/art-new/animation-pack/A-sprite.png');
+      background-image: image-set(
+        url('assert/art-new/animation-pack/A-sprite.webp') type('image/webp'),
+        url('assert/art-new/animation-pack/A-sprite.png') type('image/png'));
       background-position: var(--sp-A-fx, 0%) var(--sp-A-fy, 0%);
     }
     .sym-sprite-D {
       background-image: url('assert/art-new/animation-pack/D-sprite.png');
+      background-image: image-set(
+        url('assert/art-new/animation-pack/D-sprite.webp') type('image/webp'),
+        url('assert/art-new/animation-pack/D-sprite.png') type('image/png'));
       background-position: var(--sp-D-fx, 0%) var(--sp-D-fy, 0%);
     }
     .sym-sprite-E {
       background-image: url('assert/art-new/animation-pack/E-sprite.png');
+      background-image: image-set(
+        url('assert/art-new/animation-pack/E-sprite.webp') type('image/webp'),
+        url('assert/art-new/animation-pack/E-sprite.png') type('image/png'));
       background-position: var(--sp-E-fx, 0%) var(--sp-E-fy, 0%);
     }
     .sym-sprite-S {
       background-image: url('assert/art-new/animation-pack/S-sprite.png');
+      background-image: image-set(
+        url('assert/art-new/animation-pack/S-sprite.webp') type('image/webp'),
+        url('assert/art-new/animation-pack/S-sprite.png') type('image/png'));
       background-position: var(--sp-S-fx, 0%) var(--sp-S-fy, 0%);
     }
     .sym-sprite-M {
       background-image: url('assert/art-new/animation-pack/M-sprite.png');
+      background-image: image-set(
+        url('assert/art-new/animation-pack/M-sprite.webp') type('image/webp'),
+        url('assert/art-new/animation-pack/M-sprite.png') type('image/png'));
       background-position: var(--sp-M-fx, 0%) var(--sp-M-fy, 0%);
     }
     /* Alias cũ (Wild) */
     .sym-wild-sprite {
       background-image: url('assert/art-new/animation-pack/wild-sprite.png');
+      background-image: image-set(
+        url('assert/art-new/animation-pack/wild-sprite.webp') type('image/webp'),
+        url('assert/art-new/animation-pack/wild-sprite.png') type('image/png'));
       background-size: 600% 600%;
       background-position: var(--sp-W-fx, 0%) var(--sp-W-fy, 0%);
     }
@@ -3484,6 +3514,9 @@
       width: 100%;
       height: 100%;
       background-image: url('assert/art-new/animation-pack/animation-sequence.png');
+      background-image: image-set(
+        url('assert/art-new/animation-pack/animation-sequence.webp') type('image/webp'),
+        url('assert/art-new/animation-pack/animation-sequence.png') type('image/png'));
       background-repeat: no-repeat;
       background-size: 600% 600%;
       background-position: 0% 0%;
@@ -3916,9 +3949,12 @@
           <button class="circle-btn turbo" id="btnFast" title="Fast Spin">⚡</button>
           <button class="circle-btn" id="btnExplainFeat" title="Feature Explain Mode — pause & show what each feature does">📖</button>
           <button class="spin-btn" id="btnSpin" title="SPIN">
-            <img src="assert/spin.png" alt="SPIN">
+            <picture>
+              <source type="image/webp" srcset="assert/spin.webp">
+              <img src="assert/spin.png" alt="SPIN">
+            </picture>
           </button>
-          <button class="circle-btn" id="btnAuto" title="Autospin"><img src="assert/auto-spin.png" alt="Auto"></button>
+          <button class="circle-btn" id="btnAuto" title="Autospin"><picture><source type="image/webp" srcset="assert/auto-spin.webp"><img src="assert/auto-spin.png" alt="Auto"></picture></button>
         </div>
       </div>
     </div>
@@ -3926,7 +3962,7 @@
     <div class="side-left">
       <div class="side-stack">
         <button class="circle-btn buy" id="btnBuyFeature" title="Execute Script / Buy Feature">★</button>
-        <button class="circle-btn" id="btnBuyFS" title="Buy Free Spin"><img src="assert/buy-free-spin.png" alt="Buy FS"></button>
+        <button class="circle-btn" id="btnBuyFS" title="Buy Free Spin"><picture><source type="image/webp" srcset="assert/buy-free-spin.webp"><img src="assert/buy-free-spin.png" alt="Buy FS"></picture></button>
         <button class="circle-btn" id="btnMenu" title="Menu">☰</button>
       </div>
       <div class="side-row">
@@ -4303,6 +4339,37 @@
 // ═══════════════════════════════════════════════════════════════
 
 const ASSET = 'assert/';
+
+/** Canonical path stays .png; swap to .webp when canvas probe said yes. */
+function toPngPath(path) {
+  return String(path || '').replace(/\.webp(\?|#|$)/i, '.png$1');
+}
+function assetUrl(path) {
+  const png = toPngPath(path);
+  if (!png || window.__ZD_WEBP === false) return png;
+  return png.replace(/\.png(\?|#|$)/i, '.webp$1');
+}
+function setImgSrc(el, path) {
+  if (!el) return;
+  const png = toPngPath(path);
+  const href = assetUrl(png);
+  el.src = href;
+  if (href && href !== png) {
+    el.onerror = () => {
+      el.onerror = null;
+      window.__ZD_WEBP = false;
+      document.documentElement.classList.remove('webp');
+      el.src = png;
+    };
+  }
+}
+function imgTag(path, extra = '') {
+  const png = toPngPath(path);
+  const href = assetUrl(png);
+  const fb = href && href !== png ? ` onerror="this.onerror=null;this.src='${png}'"` : '';
+  return `<img src="${href}"${fb}${extra ? ' ' + extra : ''}>`;
+}
+
 /** Letter symbols shared by both art packs (A–K, W, S). Mystery uses pack file name. */
 const LETTER_SYMS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'W', 'S'];
 const MYSTERY_FILE = 'trojan-horse-mystery.png';
@@ -4343,9 +4410,9 @@ function applySymbolPack(packId, { persist = true, toast = false, rerender = tru
   const pack = SYMBOL_PACKS[packId] || SYMBOL_PACKS.classic;
   if (state) state.symbolPack = pack.id;
   for (const k of LETTER_SYMS) {
-    if (SYMBOLS[k]) SYMBOLS[k].img = pack.base + k + '.png';
+    if (SYMBOLS[k]) SYMBOLS[k].img = assetUrl(pack.base + k + '.png');
   }
-  if (SYMBOLS.M) SYMBOLS.M.img = pack.base + MYSTERY_FILE;
+  if (SYMBOLS.M) SYMBOLS.M.img = assetUrl(pack.base + MYSTERY_FILE);
   if (persist) {
     try { localStorage.setItem('zd_symbol_pack', pack.id); } catch (_) { /* ignore */ }
   }
@@ -4635,13 +4702,13 @@ function preloadSpritePack() {
   for (const cfg of Object.values(SYM_SPRITES)) {
     try {
       const pre = new Image();
-      pre.src = SPRITE_PACK_BASE + cfg.file;
+      pre.src = assetUrl(SPRITE_PACK_BASE + cfg.file);
     } catch (_) { /* ignore */ }
   }
   // Win celebration sequence (mọi win > 0)
   try {
     const winSeq = new Image();
-    winSeq.src = SPRITE_PACK_BASE + 'animation-sequence.png';
+    winSeq.src = assetUrl(SPRITE_PACK_BASE + 'animation-sequence.png');
   } catch (_) { /* ignore */ }
 }
 
@@ -4676,7 +4743,7 @@ function createSymbolEl(sym, { fx, className, splitSide, breathe = true } = {}) 
   img.className = ['sym-img', splitSide, className].filter(Boolean).join(' ');
   img.decoding = 'async';
   img.draggable = false;
-  if (s?.img) img.src = s.img;
+  if (s?.img) setImgSrc(img, s.img);
   img.alt = s?.name || sym;
   img.dataset.sym = sym;
   // Mỗi symbol idle tỏa 1 màu aura riêng
@@ -4913,7 +4980,7 @@ const JACKPOT_CORE_IMG = ASSET + 'quantum-core-jackpot.png';
 function symImgHtml(sym, alt = '') {
   const s = SYMBOLS[sym];
   if (!s?.img) return alt || '?';
-  return `<img class="sym-img" src="${s.img}" alt="${s.name}" draggable="false">`;
+  return imgTag(s.img, `class="sym-img" alt="${s.name}" draggable="false"`);
 }
 
 // Reel strips (weighted)
@@ -5935,7 +6002,7 @@ function showFeatureDetail(featureId) {
     f.timing === 'win' ? 'Giai đoạn tính tiền thắng' :
     'Sau khi hàng dừng';
 
-  img.src = f.img || '';
+  setImgSrc(img, f.img || '');
   img.alt = vi.nameVi || f.name;
   title.textContent = vi.nameVi || f.name;
   title.style.color = f.color || 'var(--cyan)';
@@ -5987,7 +6054,7 @@ function renderFeatureMeter(activeIds = []) {
     if (on) badge.setAttribute('aria-current', 'true');
     if (f.img) {
       const img = document.createElement('img');
-      img.src = f.img;
+      setImgSrc(img, f.img);
       img.alt = viName;
       img.draggable = false;
       badge.appendChild(img);
@@ -6044,7 +6111,7 @@ function showSymTooltip(sym, el) {
   const tip = document.getElementById('symTooltip');
   // GDD paytable = multipliers of totalBet (not cash). Show raw Cx like 0.75 / 1.00 / 1.50.
   const pays = s.pays.slice(2).map((p, i) => `${i + 3}: ${Number(p).toFixed(2)}x`).join(' | ');
-  tip.innerHTML = `<div style="display:flex;align-items:center;gap:8px"><img src="${s.img}" style="width:40px;height:40px;object-fit:contain" alt=""><strong>${s.name}</strong></div><br>${pays || 'Special symbol'}`;
+  tip.innerHTML = `<div style="display:flex;align-items:center;gap:8px">${imgTag(s.img, 'style="width:40px;height:40px;object-fit:contain" alt=""')}<strong>${s.name}</strong></div><br>${pays || 'Special symbol'}`;
   const rect = el.getBoundingClientRect();
   tip.style.left = Math.min(rect.right + 8, window.innerWidth - 200) + 'px';
   tip.style.top = rect.top + 'px';
@@ -6673,7 +6740,7 @@ function renderWinExplainBody() {
         const img = SYMBOLS[sym]?.img || '';
         const cls = hitRtl.has(key) ? 'wx-mini-cell hit-rtl' : (hit.has(key) ? 'wx-mini-cell hit' : 'wx-mini-cell');
         mini += `<div class="${cls}" title="col ${c}, row ${r}: ${sym}">${
-          img ? `<img src="${img}" alt="${sym}">` : `<span style="font-size:.65rem;color:#666">${sym || '·'}</span>`
+          img ? imgTag(img, `alt="${sym}"`) : `<span style="font-size:.65rem;color:#666">${sym || '·'}</span>`
         }</div>`;
       }
     }
@@ -6709,7 +6776,7 @@ function renderWinExplainBody() {
       ).join('');
       return `<div class="wx-way">
         <div class="wx-way-head">
-          ${L.img ? `<img src="${L.img}" alt="">` : ''}
+          ${L.img ? imgTag(L.img, 'alt=""') : ''}
           <div class="wx-way-title">
             <strong>#${L.idx} · ${L.name}</strong>
             <span class="sub">Symbol ${L.sym} · id ${sid} · type ${L.type || 'way'}</span>
@@ -7313,7 +7380,7 @@ async function playJackpot(serverJp = null) {
       const node = document.createElement('div');
       node.className = 'jackpot-node';
       const coreImg = document.createElement('img');
-      coreImg.src = JACKPOT_CORE_IMG;
+      setImgSrc(coreImg, JACKPOT_CORE_IMG);
       coreImg.alt = 'Encrypted Node';
       node.appendChild(coreImg);
       node.addEventListener('click', () => {
@@ -9184,7 +9251,7 @@ async function flyFeatureIconFromMeter(featId) {
   const endX = wr.left + wr.width / 2 - 24;
   const endY = wr.top + wr.height / 2 - 36;
 
-  fly.src = feat.img;
+  setImgSrc(fly, feat.img);
   fly.classList.remove('fly');
   fly.style.display = 'block';
   fly.style.opacity = '1';
@@ -9402,7 +9469,7 @@ async function playFeatureIntro(featId) {
   const img = document.getElementById('vfxIntroImg');
   const name = document.getElementById('vfxIntroName');
   if (intro && img && name && feat) {
-    img.src = feat.img || '';
+    setImgSrc(img, feat.img || '');
     img.alt = feat.name;
     name.textContent = feat.name;
     name.style.borderColor = feat.color || 'var(--cyan)';
@@ -9504,7 +9571,7 @@ async function playFeatureExplainBeat(featId, step = null) {
   hideFeatureIntro(true);
 
   if (img) {
-    img.src = feat.img || '';
+    setImgSrc(img, feat.img || '');
     img.alt = vi.nameVi || feat.name;
   }
   if (nameEl) {
