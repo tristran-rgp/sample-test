@@ -56,6 +56,7 @@
       z-index: 0;
       pointer-events: none;
       overflow: hidden;
+      contain: paint;
       background:
         radial-gradient(ellipse 120% 70% at 50% -15%, rgba(0, 140, 255, .42) 0%, transparent 52%),
         radial-gradient(ellipse 55% 45% at 8% 55%, rgba(0, 255, 220, .12) 0%, transparent 55%),
@@ -555,7 +556,7 @@
       opacity: .04;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
       background-size: 180px 180px;
-      animation: noiseShift 0.4s steps(2) infinite;
+      animation: noiseShift 2.8s steps(2) infinite;
       mix-blend-mode: overlay;
     }
     @keyframes noiseShift {
@@ -630,6 +631,27 @@
     @keyframes liveBlink {
       0%,100% { opacity: 1; }
       50% { opacity: .25; }
+    }
+    body.tab-hidden #bgScene *,
+    body.tab-hidden .info-bar .marquee {
+      animation-play-state: paused !important;
+    }
+    body.spin-busy #bgScene .bg-noise,
+    body.spin-busy #bgScene .bg-rain,
+    body.spin-busy #bgScene .bg-matrix,
+    body.spin-busy #bgScene .bg-packets,
+    body.spin-busy #bgScene .bg-core,
+    body.spin-busy #bgScene .bg-scan,
+    body.spin-busy #bgScene .bg-laser,
+    body.spin-busy #bgScene .bg-hex {
+      animation-play-state: paused;
+    }
+    body.spin-busy #bgScene .bg-noise { opacity: 0; }
+    @media (prefers-reduced-motion: reduce) {
+      #bgScene *,
+      .info-bar .marquee,
+      .fx-aura-breathe,
+      .feat-badge.active { animation: none !important; }
     }
     /* Server rack towers */
     #bgScene .bg-towers {
@@ -4540,26 +4562,45 @@ function spriteShouldBoost(sym) {
   return !!document.querySelector(sel);
 }
 
+let _spriteScanTs = 0;
+const _spritePresent = {};
+const _spriteBoosting = {};
+
+function refreshSpritePresence(now) {
+  if (now - _spriteScanTs < 180) return;
+  _spriteScanTs = now;
+  for (const sym of Object.keys(SYM_SPRITES)) {
+    const present =
+      !!document.querySelector(`.sym-sprite-${sym}`) ||
+      (sym === 'W' && !!document.querySelector('.sym-wild-sprite'));
+    _spritePresent[sym] = present;
+    _spriteBoosting[sym] = present && spriteShouldBoost(sym);
+  }
+}
+
 function spritePackTick(now) {
+  if (document.hidden) {
+    _spriteRaf = 0;
+    return;
+  }
   _spriteRaf = requestAnimationFrame(spritePackTick);
   if (!useSpritePackAnim()) return;
+  refreshSpritePresence(now);
 
   for (const sym of Object.keys(SYM_SPRITES)) {
+    if (!_spritePresent[sym]) continue;
     const cfg = SYM_SPRITES[sym];
-    const has =
-      document.querySelector(`.sym-sprite-${sym}`) ||
-      (sym === 'W' && document.querySelector('.sym-wild-sprite'));
-    if (!has) continue;
 
     if (!_spriteState[sym]) {
-      // phase offset so symbols don't blink in perfect sync
       const phase = (sym.charCodeAt(0) * 7) % cfg.frames;
       _spriteState[sym] = { frame: phase, lastTs: now };
       setSpriteCssFrame(sym, phase);
       continue;
     }
     const st = _spriteState[sym];
-    const fps = spriteShouldBoost(sym) ? cfg.winFps : cfg.idleFps;
+    const fps = (performance.now() < _spriteBoostUntil || _spriteBoosting[sym])
+      ? cfg.winFps
+      : cfg.idleFps;
     const interval = 1000 / fps;
     if (now - st.lastTs < interval) continue;
     st.lastTs += interval;
@@ -4570,6 +4611,7 @@ function spritePackTick(now) {
 }
 
 function ensureSpritePackTicker() {
+  if (document.hidden) return;
   if (_spriteRaf) return;
   for (const sym of Object.keys(SYM_SPRITES)) setSpriteCssFrame(sym, 0);
   _spriteRaf = requestAnimationFrame(spritePackTick);
@@ -4632,9 +4674,10 @@ function createSymbolEl(sym, { fx, className, splitSide, breathe = true } = {}) 
 
   const img = document.createElement('img');
   img.className = ['sym-img', splitSide, className].filter(Boolean).join(' ');
+  img.decoding = 'async';
+  img.draggable = false;
   if (s?.img) img.src = s.img;
   img.alt = s?.name || sym;
-  img.draggable = false;
   img.dataset.sym = sym;
   // Mỗi symbol idle tỏa 1 màu aura riêng
   if (fx) setSymbolFx(img, fx);
@@ -5385,8 +5428,8 @@ function sfxForFeatureHit(featId) {
 }
 
 // ─── Presentation gate: auto/FS chỉ spin tiếp khi FX xong ────
-function beginFx() { state.fxPlaying = true; }
-function endFx() { state.fxPlaying = false; }
+function beginFx() { state.fxPlaying = true; syncPerfMode(); }
+function endFx() { state.fxPlaying = false; syncPerfMode(); }
 
 /**
  * Chờ toàn bộ hiệu ứng UI của spin hiện tại kết thúc
@@ -5786,37 +5829,77 @@ function appendSymbolVisual(cell, sym, isSplit, fx) {
   }
 }
 
+function bindGridClicksOnce() {
+  const grid = document.getElementById('reelsGrid');
+  if (!grid || grid.dataset.clickBound === '1') return;
+  grid.dataset.clickBound = '1';
+  grid.addEventListener('click', e => {
+    const cell = e.target.closest('.cell');
+    if (!cell || !grid.contains(cell)) return;
+    const c = Number(cell.dataset.reel);
+    const r = Number(cell.dataset.row);
+    const sym = state.grid?.[c]?.[r];
+    if (sym) showSymTooltip(sym, cell);
+  });
+}
+
+function paintCell(cell, c, r, highlightSet) {
+  const sym = state.grid[c][r];
+  const meta = state.cellMeta[c][r] || { split: false, multiplier: 1, mystery: false };
+  const split = !!meta.split && sym !== 'S';
+  const win = highlightSet.has(`${c},${r}`);
+  const key = `${sym}|${split ? 1 : 0}|${meta.multiplier || 1}|${win ? 1 : 0}|${meta.mystery || sym === 'M' ? 1 : 0}`;
+  if (cell.dataset.rk === key) return;
+  cell.dataset.rk = key;
+  cell.dataset.reel = String(c);
+  cell.dataset.row = String(r);
+  cell.className = 'cell';
+  if (win) cell.classList.add('win');
+  if (sym === 'S') cell.classList.add('scatter-win');
+  if (meta.mystery || sym === 'M') cell.classList.add('mystery');
+  if (meta.split) cell.classList.add('split');
+  cell.replaceChildren();
+  if (meta.multiplier > 1) {
+    const tag = document.createElement('span');
+    tag.className = 'mult-tag';
+    tag.textContent = `×${meta.multiplier}`;
+    cell.appendChild(tag);
+  }
+  appendSymbolVisual(cell, sym, split);
+}
+
 function renderGrid(highlight = []) {
   const grid = document.getElementById('reelsGrid');
-  grid.innerHTML = '';
+  if (!grid || !state.grid?.length) return;
+  bindGridClicksOnce();
   const winSet = new Set(highlight);
+  const canPatch =
+    grid.children.length === REELS &&
+    Array.from(grid.children).every(reel => reel.children.length === ROWS);
+
+  if (!canPatch) {
+    grid.replaceChildren();
+    for (let c = 0; c < REELS; c++) {
+      const reel = document.createElement('div');
+      reel.className = 'reel';
+      reel.id = `reel-${c}`;
+      for (let r = 0; r < ROWS; r++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        paintCell(cell, c, r, winSet);
+        reel.appendChild(cell);
+      }
+      grid.appendChild(reel);
+    }
+    return;
+  }
 
   for (let c = 0; c < REELS; c++) {
-    const reel = document.createElement('div');
-    reel.className = 'reel';
+    const reel = grid.children[c];
     reel.id = `reel-${c}`;
     for (let r = 0; r < ROWS; r++) {
-      const sym = state.grid[c][r];
-      const meta = state.cellMeta[c][r] || { split: false, multiplier: 1, mystery: false };
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      if (winSet.has(`${c},${r}`)) cell.classList.add('win');
-      if (sym === 'S') cell.classList.add('scatter-win');
-      if (meta.mystery || sym === 'M') cell.classList.add('mystery');
-      if (meta.split) cell.classList.add('split');
-      if (meta.multiplier > 1) {
-        const tag = document.createElement('span');
-        tag.className = 'mult-tag';
-        tag.textContent = `×${meta.multiplier}`;
-        cell.appendChild(tag);
-      }
-      appendSymbolVisual(cell, sym, !!meta.split && sym !== 'S');
-      cell.dataset.reel = c;
-      cell.dataset.row = r;
-      cell.addEventListener('click', () => showSymTooltip(sym, cell));
-      reel.appendChild(cell);
+      paintCell(reel.children[r], c, r, winSet);
     }
-    grid.appendChild(reel);
   }
 }
 
@@ -5922,6 +6005,11 @@ function renderFeatureMeter(activeIds = []) {
   });
 }
 
+function syncPerfMode() {
+  const busy = !!(state.spinning || state.fxPlaying);
+  document.body.classList.toggle('spin-busy', busy);
+}
+
 function updateUI() {
   const beforeEl = document.getElementById('balanceBeforeDisplay');
   if (beforeEl) beforeEl.textContent = fmtBalance(state.balanceBefore);
@@ -5930,6 +6018,7 @@ function updateUI() {
   document.getElementById('headerWin').textContent = state.lastWin.toFixed(2);
   const mult = Math.max(1, state.globalMultiplier || 1);
   document.getElementById('multDisplay').textContent = String(mult).padStart(2, '0');
+  syncPerfMode();
 }
 
 /** Chụp số dư sau trừ bet/phí, trước khi credit win (spin đang chờ kết quả). */
@@ -7395,6 +7484,7 @@ async function doSpin(forcedScatters = 0) {
   captureBalanceBefore();
 
   state.spinning = true;
+  syncPerfMode();
   state.lastWin = 0;
   state.blockedSymbols = [];
   state.globalMultiplier = 1;
@@ -11763,6 +11853,7 @@ async function doOnlineSpin(opts = {}) {
   }
 
   state.spinning = true;
+  syncPerfMode();
   state.lastWin = 0;
   state.globalMultiplier = 1;
   state.bypassProtocol = false;
@@ -13547,6 +13638,19 @@ function initWsTrafficDock() {
 }
 
 initWsTrafficDock();
+
+document.addEventListener('visibilitychange', () => {
+  document.body.classList.toggle('tab-hidden', document.hidden);
+  if (document.hidden) {
+    if (_spriteRaf) {
+      cancelAnimationFrame(_spriteRaf);
+      _spriteRaf = 0;
+    }
+  } else if (typeof ensureSpritePackTicker === 'function') {
+    ensureSpritePackTicker();
+  }
+});
+if (document.hidden) document.body.classList.add('tab-hidden');
 
 // ─── Boot — wait for user choice ─────────────────────────────
 // initUI and splash are now triggered by button clicks above
