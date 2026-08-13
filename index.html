@@ -1059,6 +1059,8 @@
       cursor: pointer;
     }
     #modalFsGrid .grid-tools button:hover { border-color: var(--cyan); color: var(--cyan); }
+    #modalFsGrid .cheat-feature-list { margin-top: 4px; }
+    #modalFsGrid .fs-feat-note { font-size: .62rem; color: var(--dim); margin: 8px 0 0; line-height: 1.35; }
 
     .reels-wrapper {
       position: relative;
@@ -4260,6 +4262,15 @@
       </thead>
       <tbody id="fsGridBody"></tbody>
     </table>
+    <div class="cheat-feature-head">
+      <span>Feature lượt này</span>
+      <div class="grid-tools">
+        <button type="button" id="fsFeatAll">All</button>
+        <button type="button" id="fsFeatNone">None</button>
+      </div>
+    </div>
+    <div class="cheat-feature-list" id="fsFeatureList"></div>
+    <p class="fs-feat-note">Tick = feature chạy trên spin này (merge sticky). Không persist sang lượt sau. Không tick = chỉ sticky / RNG.</p>
     <div class="modal-actions">
       <button type="button" class="btn" id="fsGridSkip">Bỏ qua (RNG)</button>
       <button type="button" class="btn cheat-btn-gold" id="fsGridApply" style="font-weight:700">Apply &amp; Spin</button>
@@ -7745,6 +7756,7 @@ async function doSpin(forcedScatters = 0) {
       state.fsTotal++;
       showToast(`+1 Free Spin! New feature: ${newFeat[0].name}`, '#aa44ff');
     }
+    mergePendingLocalForceFeatures(features);
   }
 
   state.triggeredFeatures = features;
@@ -12820,6 +12832,7 @@ function saveCheatPrefs() {
 let editFsGridEnabled = false;
 let fsGridBusy = false;
 let pendingLocalForceGrid = null;
+let pendingLocalForceFeatures = null;
 
 function isEditFsGridOn() {
   return !!editFsGridEnabled;
@@ -12849,18 +12862,33 @@ function syncEditFsGridChip() {
 
 function buildFsOverlayEditor() {
   const body = document.getElementById('fsGridBody');
-  if (!body || body.dataset.built === '1') return;
-  const opts = CHEAT_SYM_OPTS.map(o => `<option value="${o.id}">${o.label}</option>`).join('');
-  let html = '';
-  for (let r = 0; r < 3; r++) {
-    html += `<tr><th style="font-size:.6rem;color:var(--dim)">row${r}</th>`;
-    for (let c = 0; c < 5; c++) {
-      html += `<td><select data-r="${r}" data-c="${c}" class="fs-cell">${opts}</select></td>`;
+  if (body && body.dataset.built !== '1') {
+    const opts = CHEAT_SYM_OPTS.map(o => `<option value="${o.id}">${o.label}</option>`).join('');
+    let html = '';
+    for (let r = 0; r < 3; r++) {
+      html += `<tr><th style="font-size:.6rem;color:var(--dim)">row${r}</th>`;
+      for (let c = 0; c < 5; c++) {
+        html += `<td><select data-r="${r}" data-c="${c}" class="fs-cell">${opts}</select></td>`;
+      }
+      html += '</tr>';
     }
-    html += '</tr>';
+    body.innerHTML = html;
+    body.dataset.built = '1';
   }
-  body.innerHTML = html;
-  body.dataset.built = '1';
+  const featRoot = document.getElementById('fsFeatureList');
+  if (featRoot && featRoot.dataset.built !== '1') {
+    featRoot.innerHTML = CHEAT_FEATURE_NAMES.map(
+      name =>
+        `<label class="cheat-feature-item" data-feature="${name}">` +
+        `<input type="checkbox" value="${name}" /><span>${name}</span></label>`
+    ).join('');
+    featRoot.dataset.built = '1';
+    featRoot.addEventListener('change', e => {
+      const input = e.target;
+      if (!(input instanceof HTMLInputElement) || input.type !== 'checkbox') return;
+      input.closest('.cheat-feature-item')?.classList.toggle('is-on', input.checked);
+    });
+  }
 }
 
 function readFsOverlayGrid() {
@@ -12889,6 +12917,22 @@ function fillFsOverlayGrid(symId) {
   });
 }
 
+function readFsOverlayFeatures() {
+  return [...document.querySelectorAll('#fsFeatureList input[type="checkbox"]:checked')]
+    .map(el => el.value)
+    .filter(name => CHEAT_FEATURE_NAMES.includes(name));
+}
+
+function applyFeaturesToFsOverlay(features) {
+  const selected = new Set(Array.isArray(features) ? features : []);
+  document.querySelectorAll('#fsFeatureList .cheat-feature-item').forEach(label => {
+    const on = selected.has(label.dataset.feature);
+    const input = label.querySelector('input');
+    if (input) input.checked = on;
+    label.classList.toggle('is-on', on);
+  });
+}
+
 function currentScreenAsRowMajor() {
   if (!state.grid || state.grid.length !== 5) return null;
   const inv = {};
@@ -12911,6 +12955,19 @@ function loadFsOverlayFromScreen() {
     return;
   }
   applyGridToFsOverlay(grid);
+}
+
+function mergePendingLocalForceFeatures(features) {
+  const names = pendingLocalForceFeatures;
+  pendingLocalForceFeatures = null;
+  if (!Array.isArray(names) || !names.length || !Array.isArray(features)) return;
+  for (const name of names) {
+    const id = SERVER_FEATURE_MAP[name];
+    if (!id) continue;
+    if (features.find(f => f.id === id)) continue;
+    const feat = FEATURES.find(f => f.id === id);
+    if (feat) features.push(feat);
+  }
 }
 
 function applyPendingLocalForceGrid() {
@@ -12966,6 +13023,7 @@ async function skipFsGridAndSpin() {
   if (fsGridBusy || state.spinning) return;
   closeFsGridEditor();
   pendingLocalForceGrid = null;
+  pendingLocalForceFeatures = null;
   showToast('FS RNG — không force grid', '#ff8800');
   await doSpin();
 }
@@ -12981,13 +13039,21 @@ async function applyFsGridAndSpin() {
   const btn = document.getElementById('fsGridApply');
   if (btn) btn.disabled = true;
   try {
+    const features = readFsOverlayFeatures();
+    const value = features.length ? { grid, features } : { grid };
     if (online) {
-      await sendCheatCode('FORCE_GRID', { grid });
-      showToast('FORCE_GRID đã set — quay FS', '#00ff88');
+      await sendCheatCode('FORCE_GRID', value);
+      showToast(
+        features.length
+          ? `FORCE_GRID + ${features.length} feature — quay FS`
+          : 'FORCE_GRID đã set — quay FS',
+        '#00ff88'
+      );
       await sleepRaw(80);
     } else {
       pendingLocalForceGrid = grid;
-      showToast('Offline: force grid local', '#ff8800');
+      pendingLocalForceFeatures = features;
+      showToast('Offline: force grid/feature local', '#ff8800');
     }
     closeFsGridEditor();
     await doSpin();
@@ -13694,6 +13760,12 @@ function bindCheatPanelEvents() {
       [6, 12, 12, 12, 10],
       [7, 8, 9, 6, 7],
     ]);
+  });
+  document.getElementById('fsFeatAll')?.addEventListener('click', () => {
+    applyFeaturesToFsOverlay(CHEAT_FEATURE_NAMES);
+  });
+  document.getElementById('fsFeatNone')?.addEventListener('click', () => {
+    applyFeaturesToFsOverlay([]);
   });
   window.addEventListener('keydown', e => {
     if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
