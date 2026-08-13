@@ -1006,8 +1006,59 @@
       animation: fsPulse 2s infinite;
       flex-shrink: 0;
     }
-    .fs-banner.visible { display: block; }
+    .fs-banner.visible { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
     @keyframes fsPulse { 0%,100%{opacity:1} 50%{opacity:.7} }
+    .fs-edit-chip {
+      display: none;
+      border: 1px solid rgba(232, 197, 107, .45);
+      background: rgba(232, 197, 107, .12);
+      color: #e8c56b;
+      font-size: .62rem;
+      font-weight: 800;
+      letter-spacing: .8px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    .fs-banner.visible .fs-edit-chip.is-on { display: inline-flex; }
+    .fs-edit-chip:hover { box-shadow: 0 0 10px rgba(232, 197, 107, .25); }
+    .cheat-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: .72rem;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+    }
+    .cheat-toggle input { accent-color: #e8c56b; }
+    .cheat-toggle span { color: var(--cheat-gold, #e8c56b); font-weight: 700; }
+    .cheat-toggle small { color: var(--dim); font-weight: 400; }
+    #modalFsGrid .fs-grid-modal { max-width: 540px; }
+    #modalFsGrid .fs-grid-hint { font-size: .75rem; color: var(--dim); margin: 0 0 12px; line-height: 1.4; }
+    #modalFsGrid table { width: 100%; border-collapse: collapse; }
+    #modalFsGrid th, #modalFsGrid td { padding: 4px; text-align: center; }
+    #modalFsGrid select {
+      width: 100%;
+      background: #0d0d1a;
+      color: var(--text);
+      border: 1px solid #1e3a5f;
+      border-radius: 6px;
+      padding: 4px 2px;
+      font-size: .7rem;
+    }
+    #modalFsGrid .grid-tools { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 10px; }
+    #modalFsGrid .grid-tools button {
+      font-size: .65rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid #1e3a5f;
+      background: #0d0d1a;
+      color: var(--dim);
+      cursor: pointer;
+    }
+    #modalFsGrid .grid-tools button:hover { border-color: var(--cyan); color: var(--cyan); }
 
     .reels-wrapper {
       position: relative;
@@ -3899,7 +3950,10 @@
           <div class="mult-box"><span class="x">x</span><span id="multDisplay">01</span></div>
         </div>
 
-        <div class="fs-banner" id="fsBanner">⚡ DEEP WEB INFILTRATION — SPINS LEFT: <span id="fsCount">0</span></div>
+        <div class="fs-banner" id="fsBanner">
+          ⚡ DEEP WEB INFILTRATION — SPINS LEFT: <span id="fsCount">0</span>
+          <button type="button" class="fs-edit-chip" id="btnFsEditGrid" title="Sửa grid lượt FS này">EDIT GRID</button>
+        </div>
 
         <div class="reels-wrapper ambient-on" id="reelsWrapper">
           <div class="reels-grid" id="reelsGrid"></div>
@@ -4089,6 +4143,11 @@
             <select id="cheatCode"></select>
           </div>
         </div>
+        <label class="cheat-toggle" id="cheatEditFsWrap">
+          <input type="checkbox" id="cheatEditFsGrid">
+          <span>Sửa grid từng lượt Free Spin</span>
+          <small>— dừng auto-FS, FORCE_GRID rồi 1500</small>
+        </label>
 
         <div class="cheat-workspace">
           <div id="cheatGridEditor">
@@ -4180,6 +4239,33 @@
 </div>
 
 <button type="button" id="btnCheatFab" title="Cheat panel (Ctrl+Shift+C)" aria-label="Open cheat panel">🛠</button>
+
+<!-- Per-FS grid editor (toggle in cheat panel) -->
+<div class="modal-overlay" id="modalFsGrid">
+  <div class="modal fs-grid-modal">
+    <h2>SỬA GRID FREE SPIN</h2>
+    <p class="fs-grid-hint" id="fsGridHint">Chọn symbol 5×3 rồi Apply &amp; Spin. Server nhận FORCE_GRID (cmd 1999) rồi spin 1500 — debit = 0, bet vẫn là mức session.</p>
+    <div class="grid-tools">
+      <button type="button" id="fsGridFillH">All H</button>
+      <button type="button" id="fsGridFillA">All A</button>
+      <button type="button" id="fsGridFromScreen">From screen</button>
+      <button type="button" id="fsGridScatter3">3S mid</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th>
+        </tr>
+      </thead>
+      <tbody id="fsGridBody"></tbody>
+    </table>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="fsGridSkip">Bỏ qua (RNG)</button>
+      <button type="button" class="btn cheat-btn-gold" id="fsGridApply" style="font-weight:700">Apply &amp; Spin</button>
+    </div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="modalPaytable">
   <div class="modal" style="max-width:600px">
@@ -7534,6 +7620,10 @@ async function continueAfterSpin() {
 
   // Free spins: remain = số lượt còn lại cần quay
   if (state.inFreeSpins && state.fsRemaining > 0) {
+    if (isEditFsGridOn()) {
+      openFsGridEditor();
+      return;
+    }
     // Nhịp ngắn giữa 2 FS — FX đã settle xong
     await sleepRaw(state.fastSpin ? 180 : 400);
     if (state.inFreeSpins && state.fsRemaining > 0 && !state.spinning && !state.fxPlaying) {
@@ -7591,6 +7681,7 @@ async function triggerFreeSpins(scatterCount, opts = {}) {
 function updateFSBanner() {
   const el = document.getElementById('fsCount');
   if (el) el.textContent = Math.max(0, state.fsRemaining || 0);
+  syncEditFsGridChip();
 }
 
 async function endFreeSpins() {
@@ -7598,6 +7689,7 @@ async function endFreeSpins() {
   state.fsRemaining = 0;
   state.persistentFeatures = [];
   state.fsActiveFeatures = [];
+  closeFsGridEditor();
   document.getElementById('fsBanner').classList.remove('visible');
   renderFeatureMeter([]);
   document.getElementById('fsTotalWin').textContent = fmt(state.fsSessionWin || 0);
@@ -7668,6 +7760,7 @@ async function doSpin(forcedScatters = 0) {
     strips[1] = [...strips[1], ...Array(5).fill('S')];
   }
   await animateReelSpin(strips);
+  applyPendingLocalForceGrid();
 
   // Force scatters for buy free spin (before feature transforms)
   if (forcedScatters > 0) {
@@ -7943,6 +8036,10 @@ function initUI() {
       return;
     }
     if (state.spinning) return;
+    if (isFsGridEditorOpen()) {
+      applyFsGridAndSpin();
+      return;
+    }
     sfx('tick', { gain: 0.45 });
     doSpin();
   });
@@ -8812,7 +8909,7 @@ function restoreOnlineSessionFromPayload(payload, { autoContinueFs = false } = {
     );
     if (autoContinueFs && state.fsRemaining > 0 && !state.spinning) {
       setTimeout(() => {
-        if (online && state.inFreeSpins && state.fsRemaining > 0 && !state.spinning) {
+        if (state.inFreeSpins && state.fsRemaining > 0 && !state.spinning) {
           continueAfterSpin();
         }
       }, 600);
@@ -12400,6 +12497,11 @@ window.addEventListener('keydown', (e) => {
     if (isTypingTarget(e.target)) return;
     const splash = document.getElementById('splash');
     if (splash && !splash.classList.contains('hidden')) return;
+    if (isFsGridEditorOpen()) {
+      e.preventDefault();
+      applyFsGridAndSpin();
+      return;
+    }
     if (document.querySelector('.modal-overlay.open')) return;
     const btn = document.getElementById('btnSpin');
     if (!btn || btn.disabled) return;
@@ -12657,6 +12759,7 @@ function initCheatPanel() {
     if (saved.debugBase) document.getElementById('cheatDebugBase').value = saved.debugBase;
     if (saved.token) document.getElementById('cheatDebugToken').value = saved.token;
     if (saved.transport) document.getElementById('cheatTransport').value = saved.transport;
+    if (saved.editFsGrid) setEditFsGridEnabled(true, { persist: false });
     // Manual overrides only if user previously saved non-empty (don't clobber session pull)
     if (saved.agencyId && document.getElementById('cheatAgencyId')?.dataset.auto === '0') {
       document.getElementById('cheatAgencyId').value = saved.agencyId;
@@ -12707,9 +12810,193 @@ function saveCheatPrefs() {
         agencyId: document.getElementById('cheatAgencyId')?.value || '',
         userId: document.getElementById('cheatUserId')?.value || '',
         transport: document.getElementById('cheatTransport')?.value || 'auto',
+        editFsGrid: isEditFsGridOn(),
       })
     );
   } catch (_) { /* ignore */ }
+}
+
+// ── Per-FS grid editor (FORCE_GRID before each 1500) ──────────
+let editFsGridEnabled = false;
+let fsGridBusy = false;
+let pendingLocalForceGrid = null;
+
+function isEditFsGridOn() {
+  return !!editFsGridEnabled;
+}
+
+function isFsGridEditorOpen() {
+  return !!document.getElementById('modalFsGrid')?.classList.contains('open');
+}
+
+function setEditFsGridEnabled(on, opts = {}) {
+  editFsGridEnabled = !!on;
+  const cb = document.getElementById('cheatEditFsGrid');
+  if (cb) cb.checked = editFsGridEnabled;
+  syncEditFsGridChip();
+  if (opts.persist !== false) saveCheatPrefs();
+  if (!editFsGridEnabled && isFsGridEditorOpen()) {
+    closeFsGridEditor();
+    if (state.inFreeSpins && state.fsRemaining > 0 && !state.spinning && !state.fxPlaying) {
+      continueAfterSpin();
+    }
+  }
+}
+
+function syncEditFsGridChip() {
+  document.getElementById('btnFsEditGrid')?.classList.toggle('is-on', isEditFsGridOn());
+}
+
+function buildFsOverlayEditor() {
+  const body = document.getElementById('fsGridBody');
+  if (!body || body.dataset.built === '1') return;
+  const opts = CHEAT_SYM_OPTS.map(o => `<option value="${o.id}">${o.label}</option>`).join('');
+  let html = '';
+  for (let r = 0; r < 3; r++) {
+    html += `<tr><th style="font-size:.6rem;color:var(--dim)">row${r}</th>`;
+    for (let c = 0; c < 5; c++) {
+      html += `<td><select data-r="${r}" data-c="${c}" class="fs-cell">${opts}</select></td>`;
+    }
+    html += '</tr>';
+  }
+  body.innerHTML = html;
+  body.dataset.built = '1';
+}
+
+function readFsOverlayGrid() {
+  const grid = [[], [], []];
+  document.querySelectorAll('#fsGridBody select.fs-cell').forEach(sel => {
+    const r = Number(sel.dataset.r);
+    const c = Number(sel.dataset.c);
+    grid[r][c] = Number(sel.value) || 1;
+  });
+  return grid;
+}
+
+function applyGridToFsOverlay(grid) {
+  if (!Array.isArray(grid) || grid.length !== 3) return;
+  document.querySelectorAll('#fsGridBody select.fs-cell').forEach(sel => {
+    const r = Number(sel.dataset.r);
+    const c = Number(sel.dataset.c);
+    const v = grid[r]?.[c];
+    if (v != null) sel.value = String(v);
+  });
+}
+
+function fillFsOverlayGrid(symId) {
+  document.querySelectorAll('#fsGridBody select.fs-cell').forEach(sel => {
+    sel.value = String(symId);
+  });
+}
+
+function currentScreenAsRowMajor() {
+  if (!state.grid || state.grid.length !== 5) return null;
+  const inv = {};
+  Object.entries(SYM_MAP).forEach(([id, key]) => {
+    inv[key] = Number(id);
+  });
+  const grid = [[], [], []];
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 5; c++) {
+      grid[r][c] = inv[state.grid[c][r]] || 1;
+    }
+  }
+  return grid;
+}
+
+function loadFsOverlayFromScreen() {
+  const grid = currentScreenAsRowMajor();
+  if (!grid) {
+    showToast('Chưa có screen trên reels', '#ff8800');
+    return;
+  }
+  applyGridToFsOverlay(grid);
+}
+
+function applyPendingLocalForceGrid() {
+  const rows = pendingLocalForceGrid;
+  pendingLocalForceGrid = null;
+  if (!Array.isArray(rows) || rows.length !== 3) return;
+  for (let r = 0; r < 3; r++) {
+    if (!Array.isArray(rows[r]) || rows[r].length !== 5) return;
+  }
+  for (let c = 0; c < 5; c++) {
+    for (let r = 0; r < 3; r++) {
+      const id = Number(rows[r][c]);
+      state.grid[c][r] = SYM_MAP[id] || 'A';
+    }
+  }
+  renderGrid();
+}
+
+function closeFsGridEditor() {
+  closeModal('modalFsGrid');
+}
+
+function openFsGridEditor() {
+  if (!state.inFreeSpins || state.fsRemaining <= 0 || state.spinning) return;
+  buildFsOverlayEditor();
+  const hint = document.getElementById('fsGridHint');
+  if (hint) {
+    hint.textContent =
+      `FS còn ${state.fsRemaining}/${state.fsTotal || state.fsRemaining} — sửa 5×3 rồi Apply & Spin. ` +
+      `Online: FORCE_GRID (1999) rồi 1500 (debit 0, bet session). Offline: ghi đè grid local.`;
+  }
+  const fromScreen = currentScreenAsRowMajor();
+  if (fromScreen) applyGridToFsOverlay(fromScreen);
+  setInfoBar('idle', `Sửa grid FS — ${state.fsRemaining} left`);
+  openModal('modalFsGrid');
+}
+
+async function sendCheatCode(code, value) {
+  const transport = document.getElementById('cheatTransport')?.value || 'auto';
+  if (transport === 'ws') return sendCheatViaWs(code, value);
+  if (transport === 'rest') return sendCheatViaRest(code, value);
+  if (online && ws?.readyState === WebSocket.OPEN) {
+    try {
+      return await sendCheatViaWs(code, value);
+    } catch (_) {
+      return sendCheatViaRest(code, value);
+    }
+  }
+  return sendCheatViaRest(code, value);
+}
+
+async function skipFsGridAndSpin() {
+  if (fsGridBusy || state.spinning) return;
+  closeFsGridEditor();
+  pendingLocalForceGrid = null;
+  showToast('FS RNG — không force grid', '#ff8800');
+  await doSpin();
+}
+
+async function applyFsGridAndSpin() {
+  if (fsGridBusy || state.spinning) return;
+  if (!state.inFreeSpins || state.fsRemaining <= 0) {
+    closeFsGridEditor();
+    return;
+  }
+  const grid = readFsOverlayGrid();
+  fsGridBusy = true;
+  const btn = document.getElementById('fsGridApply');
+  if (btn) btn.disabled = true;
+  try {
+    if (online) {
+      await sendCheatCode('FORCE_GRID', { grid });
+      showToast('FORCE_GRID đã set — quay FS', '#00ff88');
+      await sleepRaw(80);
+    } else {
+      pendingLocalForceGrid = grid;
+      showToast('Offline: force grid local', '#ff8800');
+    }
+    closeFsGridEditor();
+    await doSpin();
+  } catch (e) {
+    showToast('FORCE_GRID thất bại: ' + e.message, '#ff3355');
+  } finally {
+    fsGridBusy = false;
+    if (btn) btn.disabled = false;
+  }
 }
 
 // ── FORCE_GRID editor ─────────────────────────────────────────
@@ -13387,6 +13674,26 @@ function bindCheatPanelEvents() {
   document.getElementById('cheatFeatNone')?.addEventListener('click', () => {
     applyFeaturesToEditor([]);
     writeCheatGridToJson();
+  });
+  document.getElementById('cheatEditFsGrid')?.addEventListener('change', e => {
+    setEditFsGridEnabled(!!e.target.checked);
+  });
+  document.getElementById('btnFsEditGrid')?.addEventListener('click', e => {
+    e.stopPropagation();
+    if (!state.inFreeSpins || state.spinning) return;
+    openFsGridEditor();
+  });
+  document.getElementById('fsGridSkip')?.addEventListener('click', () => skipFsGridAndSpin());
+  document.getElementById('fsGridApply')?.addEventListener('click', () => applyFsGridAndSpin());
+  document.getElementById('fsGridFillH')?.addEventListener('click', () => fillFsOverlayGrid(8));
+  document.getElementById('fsGridFillA')?.addEventListener('click', () => fillFsOverlayGrid(1));
+  document.getElementById('fsGridFromScreen')?.addEventListener('click', () => loadFsOverlayFromScreen());
+  document.getElementById('fsGridScatter3')?.addEventListener('click', () => {
+    applyGridToFsOverlay([
+      [6, 7, 8, 9, 10],
+      [6, 12, 12, 12, 10],
+      [7, 8, 9, 6, 7],
+    ]);
   });
   window.addEventListener('keydown', e => {
     if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
