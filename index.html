@@ -2948,69 +2948,90 @@
       box-shadow: 0 0 6px var(--orange);
     }
 
-    /* Cheat debug panel — wide two-pane modal */
-    #modalCheat.modal-overlay { padding: 18px 20px; align-items: stretch; }
+    /* Cheat debug panel — large studio console */
+    #modalCheat.modal-overlay {
+      padding: 10px 12px;
+      align-items: stretch;
+      background:
+        radial-gradient(ellipse 80% 70% at 50% 40%, rgba(8, 28, 64, .45) 0%, transparent 55%),
+        rgba(0, 2, 8, .86);
+    }
     #modalCheat .cheat-modal {
-      max-width: min(1240px, 98vw);
+      --cheat-gold: #e8c56b;
+      --cheat-gold-dim: rgba(232, 197, 107, .18);
+      --cheat-cyan: #4de6ff;
+      --cheat-violet: #c084fc;
+      --cheat-amber: #ffb020;
+      --cheat-emerald: #3ee0a0;
+      position: relative;
+      max-width: min(1520px, 99vw);
       width: 100%;
-      max-height: min(94vh, 920px);
+      height: min(97vh, 1100px);
+      max-height: min(97vh, 1100px);
       padding: 0;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      border: 1px solid rgba(0,240,255,.22);
+      border: 1px solid rgba(232, 197, 107, .28);
+      border-radius: 14px;
       background:
-        linear-gradient(180deg, rgba(8,18,36,.98) 0%, rgba(6,10,20,.98) 100%);
+        linear-gradient(165deg, rgba(18, 32, 62, .97) 0%, rgba(8, 12, 24, .99) 38%, rgba(6, 8, 16, .99) 100%);
       box-shadow:
-        0 0 0 1px rgba(255,208,0,.08),
-        0 24px 80px rgba(0,0,0,.55),
-        0 0 80px rgba(0,240,255,.08);
+        0 0 0 1px rgba(77, 230, 255, .08),
+        0 28px 90px rgba(0, 0, 0, .65),
+        0 0 90px rgba(232, 197, 107, .07),
+        inset 0 1px 0 rgba(255, 255, 255, .06);
+    }
+    #modalCheat .cheat-modal::before {
+      content: '';
+      position: absolute;
+      left: 12px; right: 12px; top: 0;
+      height: 2px;
+      border-radius: 0 0 2px 2px;
+      background: linear-gradient(90deg, transparent, var(--cheat-gold) 20%, var(--cheat-cyan) 55%, var(--cheat-violet) 80%, transparent);
+      opacity: .85;
+      pointer-events: none;
     }
     .cheat-modal-head {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      padding: 16px 20px 14px;
-      border-bottom: 1px solid rgba(30,58,95,.85);
+      gap: 18px;
+      flex-shrink: 0;
+      padding: 16px 22px 14px;
+      border-bottom: 1px solid rgba(77, 230, 255, .12);
       background:
-        linear-gradient(90deg, rgba(255,208,0,.08), transparent 42%),
-        linear-gradient(180deg, rgba(0,240,255,.06), transparent);
+        linear-gradient(90deg, rgba(232, 197, 107, .1), transparent 46%),
+        linear-gradient(180deg, rgba(77, 230, 255, .07), transparent);
     }
     .cheat-modal-head h2 {
       margin: 0;
-      color: var(--yellow);
-      font-size: 1.05rem;
-      letter-spacing: 2.4px;
+      color: var(--cheat-gold);
+      font-size: 1.12rem;
+      letter-spacing: 2.6px;
+      text-shadow: 0 0 18px rgba(232, 197, 107, .25);
     }
     .cheat-kicker {
-      font-size: .62rem;
-      letter-spacing: 1.6px;
+      font-size: .64rem;
+      letter-spacing: 1.3px;
       text-transform: uppercase;
-      color: var(--yellow);
-      opacity: .75;
-      margin-bottom: 4px;
-    }
-    .cheat-lead {
-      font-size: .72rem;
       color: var(--dim);
-      margin: 6px 0 0;
-      line-height: 1.45;
-      max-width: 62ch;
+      margin: 4px 0 0;
     }
-    .cheat-lead strong { color: var(--cyan); font-weight: 700; }
+    .cheat-kicker strong { color: var(--cheat-cyan); font-weight: 700; }
     #cheatSessionBadge {
-      flex: 0 0 auto;
-      max-width: 360px;
+      flex: 0 1 520px;
       font-size: .68rem;
-      color: var(--dim);
-      padding: 8px 10px;
-      border-radius: 8px;
-      background: rgba(0,240,255,.05);
-      border: 1px dashed #1e3a5f;
+      color: #9aacC4;
+      padding: 8px 12px;
+      border-radius: 9px;
+      background: linear-gradient(180deg, rgba(77, 230, 255, .07), rgba(0, 0, 0, .25));
+      border: 1px solid rgba(77, 230, 255, .2);
       line-height: 1.45;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    #cheatSessionBadge strong { color: var(--cyan); }
+    #cheatSessionBadge strong { color: var(--cheat-cyan); }
     .cheat-modal-body {
       display: grid;
       grid-template-columns: 300px minmax(0, 1fr);
@@ -3018,164 +3039,231 @@
       flex: 1;
     }
     .cheat-modal-side {
-      border-right: 1px solid rgba(30,58,95,.85);
-      background: rgba(0,0,0,.22);
-      padding: 12px 12px 14px;
+      border-right: 1px solid rgba(77, 230, 255, .1);
+      background:
+        linear-gradient(180deg, rgba(12, 20, 40, .55), rgba(4, 8, 16, .4));
+      padding: 14px 12px 16px;
       overflow: auto;
       min-height: 0;
     }
+    .cheat-side-group { margin: 0 0 16px; }
+    .cheat-side-group:last-child { margin-bottom: 0; }
     .cheat-side-label {
-      font-size: .62rem;
-      letter-spacing: 1.4px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: .6rem;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
       color: var(--dim);
       margin: 0 2px 8px;
+      font-weight: 700;
     }
+    .cheat-side-label::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+    }
+    .cheat-side-group.g-spin .cheat-side-label { color: var(--cheat-cyan); }
+    .cheat-side-group.g-jp .cheat-side-label { color: var(--cheat-amber); }
+    .cheat-side-group.g-feat .cheat-side-label { color: var(--cheat-violet); }
+    .cheat-side-group.g-sess .cheat-side-label { color: var(--cheat-emerald); }
     .cheat-presets {
       display: grid;
       grid-template-columns: 1fr;
       gap: 5px;
       margin: 0;
     }
+    .cheat-presets.cols-2 { grid-template-columns: 1fr 1fr; }
     .cheat-presets button {
       text-align: left;
-      padding: 7px 9px;
-      font-size: .7rem;
-      line-height: 1.25;
-      background: #0a1220;
-      border: 1px solid #1e3a5f;
+      padding: 8px 10px;
+      font-size: .72rem;
+      line-height: 1.2;
+      background: rgba(8, 14, 26, .85);
+      border: 1px solid rgba(30, 58, 95, .9);
       border-radius: 8px;
       color: var(--text);
       cursor: pointer;
       font-family: inherit;
-      transition: border-color .12s, background .12s, box-shadow .12s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: border-color .14s, background .14s, box-shadow .14s, color .14s;
     }
-    .cheat-presets button:hover {
-      border-color: var(--cyan);
-      background: rgba(0,240,255,.08);
+    .cheat-side-group.g-spin .cheat-presets button:hover {
+      border-color: var(--cheat-cyan); background: rgba(77, 230, 255, .1); color: var(--cheat-cyan);
+    }
+    .cheat-side-group.g-jp .cheat-presets button:hover {
+      border-color: var(--cheat-amber); background: rgba(255, 176, 32, .1); color: var(--cheat-amber);
+    }
+    .cheat-side-group.g-feat .cheat-presets button:hover {
+      border-color: var(--cheat-violet); background: rgba(192, 132, 252, .1); color: var(--cheat-violet);
+    }
+    .cheat-side-group.g-sess .cheat-presets button:hover {
+      border-color: var(--cheat-emerald); background: rgba(62, 224, 160, .1); color: var(--cheat-emerald);
     }
     .cheat-presets button.is-active {
-      border-color: var(--yellow);
-      background: rgba(255,208,0,.08);
-      box-shadow: inset 2px 0 0 var(--yellow);
+      font-weight: 700;
     }
-    .cheat-presets button strong {
-      display: block;
-      color: var(--cyan);
-      font-size: .66rem;
-      letter-spacing: .3px;
-      margin-bottom: 1px;
+    .cheat-side-group.g-spin .cheat-presets button.is-active {
+      border-color: var(--cheat-cyan); background: rgba(77, 230, 255, .14); color: var(--cheat-cyan);
+      box-shadow: inset 2px 0 0 var(--cheat-cyan), 0 0 12px rgba(77, 230, 255, .15);
     }
-    .cheat-presets button.is-active strong { color: var(--yellow); }
+    .cheat-side-group.g-jp .cheat-presets button.is-active {
+      border-color: var(--cheat-amber); background: rgba(255, 176, 32, .14); color: var(--cheat-amber);
+      box-shadow: inset 2px 0 0 var(--cheat-amber), 0 0 12px rgba(255, 176, 32, .15);
+    }
+    .cheat-side-group.g-feat .cheat-presets button.is-active {
+      border-color: var(--cheat-violet); background: rgba(192, 132, 252, .16); color: var(--cheat-violet);
+      box-shadow: inset 2px 0 0 var(--cheat-violet), 0 0 12px rgba(192, 132, 252, .18);
+    }
+    .cheat-side-group.g-sess .cheat-presets button.is-active {
+      border-color: var(--cheat-emerald); background: rgba(62, 224, 160, .14); color: var(--cheat-emerald);
+      box-shadow: inset 2px 0 0 var(--cheat-emerald), 0 0 12px rgba(62, 224, 160, .15);
+    }
     .cheat-modal-main {
-      padding: 14px 18px 16px;
+      padding: 16px 22px 16px;
       overflow: auto;
       min-height: 0;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
+      background:
+        radial-gradient(ellipse 70% 50% at 90% 0%, rgba(192, 132, 252, .05), transparent 50%),
+        radial-gradient(ellipse 50% 40% at 10% 100%, rgba(77, 230, 255, .04), transparent 50%);
     }
     .cheat-ctrl-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-      gap: 12px;
+      grid-template-columns: minmax(0, .9fr) minmax(0, 1.2fr);
+      gap: 14px;
+      flex-shrink: 0;
     }
     .cheat-workspace {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      align-items: start;
-    }
-    .cheat-workspace.has-grid {
-      grid-template-columns: minmax(0, 1.25fr) minmax(280px, .85fr);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 0;
+      flex: 1;
     }
     .cheat-field { margin-bottom: 0; }
     .cheat-field label {
       display: block;
       font-size: .68rem;
-      color: var(--dim);
-      margin-bottom: 4px;
-      letter-spacing: .4px;
+      color: #8ea0b8;
+      margin-bottom: 5px;
+      letter-spacing: .5px;
       text-transform: uppercase;
     }
     .cheat-field input,
     .cheat-field select,
     .cheat-field textarea {
       width: 100%;
-      padding: 8px 10px;
-      background: #0a0a0f;
-      border: 1px solid #1e3a5f;
-      border-radius: 8px;
+      padding: 10px 12px;
+      background: rgba(4, 8, 16, .9);
+      border: 1px solid rgba(77, 230, 255, .16);
+      border-radius: 9px;
       color: var(--text);
-      font-size: .8rem;
+      font-size: .82rem;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      transition: border-color .14s, box-shadow .14s;
     }
-    .cheat-field textarea { min-height: 168px; resize: vertical; }
-    .cheat-rest {
-      border: 1px solid #1e3a5f;
-      border-radius: 10px;
-      padding: 8px 12px 10px;
-      background: rgba(0,0,0,.18);
+    .cheat-field input:focus,
+    .cheat-field select:focus,
+    .cheat-field textarea:focus {
+      outline: none;
+      border-color: rgba(232, 197, 107, .55);
+      box-shadow: 0 0 0 3px rgba(232, 197, 107, .12);
     }
-    .cheat-rest summary {
+    .cheat-field textarea { min-height: 200px; resize: vertical; }
+    .cheat-json, .cheat-rest {
+      border: 1px solid rgba(77, 230, 255, .14);
+      border-radius: 11px;
+      padding: 10px 14px 12px;
+      background: linear-gradient(180deg, rgba(10, 18, 34, .55), rgba(0, 0, 0, .22));
+    }
+    .cheat-json summary, .cheat-rest summary {
       cursor: pointer;
-      color: var(--dim);
-      font-size: .75rem;
-      margin-bottom: 0;
+      color: #9ab0c8;
+      font-size: .76rem;
+      margin: 0;
+      user-select: none;
     }
-    .cheat-rest[open] summary { margin-bottom: 10px; }
+    .cheat-json summary:hover, .cheat-rest summary:hover { color: var(--cheat-gold); }
+    .cheat-json[open] summary, .cheat-rest[open] summary { margin-bottom: 10px; color: var(--cheat-cyan); }
     .cheat-rest-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 12px;
     }
     .cheat-modal-foot {
+      flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-top: auto;
+      gap: 10px;
+      padding: 12px 22px 14px;
+      border-top: 1px solid rgba(232, 197, 107, .14);
+      background:
+        linear-gradient(180deg, rgba(16, 22, 40, .95), rgba(6, 8, 16, .98));
     }
-    .cheat-modal-foot .modal-actions {
-      margin-top: 0;
+    .cheat-modal-foot .modal-actions { margin-top: 0; }
+    .cheat-btn-gold {
+      border-color: rgba(232, 197, 107, .65) !important;
+      color: var(--cheat-gold) !important;
+      background: rgba(232, 197, 107, .1) !important;
+      box-shadow: 0 0 18px rgba(232, 197, 107, .12);
+    }
+    .cheat-btn-gold:hover { box-shadow: 0 0 22px rgba(232, 197, 107, .28); }
+    .cheat-btn-cyan {
+      border-color: rgba(77, 230, 255, .4) !important;
+      color: var(--cheat-cyan) !important;
     }
     #cheatLog {
       margin-top: 0;
-      padding: 10px 12px;
+      padding: 9px 12px;
       border-radius: 8px;
       background: #050810;
-      border: 1px solid #1e3a5f;
+      border: 1px solid rgba(77, 230, 255, .14);
       font-size: .72rem;
       color: var(--dim);
-      max-height: 88px;
+      max-height: 78px;
       overflow-y: auto;
       white-space: pre-wrap;
       word-break: break-word;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     }
-    #cheatLog.ok { color: var(--green); border-color: rgba(0,255,136,.35); }
-    #cheatLog.err { color: var(--red); border-color: rgba(255,42,58,.35); }
+    #cheatLog.ok { color: var(--cheat-emerald); border-color: rgba(62, 224, 160, .4); }
+    #cheatLog.err { color: var(--red); border-color: rgba(255, 42, 58, .4); }
     #cheatGridEditor {
       display: none;
-      padding: 12px;
-      border: 1px solid rgba(0,240,255,.2);
-      border-radius: 10px;
-      background: rgba(0,240,255,.04);
+      padding: 16px 18px;
+      border: 1px solid rgba(77, 230, 255, .28);
+      border-radius: 12px;
+      background:
+        linear-gradient(180deg, rgba(77, 230, 255, .07), rgba(77, 230, 255, .02));
+      box-shadow: inset 0 1px 0 rgba(77, 230, 255, .12);
     }
     #cheatGridEditor.visible { display: block; }
-    #cheatGridEditor .grid-head {
+    #cheatGridEditor .grid-head,
+    #cheatFeatureTune .grid-head {
       display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
       justify-content: space-between; margin-bottom: 10px;
     }
-    #cheatGridEditor .grid-head span {
-      font-size: .68rem; color: var(--dim); letter-spacing: .4px; text-transform: uppercase;
+    #cheatGridEditor .grid-head span,
+    #cheatFeatureTune .grid-head span {
+      font-size: .72rem; color: var(--cheat-cyan); letter-spacing: .6px; text-transform: uppercase;
+      font-weight: 700;
     }
-    #cheatGridEditor .grid-tools { display: flex; flex-wrap: wrap; gap: 4px; }
+    #cheatFeatureTune .grid-head span { color: var(--cheat-violet); }
+    #cheatGridEditor .grid-tools { display: flex; flex-wrap: wrap; gap: 5px; }
     #cheatGridEditor .grid-tools button {
-      font-size: .65rem; padding: 4px 8px; border-radius: 6px;
-      border: 1px solid #1e3a5f; background: #0a1220; color: var(--text);
+      font-size: .68rem; padding: 5px 10px; border-radius: 7px;
+      border: 1px solid rgba(77, 230, 255, .22); background: rgba(8, 16, 30, .9); color: var(--text);
       cursor: pointer; font-family: inherit;
     }
-    #cheatGridEditor .grid-tools button:hover { border-color: var(--cyan); color: var(--cyan); }
+    #cheatGridEditor .grid-tools button:hover { border-color: var(--cheat-cyan); color: var(--cheat-cyan); }
     #cheatGridTable {
       width: 100%;
       border-collapse: collapse;
@@ -3187,13 +3275,17 @@
     #cheatGridTable td { padding: 3px; }
     #cheatGridTable select {
       width: 100%;
-      padding: 7px 4px;
-      font-size: .74rem;
+      padding: 8px 4px;
+      font-size: .76rem;
       background: #0a0a0f;
-      border: 1px solid #1e3a5f;
-      border-radius: 6px;
+      border: 1px solid rgba(77, 230, 255, .2);
+      border-radius: 7px;
       color: var(--text);
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    #cheatGridTable select:focus {
+      outline: none;
+      border-color: var(--cheat-gold);
     }
     .cheat-feature-head {
       display: flex;
@@ -3208,7 +3300,7 @@
     .cheat-feature-head .grid-tools { display: flex; gap: 4px; }
     .cheat-feature-list {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 5px;
     }
     .cheat-feature-item {
@@ -3226,22 +3318,84 @@
       user-select: none;
     }
     .cheat-feature-item.is-on {
-      border-color: rgba(255,208,0,.45);
-      background: rgba(255,208,0,.08);
-      color: var(--yellow);
+      border-color: rgba(192, 132, 252, .55);
+      background: rgba(192, 132, 252, .12);
+      color: var(--cheat-violet);
     }
-    .cheat-feature-item input { width: 13px; height: 13px; margin: 0; accent-color: var(--yellow); }
-    @media (max-width: 900px) {
-      #modalCheat .cheat-modal { max-height: 96vh; }
+    .cheat-feature-item input { width: 13px; height: 13px; margin: 0; accent-color: var(--cheat-violet); }
+    #cheatFeatureTune {
+      display: none;
+      padding: 16px 18px 18px;
+      border: 1px solid rgba(192, 132, 252, .32);
+      border-radius: 12px;
+      background:
+        linear-gradient(180deg, rgba(192, 132, 252, .09), rgba(232, 197, 107, .04));
+      box-shadow: inset 0 1px 0 rgba(192, 132, 252, .14);
+    }
+    #cheatFeatureTune.visible { display: block; }
+    #cheatTuneHelp {
+      font-size: .72rem; color: #b8c4d6; line-height: 1.5; margin: 0 0 14px;
+    }
+    .cheat-tune-row {
+      display: grid;
+      grid-template-columns: 128px minmax(0, 1fr);
+      gap: 8px 16px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+    .cheat-tune-row:last-child { margin-bottom: 0; }
+    .cheat-tune-row label {
+      font-size: .68rem; color: #c4b0e8; text-transform: uppercase; letter-spacing: .35px;
+      padding-top: 8px;
+    }
+    .cheat-tune-row select, .cheat-tune-row input[type="number"] {
+      background: #0a0a0f; border: 1px solid rgba(192, 132, 252, .28); color: var(--text);
+      border-radius: 7px; padding: 8px 10px; font-size: .78rem; font-family: inherit;
+      max-width: 260px;
+    }
+    .cheat-chip-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .cheat-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 6px 10px; border: 1px solid rgba(77, 230, 255, .18); border-radius: 7px;
+      background: rgba(8, 14, 26, .9); color: var(--text); font-size: .7rem; cursor: pointer;
+      user-select: none;
+    }
+    .cheat-chip.is-on {
+      border-color: rgba(192, 132, 252, .6); background: rgba(192, 132, 252, .16); color: var(--cheat-violet);
+    }
+    .cheat-pos-wrap { max-width: 360px; }
+    .cheat-pos-head, .cheat-pos-grid {
+      display: grid; grid-template-columns: 26px repeat(5, 1fr); gap: 5px;
+    }
+    .cheat-pos-head span {
+      font-size: .6rem; color: var(--cheat-cyan); text-align: center; font-weight: 700;
+    }
+    .cheat-pos-rowlab {
+      font-size: .6rem; color: var(--cheat-violet); display: flex; align-items: center; font-weight: 700;
+    }
+    .cheat-pos-cell {
+      aspect-ratio: 1; border: 1px solid rgba(77, 230, 255, .18); border-radius: 7px;
+      background: rgba(8, 14, 26, .9); color: var(--dim); font-size: .62rem; cursor: pointer;
+      transition: border-color .12s, background .12s, box-shadow .12s;
+    }
+    .cheat-pos-cell:hover { border-color: var(--cheat-cyan); }
+    .cheat-pos-cell.is-on {
+      border-color: var(--cheat-gold);
+      background: rgba(232, 197, 107, .22);
+      box-shadow: 0 0 10px rgba(232, 197, 107, .25);
+    }
+    @media (max-width: 960px) {
+      #modalCheat .cheat-modal { height: 97vh; max-height: 97vh; }
       .cheat-modal-body,
       .cheat-ctrl-row,
-      .cheat-workspace,
       .cheat-rest-grid,
-      .cheat-feature-list { grid-template-columns: 1fr; }
-      .cheat-modal-side { border-right: 0; border-bottom: 1px solid rgba(30,58,95,.85); max-height: 220px; }
-      .cheat-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      #cheatSessionBadge { max-width: none; }
-      .cheat-modal-head { flex-direction: column; }
+      .cheat-feature-list,
+      .cheat-tune-row { grid-template-columns: 1fr; }
+      .cheat-modal-side { border-right: 0; border-bottom: 1px solid rgba(77, 230, 255, .12); max-height: 220px; }
+      .cheat-presets, .cheat-presets.cols-2 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      #cheatSessionBadge { max-width: none; flex-basis: auto; }
+      .cheat-modal-head { flex-direction: column; align-items: stretch; }
+      .cheat-tune-row label { padding-top: 0; }
     }
     #btnCheatFab {
       position: fixed;
@@ -3849,21 +4003,14 @@
   <div class="modal cheat-modal">
     <header class="cheat-modal-head">
       <div>
-        <div class="cheat-kicker">Dev / Staging · cmd 1999</div>
         <h2>🛠 CHEAT / DEBUG</h2>
-        <p class="cheat-lead">
-          Ưu tiên <strong>WS cmd 1999</strong> khi online; fallback <strong>REST /debug/cheat</strong>.
-          Next-spin: <strong style="color:var(--yellow)">Send &amp; Spin</strong>.
-        </p>
+        <p class="cheat-kicker">dev/staging · <strong>WS 1999</strong> · fallback REST · next-spin: Send &amp; Spin</p>
       </div>
       <div id="cheatSessionBadge">Session: —</div>
     </header>
 
     <div class="cheat-modal-body">
-      <aside class="cheat-modal-side">
-        <div class="cheat-side-label">Presets</div>
-        <div class="cheat-presets" id="cheatPresets"></div>
-      </aside>
+      <aside class="cheat-modal-side" id="cheatPresets"></aside>
 
       <div class="cheat-modal-main">
         <div class="cheat-ctrl-row">
@@ -3915,10 +4062,20 @@
             <div class="cheat-feature-list" id="cheatFeatureList"></div>
           </div>
 
-          <div class="cheat-field">
-            <label>Value (JSON object)</label>
-            <textarea id="cheatValue" placeholder='{}  e.g. {"scatters":4}  {"multiplier":500}  {"features":["BypassProtocol"]}'>{}</textarea>
+          <div id="cheatFeatureTune">
+            <div class="grid-head">
+              <span id="cheatTuneTitle">Feature tune</span>
+            </div>
+            <p id="cheatTuneHelp"></p>
+            <div id="cheatTuneFields"></div>
           </div>
+
+          <details class="cheat-json" id="cheatJsonBox" open>
+            <summary>Value JSON <span style="opacity:.7">(tự sync từ editor)</span></summary>
+            <div class="cheat-field">
+              <textarea id="cheatValue" placeholder='{}  e.g. {"scatters":4}  {"multiplier":500}'>{}</textarea>
+            </div>
+          </details>
         </div>
 
         <details class="cheat-rest">
@@ -3945,17 +4102,17 @@
             Pull agency/user from session
           </button>
         </details>
-
-        <div class="cheat-modal-foot">
-          <div class="modal-actions" style="justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px">
-            <button type="button" class="btn" id="cheatClearLog" style="margin-right:auto">Clear log</button>
-            <button type="button" class="btn" id="closeCheat">Close</button>
-            <button type="button" class="btn" id="cheatSend" style="border-color:#1e3a5f;color:var(--text)">Send only</button>
-            <button type="button" class="btn" id="cheatSendSpin" style="border-color:var(--yellow);color:var(--yellow);font-weight:700">Send &amp; Spin</button>
-          </div>
-          <div id="cheatLog">Ready. Chọn preset hoặc code → Send / Send &amp; Spin.</div>
-        </div>
       </div>
+    </div>
+
+    <div class="cheat-modal-foot">
+      <div class="modal-actions" style="justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px">
+        <button type="button" class="btn" id="cheatClearLog" style="margin-right:auto">Clear log</button>
+        <button type="button" class="btn" id="closeCheat">Close</button>
+        <button type="button" class="btn cheat-btn-cyan" id="cheatSend">Send only</button>
+        <button type="button" class="btn cheat-btn-gold" id="cheatSendSpin" style="font-weight:700">Send &amp; Spin</button>
+      </div>
+      <div id="cheatLog">Ready. Chọn preset hoặc code → Send / Send &amp; Spin.</div>
     </div>
   </div>
 </div>
@@ -11994,6 +12151,18 @@ const CHEAT_CODES = [
   'FORCE_FEATURES',
   'FORCE_3_FEATURES',
   'FORCE_12_FEATURES',
+  'FORCE_FIREWALL_BLOCK',
+  'FORCE_DATA_DECRYPT',
+  'FORCE_TROJAN_HORSE',
+  'FORCE_DATA_OVERLOAD',
+  'FORCE_SYSTEM_OVERCLOCK',
+  'FORCE_DATA_CLONING',
+  'FORCE_ROOT_ACCESS',
+  'FORCE_POWER_SURGE',
+  'FORCE_SYSTEM_GLITCH',
+  'FORCE_ALGORITHMIC_SCAN',
+  'FORCE_BANDWIDTH_MULTIPLIER',
+  'FORCE_BYPASS_PROTOCOL',
   'SET_JACKPOT_POOL',
   'SET_AGENT_JACKPOT_POOL',
   'RESET_JACKPOT_POOL',
@@ -12048,42 +12217,97 @@ const CHEAT_FEATURE_NAMES = [
   'BandwidthMultiplier',
 ];
 
-/** Quick presets shown as big buttons */
+/** Quick presets. `group` drives sidebar sections (2-col for Features). */
 const CHEAT_PRESETS = [
-  { code: 'FORCE_FREE_SPIN', label: 'FS 3 scatters', value: {} },
-  { code: 'FORCE_FREE_SPIN_4', label: 'FS 4 scatters', value: {} },
-  { code: 'FORCE_FREE_SPIN_5', label: 'FS 5 scatters', value: {} },
-  { code: 'FORCE_LOSS', label: 'Force loss', value: {} },
-  { code: 'FORCE_WIN_CAP', label: 'Max win grid', value: {} },
-  { code: 'FORCE_WIN_MULTIPLIER', label: 'Win ×500', value: { multiplier: 500 } },
-  { code: 'FORCE_JACKPOT', label: 'Jackpot (rand tier)', value: {} },
-  { code: 'FORCE_GOD_JACKPOT', label: 'Jackpot GOD', value: {} },
-  { code: 'FORCE_ELITE_JACKPOT', label: 'Jackpot ELITE', value: {} },
-  { code: 'FORCE_USER_JACKPOT', label: 'Jackpot USER', value: {} },
-  { code: 'FORCE_3_FEATURES', label: '3 features', value: {} },
-  { code: 'FORCE_12_FEATURES', label: '12 features', value: {} },
+  { group: 'Spin', code: 'FORCE_FREE_SPIN', label: 'FS · 3 scatters', value: {} },
+  { group: 'Spin', code: 'FORCE_FREE_SPIN_4', label: 'FS · 4 scatters', value: {} },
+  { group: 'Spin', code: 'FORCE_FREE_SPIN_5', label: 'FS · 5 scatters', value: {} },
+  { group: 'Spin', code: 'FORCE_LOSS', label: 'Force loss', value: {} },
+  { group: 'Spin', code: 'FORCE_WIN_CAP', label: 'Max win grid', value: {} },
+  { group: 'Spin', code: 'FORCE_WIN_MULTIPLIER', label: 'Win ×500', value: { multiplier: 500 } },
   {
+    group: 'Spin',
+    code: 'FORCE_GRID',
+    label: 'Custom grid',
+    value: { grid: [[1, 2, 3, 4, 5], [8, 8, 8, 8, 8], [6, 7, 9, 10, 1]] },
+  },
+  { group: 'Spin', code: 'FORCE_FS_MAX_LINE_WIN', label: 'FS max line', value: {} },
+  { group: 'Jackpot', code: 'FORCE_JACKPOT', label: 'JP random', value: {} },
+  { group: 'Jackpot', code: 'FORCE_GOD_JACKPOT', label: 'JP GOD', value: {} },
+  { group: 'Jackpot', code: 'FORCE_ELITE_JACKPOT', label: 'JP ELITE', value: {} },
+  { group: 'Jackpot', code: 'FORCE_USER_JACKPOT', label: 'JP USER', value: {} },
+  { group: 'Features', code: 'FORCE_3_FEATURES', label: '3 random', value: {} },
+  { group: 'Features', code: 'FORCE_12_FEATURES', label: 'All 12', value: {} },
+  {
+    group: 'Features',
     code: 'FORCE_FEATURES',
-    label: 'Bypass + Bandwidth',
+    label: 'Bypass+BW',
     value: { features: ['BypassProtocol', 'BandwidthMultiplier'] },
   },
+  { group: 'Features', code: 'FORCE_FIREWALL_BLOCK', label: 'Firewall', value: { bannedLows: [8, 10] } },
+  { group: 'Features', code: 'FORCE_DATA_DECRYPT', label: 'Decrypt', value: { count: 2, toSymbol: 1 } },
   {
-    code: 'FORCE_GRID',
-    label: 'Custom grid (H row)',
-    value: {
-      grid: [
-        [1, 2, 3, 4, 5],
-        [8, 8, 8, 8, 8],
-        [6, 7, 9, 10, 1],
-      ],
-    },
+    group: 'Features',
+    code: 'FORCE_TROJAN_HORSE',
+    label: 'Trojan',
+    value: { revealTo: 8, positions: [[0, 0], [1, 0], [2, 1], [3, 2]] },
   },
-  { code: 'FORCE_FS_MAX_LINE_WIN', label: 'FS max line (sticky)', value: {} },
-  { code: 'FORCE_LAST_FREE_SPIN', label: 'Last FS remain=1', value: { game_id: 'yama_01023' } },
-  { code: 'SET_GAME_MODE', label: 'Enter free mode', value: { mode: 'free', bet: 1, game_id: 'yama_01023' } },
-  { code: 'RESET_SESSION', label: 'Reset session', value: { game_id: 'yama_01023' } },
-  { code: 'CLEAR_AGENT_STATE', label: 'Clear state', value: { game_id: 'yama_01023' } },
+  { group: 'Features', code: 'FORCE_DATA_OVERLOAD', label: 'Overload', value: { columns: [0, 4] } },
+  { group: 'Features', code: 'FORCE_SYSTEM_OVERCLOCK', label: 'Overclock', value: { targetSymbol: 1, multiplier: 8 } },
+  { group: 'Features', code: 'FORCE_DATA_CLONING', label: 'Cloning', value: { targetSymbol: 8 } },
+  { group: 'Features', code: 'FORCE_ROOT_ACCESS', label: 'Root', value: { reels: [2] } },
+  { group: 'Features', code: 'FORCE_POWER_SURGE', label: 'Surge', value: { convertedTypes: [1, 6] } },
+  { group: 'Features', code: 'FORCE_SYSTEM_GLITCH', label: 'Glitch', value: { protectWinning: true } },
+  { group: 'Features', code: 'FORCE_ALGORITHMIC_SCAN', label: 'Scan', value: { convertedTypes: [8] } },
+  { group: 'Features', code: 'FORCE_BANDWIDTH_MULTIPLIER', label: 'Bandwidth', value: { multiplier: 10 } },
+  { group: 'Features', code: 'FORCE_BYPASS_PROTOCOL', label: 'Bypass', value: {} },
+  { group: 'Session', code: 'FORCE_LAST_FREE_SPIN', label: 'Last FS = 1', value: { game_id: 'yama_01023' } },
+  { group: 'Session', code: 'SET_GAME_MODE', label: 'Enter free', value: { mode: 'free', bet: 1, game_id: 'yama_01023' } },
+  { group: 'Session', code: 'RESET_SESSION', label: 'Reset session', value: { game_id: 'yama_01023' } },
+  { group: 'Session', code: 'CLEAR_AGENT_STATE', label: 'Clear state', value: { game_id: 'yama_01023' } },
 ];
+
+const CHEAT_CODE_GROUP = {
+  FORCE_FREE_SPIN: 'Spin',
+  FORCE_FREE_SPIN_4: 'Spin',
+  FORCE_FREE_SPIN_5: 'Spin',
+  FORCE_LOSS: 'Spin',
+  FORCE_NORMAL_WIN: 'Spin',
+  FORCE_WIN_CAP: 'Spin',
+  FORCE_WIN_MULTIPLIER: 'Spin',
+  FORCE_GRID: 'Spin',
+  FORCE_FS_MAX_LINE_WIN: 'Spin',
+  FORCE_JACKPOT: 'Jackpot',
+  FORCE_JACKPOT_TRIGGER: 'Jackpot',
+  FORCE_GOD_JACKPOT: 'Jackpot',
+  FORCE_ELITE_JACKPOT: 'Jackpot',
+  FORCE_GHOST_JACKPOT: 'Jackpot',
+  FORCE_USER_JACKPOT: 'Jackpot',
+  FORCE_FEATURES: 'Features',
+  FORCE_3_FEATURES: 'Features',
+  FORCE_12_FEATURES: 'Features',
+  FORCE_FIREWALL_BLOCK: 'Features',
+  FORCE_DATA_DECRYPT: 'Features',
+  FORCE_TROJAN_HORSE: 'Features',
+  FORCE_DATA_OVERLOAD: 'Features',
+  FORCE_SYSTEM_OVERCLOCK: 'Features',
+  FORCE_DATA_CLONING: 'Features',
+  FORCE_ROOT_ACCESS: 'Features',
+  FORCE_POWER_SURGE: 'Features',
+  FORCE_SYSTEM_GLITCH: 'Features',
+  FORCE_ALGORITHMIC_SCAN: 'Features',
+  FORCE_BANDWIDTH_MULTIPLIER: 'Features',
+  FORCE_BYPASS_PROTOCOL: 'Features',
+  SET_JACKPOT_POOL: 'Session',
+  SET_AGENT_JACKPOT_POOL: 'Session',
+  RESET_JACKPOT_POOL: 'Session',
+  SET_FREE_SPIN_COUNT: 'Session',
+  FORCE_LAST_FREE_SPIN: 'Session',
+  SET_GAME_MODE: 'Session',
+  SET_ACCUMULATED_WIN: 'Session',
+  RESET_SESSION: 'Session',
+  CLEAR_AGENT_STATE: 'Session',
+};
 
 let cheatPanelBuilt = false;
 
@@ -12093,13 +12317,42 @@ function initCheatPanel() {
   if (!sel || !presets) return;
 
   if (!cheatPanelBuilt) {
-    sel.innerHTML = CHEAT_CODES.map(c => `<option value="${c}">${c}</option>`).join('');
+    const groupOrder = ['Spin', 'Jackpot', 'Features', 'Session'];
+    const groupedCodes = {};
+    for (const c of CHEAT_CODES) {
+      const g = CHEAT_CODE_GROUP[c] || 'More';
+      if (!groupedCodes[g]) groupedCodes[g] = [];
+      groupedCodes[g].push(c);
+    }
+    sel.innerHTML = [...groupOrder, 'More']
+      .filter(g => groupedCodes[g]?.length)
+      .map(g => {
+        const opts = groupedCodes[g].map(c => `<option value="${c}">${c}</option>`).join('');
+        return `<optgroup label="${g}">${opts}</optgroup>`;
+      })
+      .join('');
 
-    presets.innerHTML = CHEAT_PRESETS.map(
-      (p, i) =>
-        `<button type="button" data-preset="${i}" title="${p.code}">` +
-        `<strong>${p.code}</strong>${p.label}</button>`
-    ).join('');
+    const groupedPresets = {};
+    CHEAT_PRESETS.forEach((p, i) => {
+      const g = p.group || 'More';
+      if (!groupedPresets[g]) groupedPresets[g] = [];
+      groupedPresets[g].push({ ...p, i });
+    });
+    presets.innerHTML = groupOrder
+      .filter(g => groupedPresets[g]?.length)
+      .map(g => {
+        const cols = g === 'Features' || g === 'Jackpot' || g === 'Session' ? ' cols-2' : '';
+        const btns = groupedPresets[g]
+          .map(
+            p =>
+              `<button type="button" data-preset="${p.i}" title="${p.code}">${p.label}</button>`
+          )
+          .join('');
+        const gClass = { Spin: 'g-spin', Jackpot: 'g-jp', Features: 'g-feat', Session: 'g-sess' }[g] || '';
+        return `<div class="cheat-side-group ${gClass}"><div class="cheat-side-label">${g}</div>` +
+          `<div class="cheat-presets${cols}">${btns}</div></div>`;
+      })
+      .join('');
 
     presets.querySelectorAll('button[data-preset]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -12202,7 +12455,240 @@ function buildCheatGridEditor() {
 
 function setCheatGridEditorVisible(on) {
   document.getElementById('cheatGridEditor')?.classList.toggle('visible', !!on);
-  document.querySelector('#modalCheat .cheat-workspace')?.classList.toggle('has-grid', !!on);
+}
+
+function syncCheatJsonBox(code) {
+  const box = document.getElementById('cheatJsonBox');
+  if (!box) return;
+  box.open = !(code === 'FORCE_GRID' || isDedicatedFeatureCheat(code));
+}
+
+const CHEAT_FEATURE_TUNES = {
+  FORCE_FIREWALL_BLOCK: {
+    title: 'FirewallBlock',
+    help: 'Cấm 1–2 low (6–10) khỏi strip + scrub grid. Bỏ trống = RNG 1–2 loại.',
+    fields: ['bannedLows'],
+  },
+  FORCE_DATA_DECRYPT: {
+    title: 'DataDecrypt',
+    help: 'Đổi low → high. Chọn ô (FE [col,row]) hoặc count 1–2. toSymbol = high 1–5.',
+    fields: ['count12', 'toHigh', 'positions'],
+  },
+  FORCE_TROJAN_HORSE: {
+    title: 'TrojanHorse',
+    help: 'Bấm 3–6 ô Mystery ([col,row]). revealTo = symbol sau khi mở (1–10). Không chọn ô thì dùng count.',
+    fields: ['count36', 'revealTo', 'positions'],
+  },
+  FORCE_DATA_OVERLOAD: {
+    title: 'DataOverload',
+    help: 'Reel được chọn nở full Wild (kể cả reel chưa có Wild).',
+    fields: ['reels'],
+  },
+  FORCE_SYSTEM_OVERCLOCK: {
+    title: 'SystemOverclock',
+    help: 'targetSymbol phải đang có trên grid. multiplier ∈ 3 / 5 / 8 / 10.',
+    fields: ['targetPay', 'mult'],
+  },
+  FORCE_DATA_CLONING: {
+    title: 'DataCloning',
+    help: 'Split ×2 mọi ô của targetSymbol (phải có trên grid).',
+    fields: ['targetPay'],
+  },
+  FORCE_ROOT_ACCESS: {
+    title: 'RootAccess',
+    help: 'Split ×2 cả reel (trừ Scatter). Chọn reel hoặc reelCount 1–3.',
+    fields: ['reels', 'reelCount'],
+  },
+  FORCE_POWER_SURGE: {
+    title: 'PowerSurge',
+    help: '1–2 loại pay → Wild + neighbor split. Tick loại, tối đa 2.',
+    fields: ['types2'],
+  },
+  FORCE_SYSTEM_GLITCH: {
+    title: 'SystemGlitch',
+    help: 'Shuffle ô không thắng / không scatter. Tắt protectWinning để xáo cả ô thắng.',
+    fields: ['protectWinning'],
+  },
+  FORCE_ALGORITHMIC_SCAN: {
+    title: 'AlgorithmicScan',
+    help: '1–3 loại pay → Wild. Tick loại, tối đa 3.',
+    fields: ['types3'],
+  },
+  FORCE_BANDWIDTH_MULTIPLIER: {
+    title: 'BandwidthMultiplier',
+    help: 'Hệ số nhân win sau payout: 3 / 5 / 8 / 10.',
+    fields: ['mult'],
+  },
+  FORCE_BYPASS_PROTOCOL: {
+    title: 'BypassProtocol',
+    help: 'Bật đánh ways phải → trái. Không có tham số thêm.',
+    fields: [],
+  },
+};
+
+const CHEAT_PAY_OPTS = [
+  { id: 1, label: '1 A' }, { id: 2, label: '2 B' }, { id: 3, label: '3 C' },
+  { id: 4, label: '4 D' }, { id: 5, label: '5 E' }, { id: 6, label: '6 F' },
+  { id: 7, label: '7 G' }, { id: 8, label: '8 H' }, { id: 9, label: '9 I' },
+  { id: 10, label: '10 K' },
+];
+
+function isDedicatedFeatureCheat(code) {
+  return !!CHEAT_FEATURE_TUNES[code];
+}
+
+function setCheatTuneVisible(on) {
+  document.getElementById('cheatFeatureTune')?.classList.toggle('visible', !!on);
+}
+
+function renderCheatTune(code, value) {
+  const spec = CHEAT_FEATURE_TUNES[code];
+  const root = document.getElementById('cheatTuneFields');
+  const title = document.getElementById('cheatTuneTitle');
+  const help = document.getElementById('cheatTuneHelp');
+  if (!spec || !root) return;
+  title.textContent = spec.title;
+  help.textContent = spec.help;
+  const v = value && typeof value === 'object' ? value : {};
+  const posSet = new Set(
+    (Array.isArray(v.positions) ? v.positions : [])
+      .filter(p => Array.isArray(p) && p.length >= 2)
+      .map(p => `${p[0]},${p[1]}`)
+  );
+  const selected = (arr) => new Set((arr || []).map(Number));
+  let html = '';
+  for (const field of spec.fields) {
+    if (field === 'bannedLows') {
+      const on = selected(v.bannedLows);
+      html += `<div class="cheat-tune-row"><label>bannedLows</label><div class="cheat-chip-list" data-tune="bannedLows">`;
+      for (const o of CHEAT_PAY_OPTS.filter(x => x.id >= 6)) {
+        html += `<button type="button" class="cheat-chip${on.has(o.id) ? ' is-on' : ''}" data-id="${o.id}">${o.label}</button>`;
+      }
+      html += `</div></div>`;
+    } else if (field === 'count12' || field === 'count36' || field === 'reelCount') {
+      const min = field === 'count36' ? 3 : 1;
+      const max = field === 'count36' ? 6 : field === 'reelCount' ? 3 : 2;
+      const key = field === 'reelCount' ? 'reelCount' : 'count';
+      const val = v[key] != null ? v[key] : (field === 'count36' ? 4 : min);
+      html += `<div class="cheat-tune-row"><label>${key}</label><input type="number" min="${min}" max="${max}" value="${val}" data-tune="${key}"></div>`;
+    } else if (field === 'toHigh' || field === 'revealTo' || field === 'targetPay') {
+      const key = field === 'targetPay' ? 'targetSymbol' : field === 'toHigh' ? 'toSymbol' : 'revealTo';
+      const min = field === 'toHigh' ? 1 : 1;
+      const max = field === 'toHigh' ? 5 : 10;
+      const val = v[key] != null ? v[key] : (field === 'revealTo' ? 8 : 1);
+      const opts = CHEAT_PAY_OPTS.filter(o => o.id >= min && o.id <= max);
+      html += `<div class="cheat-tune-row"><label>${key}</label><select data-tune="${key}">`;
+      html += opts.map(o => `<option value="${o.id}"${Number(val) === o.id ? ' selected' : ''}>${o.label}</option>`).join('');
+      html += `</select></div>`;
+    } else if (field === 'mult') {
+      const val = v.multiplier != null ? v.multiplier : 10;
+      html += `<div class="cheat-tune-row"><label>multiplier</label><select data-tune="multiplier">`;
+      html += [3, 5, 8, 10].map(m => `<option value="${m}"${Number(val) === m ? ' selected' : ''}>×${m}</option>`).join('');
+      html += `</select></div>`;
+    } else if (field === 'reels') {
+      const on = selected(v.reels || v.columns);
+      html += `<div class="cheat-tune-row"><label>reels</label><div class="cheat-chip-list" data-tune="reels">`;
+      for (let i = 0; i < 5; i++) {
+        html += `<button type="button" class="cheat-chip${on.has(i) ? ' is-on' : ''}" data-id="${i}">R${i + 1}</button>`;
+      }
+      html += `</div></div>`;
+    } else if (field === 'types2' || field === 'types3') {
+      const max = field === 'types2' ? 2 : 3;
+      const on = selected(v.convertedTypes);
+      html += `<div class="cheat-tune-row"><label>types (max ${max})</label><div class="cheat-chip-list" data-tune="convertedTypes" data-max="${max}">`;
+      for (const o of CHEAT_PAY_OPTS) {
+        html += `<button type="button" class="cheat-chip${on.has(o.id) ? ' is-on' : ''}" data-id="${o.id}">${o.label}</button>`;
+      }
+      html += `</div></div>`;
+    } else if (field === 'protectWinning') {
+      const on = v.protectWinning !== false;
+      html += `<div class="cheat-tune-row"><label>protectWinning</label><button type="button" class="cheat-chip${on ? ' is-on' : ''}" data-tune="protectWinning">${on ? 'true' : 'false'}</button></div>`;
+    } else if (field === 'positions') {
+      html += `<div class="cheat-tune-row"><label>positions</label><div class="cheat-pos-wrap">`;
+      html += `<div class="cheat-pos-head"><span></span><span>R1</span><span>R2</span><span>R3</span><span>R4</span><span>R5</span></div>`;
+      html += `<div class="cheat-pos-grid" data-tune="positions">`;
+      for (let r = 0; r < 3; r++) {
+        html += `<span class="cheat-pos-rowlab">r${r}</span>`;
+        for (let c = 0; c < 5; c++) {
+          const key = `${c},${r}`;
+          html += `<button type="button" class="cheat-pos-cell${posSet.has(key) ? ' is-on' : ''}" data-c="${c}" data-r="${r}" title="[${c},${r}]"></button>`;
+        }
+      }
+      html += `</div></div></div>`;
+    }
+  }
+  root.innerHTML = html || '<p style="font-size:.7rem;color:var(--dim);margin:0">Không có field — chỉ force feature.</p>';
+  root.querySelectorAll('.cheat-chip-list .cheat-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const list = btn.parentElement;
+      const max = Number(list.dataset.max || 0);
+      if (list.dataset.tune === 'bannedLows') {
+        btn.classList.toggle('is-on');
+        const ons = [...list.querySelectorAll('.cheat-chip.is-on')];
+        if (ons.length > 2) ons[0].classList.remove('is-on');
+      } else if (max > 0) {
+        if (btn.classList.contains('is-on')) btn.classList.remove('is-on');
+        else {
+          const ons = [...list.querySelectorAll('.cheat-chip.is-on')];
+          if (ons.length >= max) ons[0].classList.remove('is-on');
+          btn.classList.add('is-on');
+        }
+      } else {
+        btn.classList.toggle('is-on');
+      }
+      writeCheatTuneToJson();
+    });
+  });
+  root.querySelectorAll('.cheat-pos-cell').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('is-on');
+      const ons = root.querySelectorAll('.cheat-pos-cell.is-on');
+      if (ons.length > 6) ons[0].classList.remove('is-on');
+      writeCheatTuneToJson();
+    });
+  });
+  root.querySelectorAll('select[data-tune], input[data-tune]').forEach(el => {
+    el.addEventListener('change', () => writeCheatTuneToJson());
+    el.addEventListener('input', () => writeCheatTuneToJson());
+  });
+  const prot = root.querySelector('[data-tune="protectWinning"]');
+  if (prot) {
+    prot.addEventListener('click', () => {
+      const next = prot.textContent !== 'true';
+      prot.textContent = next ? 'true' : 'false';
+      prot.classList.toggle('is-on', next);
+      writeCheatTuneToJson();
+    });
+  }
+}
+
+function writeCheatTuneToJson() {
+  const code = document.getElementById('cheatCode')?.value;
+  if (!isDedicatedFeatureCheat(code)) return;
+  let value = {};
+  try { value = parseCheatValue(); } catch (_) { value = {}; }
+  const root = document.getElementById('cheatTuneFields');
+  if (!root) return;
+  root.querySelectorAll('select[data-tune], input[data-tune]').forEach(el => {
+    const key = el.dataset.tune;
+    const n = Number(el.value);
+    value[key] = Number.isFinite(n) ? n : el.value;
+  });
+  root.querySelectorAll('.cheat-chip-list').forEach(list => {
+    const key = list.dataset.tune;
+    const ids = [...list.querySelectorAll('.cheat-chip.is-on')].map(b => Number(b.dataset.id));
+    if (ids.length) value[key] = ids;
+    else delete value[key];
+  });
+  const prot = root.querySelector('[data-tune="protectWinning"]');
+  if (prot) value.protectWinning = prot.textContent === 'true';
+  const posRoot = root.querySelector('[data-tune="positions"]');
+  if (posRoot) {
+    const pos = [...posRoot.querySelectorAll('.cheat-pos-cell.is-on')].map(b => [Number(b.dataset.c), Number(b.dataset.r)]);
+    if (pos.length) value.positions = pos;
+    else delete value.positions;
+  }
+  document.getElementById('cheatValue').value = JSON.stringify(value, null, 2);
 }
 
 function setCheatPresetActive(code) {
@@ -12250,6 +12736,7 @@ function onCheatCodeChanged({ fromPreset = false } = {}) {
   const preset = CHEAT_PRESETS.find(p => p.code === code);
   setCheatPresetActive(code);
   if (code === 'FORCE_GRID') {
+    setCheatTuneVisible(false);
     setCheatGridEditorVisible(true);
     try {
       const v = JSON.parse(document.getElementById('cheatValue')?.value || '{}');
@@ -12268,8 +12755,24 @@ function onCheatCodeChanged({ fromPreset = false } = {}) {
       fillCheatGrid(8);
       applyFeaturesToEditor([]);
     }
+  } else if (isDedicatedFeatureCheat(code)) {
+    setCheatGridEditorVisible(false);
+    setCheatTuneVisible(true);
+    let v = {};
+    if (fromPreset && preset?.value != null) {
+      v = preset.value;
+      document.getElementById('cheatValue').value = JSON.stringify(v, null, 2);
+    } else {
+      try { v = JSON.parse(document.getElementById('cheatValue')?.value || '{}'); } catch (_) { v = {}; }
+      if (!v || typeof v !== 'object' || Array.isArray(v) || !Object.keys(v).length) {
+        v = preset?.value && typeof preset.value === 'object' ? preset.value : {};
+        document.getElementById('cheatValue').value = JSON.stringify(v, null, 2);
+      }
+    }
+    renderCheatTune(code, v);
   } else {
     setCheatGridEditorVisible(false);
+    setCheatTuneVisible(false);
     if (fromPreset && preset?.value != null) {
       document.getElementById('cheatValue').value = JSON.stringify(preset.value, null, 2);
     }
@@ -12280,6 +12783,7 @@ function onCheatCodeChanged({ fromPreset = false } = {}) {
       ? 'Immediate cheat — will send only (no auto-spin)'
       : 'Send next-spin cheat then trigger SPIN';
   }
+  syncCheatJsonBox(code);
 }
 
 function readCheatGridFromEditor() {
