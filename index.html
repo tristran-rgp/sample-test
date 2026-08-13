@@ -3850,10 +3850,14 @@
         <input id="gameId" value="yama_01023" style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
       </div>
       <div style="display:flex;gap:8px;margin-top:14px">
-        <button id="btnPlayOnline" class="btn" style="flex:1;padding:12px;background:linear-gradient(135deg,#003344,#005566);border-color:var(--cyan);color:var(--cyan);font-size:1rem;font-weight:700;box-shadow:var(--glow-cyan)">Play Online</button>
+        <button id="btnPlayOnline" class="btn" title="Enter" style="flex:1;padding:12px;background:linear-gradient(135deg,#003344,#005566);border-color:var(--cyan);color:var(--cyan);font-size:1rem;font-weight:700;box-shadow:var(--glow-cyan)">Play Online</button>
         <button id="btnPlayOffline" class="btn" style="flex:1;padding:12px;background:#1a1a2e;border-color:#555;color:#aaa;font-size:1rem">Play Offline</button>
       </div>
       <div id="loginStatus" style="margin-top:10px;font-size:.8rem;color:var(--dim);text-align:center"></div>
+      <div id="loginLoadStatus" style="margin-top:10px;font-size:.72rem;color:var(--dim);text-align:center;letter-spacing:.4px">Loading assets…</div>
+      <div style="height:3px;background:#12182a;border-radius:2px;margin-top:8px;overflow:hidden">
+        <div id="loginLoadFill" style="height:100%;width:0%;background:var(--cyan);box-shadow:var(--glow-cyan);transition:width .15s"></div>
+      </div>
     </div>
   </div>
 
@@ -3948,7 +3952,7 @@
         <div class="spin-controls">
           <button class="circle-btn turbo" id="btnFast" title="Fast Spin">⚡</button>
           <button class="circle-btn" id="btnExplainFeat" title="Feature Explain Mode — pause & show what each feature does">📖</button>
-          <button class="spin-btn" id="btnSpin" title="SPIN">
+          <button class="spin-btn" id="btnSpin" title="SPIN (Space)">
             <picture>
               <source type="image/webp" srcset="assert/spin.webp">
               <img src="assert/spin.png" alt="SPIN">
@@ -4976,6 +4980,79 @@ const JACKPOT_TIERS = [
   { name: 'GOD', mult: 19693, emoji: '🔱' },
 ];
 const JACKPOT_CORE_IMG = ASSET + 'quantum-core-jackpot.png';
+
+let _preloadPromise = null;
+let _preloadDone = 0;
+let _preloadTotal = 0;
+
+function listPreloadUrls() {
+  const urls = new Set();
+  const add = (p) => { if (p) urls.add(assetUrl(p)); };
+  for (const k of LETTER_SYMS) {
+    add(ASSET + k + '.png');
+    add(ASSET + 'art-new/' + k + '.png');
+  }
+  add(ASSET + MYSTERY_FILE);
+  add(ASSET + 'art-new/' + MYSTERY_FILE);
+  for (const cfg of Object.values(SYM_SPRITES)) add(SPRITE_PACK_BASE + cfg.file);
+  add(SPRITE_PACK_BASE + 'animation-sequence.png');
+  add(CORE_HACK.img);
+  for (const f of FEATURES) add(f.img);
+  add(JACKPOT_CORE_IMG);
+  add(ASSET + 'spin.png');
+  add(ASSET + 'auto-spin.png');
+  add(ASSET + 'buy-free-spin.png');
+  return [...urls];
+}
+
+function preloadOne(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const done = () => resolve();
+    img.onload = done;
+    img.onerror = done;
+    img.src = url;
+  });
+}
+
+function updateLoginLoadUi() {
+  const label = document.getElementById('loginLoadStatus');
+  const fill = document.getElementById('loginLoadFill');
+  const splashFill = document.getElementById('splashFill');
+  const pct = _preloadTotal ? Math.round((_preloadDone / _preloadTotal) * 100) : 0;
+  if (label) {
+    label.textContent = (_preloadTotal && _preloadDone >= _preloadTotal)
+      ? `Assets ready (${_preloadTotal})`
+      : `Loading assets ${_preloadDone}/${_preloadTotal || '…'} (${pct}%)`;
+    label.style.color = (_preloadTotal && _preloadDone >= _preloadTotal) ? 'var(--green)' : 'var(--dim)';
+  }
+  if (fill) fill.style.width = pct + '%';
+  if (splashFill) splashFill.style.width = pct + '%';
+}
+
+function startAssetPreload() {
+  if (_preloadPromise) return _preloadPromise;
+  const urls = listPreloadUrls();
+  _preloadTotal = urls.length;
+  _preloadDone = 0;
+  updateLoginLoadUi();
+  const conc = 8;
+  let i = 0;
+  const worker = async () => {
+    while (i < urls.length) {
+      const url = urls[i++];
+      await preloadOne(url);
+      _preloadDone++;
+      updateLoginLoadUi();
+    }
+  };
+  _preloadPromise = Promise.all(Array.from({ length: conc }, worker));
+  return _preloadPromise;
+}
+
+function assetsReady() {
+  return _preloadTotal > 0 && _preloadDone >= _preloadTotal;
+}
 
 function symImgHtml(sym, alt = '') {
   const s = SYMBOLS[sym];
@@ -8258,11 +8335,16 @@ async function renderJackpotHistoryOnline() {
 // ─── Splash ──────────────────────────────────────────────────
 async function splash() {
   const fill = document.getElementById('splashFill');
-  for (let i = 0; i <= 100; i += 5) {
-    fill.style.width = i + '%';
-    await sleep(60);
+  const pending = startAssetPreload();
+  if (!assetsReady()) {
+    updateLoginLoadUi();
+    while (!assetsReady()) {
+      await Promise.race([pending, sleep(80)]);
+    }
   }
-  await sleep(300);
+  if (fill) fill.style.width = '100%';
+  await pending;
+  await sleep(assetsReady() ? 180 : 80);
   document.getElementById('splash').classList.add('hidden');
   document.getElementById('game').classList.add('visible');
 }
@@ -12286,6 +12368,46 @@ document.getElementById('btnDisconnect').addEventListener('click', () => {
   returnToLogin({ message: 'Disconnected. Log in again to play online.', color: 'var(--dim)' });
 });
 
+function isLoginVisible() {
+  const el = document.getElementById('loginOverlay');
+  return !!(el && el.style.display !== 'none');
+}
+
+function isTypingTarget(el) {
+  if (!el || el === document.body || el === document.documentElement) return false;
+  const tag = (el.tagName || '').toUpperCase();
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+  if (el.isContentEditable) return true;
+  return false;
+}
+
+window.addEventListener('keydown', (e) => {
+  if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+
+  if (e.key === 'Enter') {
+    if (!isLoginVisible()) return;
+    if (e.target && e.target.id === 'btnPlayOffline') return;
+    if (e.target && e.target.id === 'btnPlayOnline') return;
+    const btn = document.getElementById('btnPlayOnline');
+    if (!btn || btn.disabled) return;
+    e.preventDefault();
+    btn.click();
+    return;
+  }
+
+  if (e.key === ' ' || e.code === 'Space') {
+    if (isLoginVisible()) return;
+    if (isTypingTarget(e.target)) return;
+    const splash = document.getElementById('splash');
+    if (splash && !splash.classList.contains('hidden')) return;
+    if (document.querySelector('.modal-overlay.open')) return;
+    const btn = document.getElementById('btnSpin');
+    if (!btn || btn.disabled) return;
+    e.preventDefault();
+    btn.click();
+  }
+});
+
 // ═══════════════════════════════════════════════════════════════
 // CHEAT / DEBUG PANEL — WS cmd 1999 + REST /debug/cheat
 // ═══════════════════════════════════════════════════════════════
@@ -13719,8 +13841,8 @@ document.addEventListener('visibilitychange', () => {
 });
 if (document.hidden) document.body.classList.add('tab-hidden');
 
-// ─── Boot — wait for user choice ─────────────────────────────
-// initUI and splash are now triggered by button clicks above
+// ─── Boot — preload while login is visible ───────────────────
+startAssetPreload();
 </script>
 </body>
 </html>
