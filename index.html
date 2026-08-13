@@ -2669,6 +2669,7 @@
       margin: 0 auto;
     }
     .jackpot-node img { width: 70%; height: 70%; object-fit: contain; }
+    .jackpot-node.opened img { display: none; }
 
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,.8);
@@ -2947,17 +2948,99 @@
       box-shadow: 0 0 6px var(--orange);
     }
 
-    /* Cheat debug panel */
+    /* Cheat debug panel — wide two-pane modal */
+    #modalCheat.modal-overlay { padding: 18px 20px; align-items: stretch; }
+    #modalCheat .cheat-modal {
+      max-width: min(1240px, 98vw);
+      width: 100%;
+      max-height: min(94vh, 920px);
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(0,240,255,.22);
+      background:
+        linear-gradient(180deg, rgba(8,18,36,.98) 0%, rgba(6,10,20,.98) 100%);
+      box-shadow:
+        0 0 0 1px rgba(255,208,0,.08),
+        0 24px 80px rgba(0,0,0,.55),
+        0 0 80px rgba(0,240,255,.08);
+    }
+    .cheat-modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid rgba(30,58,95,.85);
+      background:
+        linear-gradient(90deg, rgba(255,208,0,.08), transparent 42%),
+        linear-gradient(180deg, rgba(0,240,255,.06), transparent);
+    }
+    .cheat-modal-head h2 {
+      margin: 0;
+      color: var(--yellow);
+      font-size: 1.05rem;
+      letter-spacing: 2.4px;
+    }
+    .cheat-kicker {
+      font-size: .62rem;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: var(--yellow);
+      opacity: .75;
+      margin-bottom: 4px;
+    }
+    .cheat-lead {
+      font-size: .72rem;
+      color: var(--dim);
+      margin: 6px 0 0;
+      line-height: 1.45;
+      max-width: 62ch;
+    }
+    .cheat-lead strong { color: var(--cyan); font-weight: 700; }
+    #cheatSessionBadge {
+      flex: 0 0 auto;
+      max-width: 360px;
+      font-size: .68rem;
+      color: var(--dim);
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(0,240,255,.05);
+      border: 1px dashed #1e3a5f;
+      line-height: 1.45;
+    }
+    #cheatSessionBadge strong { color: var(--cyan); }
+    .cheat-modal-body {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      min-height: 0;
+      flex: 1;
+    }
+    .cheat-modal-side {
+      border-right: 1px solid rgba(30,58,95,.85);
+      background: rgba(0,0,0,.22);
+      padding: 12px 12px 14px;
+      overflow: auto;
+      min-height: 0;
+    }
+    .cheat-side-label {
+      font-size: .62rem;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin: 0 2px 8px;
+    }
     .cheat-presets {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
-      margin-bottom: 12px;
+      grid-template-columns: 1fr;
+      gap: 5px;
+      margin: 0;
     }
     .cheat-presets button {
       text-align: left;
-      padding: 8px 10px;
-      font-size: .72rem;
+      padding: 7px 9px;
+      font-size: .7rem;
       line-height: 1.25;
       background: #0a1220;
       border: 1px solid #1e3a5f;
@@ -2965,19 +3048,48 @@
       color: var(--text);
       cursor: pointer;
       font-family: inherit;
+      transition: border-color .12s, background .12s, box-shadow .12s;
     }
     .cheat-presets button:hover {
       border-color: var(--cyan);
       background: rgba(0,240,255,.08);
     }
+    .cheat-presets button.is-active {
+      border-color: var(--yellow);
+      background: rgba(255,208,0,.08);
+      box-shadow: inset 2px 0 0 var(--yellow);
+    }
     .cheat-presets button strong {
       display: block;
       color: var(--cyan);
-      font-size: .7rem;
+      font-size: .66rem;
       letter-spacing: .3px;
-      margin-bottom: 2px;
+      margin-bottom: 1px;
     }
-    .cheat-field { margin-bottom: 10px; }
+    .cheat-presets button.is-active strong { color: var(--yellow); }
+    .cheat-modal-main {
+      padding: 14px 18px 16px;
+      overflow: auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .cheat-ctrl-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+      gap: 12px;
+    }
+    .cheat-workspace {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    .cheat-workspace.has-grid {
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, .85fr);
+    }
+    .cheat-field { margin-bottom: 0; }
     .cheat-field label {
       display: block;
       font-size: .68rem;
@@ -2998,16 +3110,43 @@
       font-size: .8rem;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     }
-    .cheat-field textarea { min-height: 72px; resize: vertical; }
+    .cheat-field textarea { min-height: 168px; resize: vertical; }
+    .cheat-rest {
+      border: 1px solid #1e3a5f;
+      border-radius: 10px;
+      padding: 8px 12px 10px;
+      background: rgba(0,0,0,.18);
+    }
+    .cheat-rest summary {
+      cursor: pointer;
+      color: var(--dim);
+      font-size: .75rem;
+      margin-bottom: 0;
+    }
+    .cheat-rest[open] summary { margin-bottom: 10px; }
+    .cheat-rest-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .cheat-modal-foot {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: auto;
+    }
+    .cheat-modal-foot .modal-actions {
+      margin-top: 0;
+    }
     #cheatLog {
-      margin-top: 10px;
-      padding: 10px;
+      margin-top: 0;
+      padding: 10px 12px;
       border-radius: 8px;
       background: #050810;
       border: 1px solid #1e3a5f;
       font-size: .72rem;
       color: var(--dim);
-      max-height: 120px;
+      max-height: 88px;
       overflow-y: auto;
       white-space: pre-wrap;
       word-break: break-word;
@@ -3017,16 +3156,15 @@
     #cheatLog.err { color: var(--red); border-color: rgba(255,42,58,.35); }
     #cheatGridEditor {
       display: none;
-      margin-bottom: 12px;
-      padding: 10px;
-      border: 1px solid #1e3a5f;
+      padding: 12px;
+      border: 1px solid rgba(0,240,255,.2);
       border-radius: 10px;
-      background: rgba(0,0,0,.35);
+      background: rgba(0,240,255,.04);
     }
     #cheatGridEditor.visible { display: block; }
     #cheatGridEditor .grid-head {
-      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-      justify-content: space-between; margin-bottom: 8px;
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      justify-content: space-between; margin-bottom: 10px;
     }
     #cheatGridEditor .grid-head span {
       font-size: .68rem; color: var(--dim); letter-spacing: .4px; text-transform: uppercase;
@@ -3044,25 +3182,67 @@
       table-layout: fixed;
     }
     #cheatGridTable th {
-      font-size: .6rem; color: var(--dim); font-weight: 600; padding: 2px;
+      font-size: .6rem; color: var(--dim); font-weight: 600; padding: 2px 3px 6px;
     }
-    #cheatGridTable td { padding: 2px; }
+    #cheatGridTable td { padding: 3px; }
     #cheatGridTable select {
       width: 100%;
-      padding: 4px 2px;
-      font-size: .68rem;
+      padding: 7px 4px;
+      font-size: .74rem;
       background: #0a0a0f;
       border: 1px solid #1e3a5f;
       border-radius: 6px;
       color: var(--text);
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     }
-    #cheatSessionBadge {
-      font-size: .68rem; color: var(--dim); margin-bottom: 10px;
-      padding: 6px 8px; border-radius: 6px; background: rgba(0,240,255,.05);
-      border: 1px dashed #1e3a5f; line-height: 1.4;
+    .cheat-feature-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 12px 0 6px;
     }
-    #cheatSessionBadge strong { color: var(--cyan); }
+    .cheat-feature-head span {
+      font-size: .68rem; color: var(--dim); letter-spacing: .4px; text-transform: uppercase;
+    }
+    .cheat-feature-head .grid-tools { display: flex; gap: 4px; }
+    .cheat-feature-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 5px;
+    }
+    .cheat-feature-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+      padding: 5px 7px;
+      border: 1px solid #1e3a5f;
+      border-radius: 7px;
+      background: #0a1220;
+      cursor: pointer;
+      font-size: .66rem;
+      color: var(--text);
+      user-select: none;
+    }
+    .cheat-feature-item.is-on {
+      border-color: rgba(255,208,0,.45);
+      background: rgba(255,208,0,.08);
+      color: var(--yellow);
+    }
+    .cheat-feature-item input { width: 13px; height: 13px; margin: 0; accent-color: var(--yellow); }
+    @media (max-width: 900px) {
+      #modalCheat .cheat-modal { max-height: 96vh; }
+      .cheat-modal-body,
+      .cheat-ctrl-row,
+      .cheat-workspace,
+      .cheat-rest-grid,
+      .cheat-feature-list { grid-template-columns: 1fr; }
+      .cheat-modal-side { border-right: 0; border-bottom: 1px solid rgba(30,58,95,.85); max-height: 220px; }
+      .cheat-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #cheatSessionBadge { max-width: none; }
+      .cheat-modal-head { flex-direction: column; }
+    }
     #btnCheatFab {
       position: fixed;
       right: 12px;
@@ -3216,14 +3396,92 @@
     #featToast.show { display: block; animation: toastIn .3s; }
     @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(-10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
 
-    .jackpot-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .jackpot-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
     .jackpot-node {
       aspect-ratio: 1; background: #1a0a2a; border: 2px solid var(--red);
       border-radius: 8px; display: flex; align-items: center; justify-content: center;
       font-size: 1.5rem; cursor: pointer; transition: all .2s;
     }
     .jackpot-node:hover:not(.opened) { box-shadow: var(--glow-red); }
-    .jackpot-node.opened { cursor: default; border-color: var(--dim); }
+    .jackpot-node.opened {
+      cursor: default;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      font-size: inherit;
+    }
+    .jp-hex-wrap {
+      --jp: #00e8ff;
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(25% 4%, 75% 4%, 98% 50%, 75% 96%, 25% 96%, 2% 50%);
+      background: var(--jp);
+      padding: 2.5px;
+      filter: drop-shadow(0 0 7px color-mix(in srgb, var(--jp) 70%, transparent));
+      animation: jpReveal .28s ease-out;
+    }
+    .jackpot-node.jp-USER { --jp: #00e8ff; }
+    .jackpot-node.jp-GHOST { --jp: #c44dff; }
+    .jackpot-node.jp-ELITE { --jp: #ff9a1a; }
+    .jackpot-node.jp-GOD { --jp: #ffd000; }
+    .jp-hex-inner {
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(25% 4%, 75% 4%, 98% 50%, 75% 96%, 25% 96%, 2% 50%);
+      background:
+        radial-gradient(circle at 50% 42%, #0c2430 0%, #041018 72%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16% 12% 13%;
+      color: var(--jp);
+    }
+    .jackpot-node.jp-GHOST .jp-hex-inner {
+      background: radial-gradient(circle at 50% 42%, #1a1230 0%, #0a0614 72%);
+    }
+    .jackpot-node.jp-ELITE .jp-hex-inner {
+      background: radial-gradient(circle at 50% 42%, #2a1808 0%, #120804 72%);
+    }
+    .jackpot-node.jp-GOD .jp-hex-inner {
+      background: radial-gradient(circle at 50% 42%, #2a2208 0%, #120e04 72%);
+    }
+    .jp-num {
+      font-family: 'Segoe UI', system-ui, monospace;
+      font-size: clamp(.62rem, 2.1vw, .95rem);
+      font-weight: 800;
+      letter-spacing: .12em;
+      line-height: 1;
+      text-shadow: 0 0 8px var(--jp);
+    }
+    .jp-ico {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 46%;
+      min-height: 0;
+      color: #fff;
+      filter: drop-shadow(0 0 6px rgba(255,255,255,.35));
+    }
+    .jp-ico svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      fill: currentColor;
+    }
+    .jp-name {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: clamp(.42rem, 1.45vw, .68rem);
+      font-weight: 800;
+      letter-spacing: .14em;
+      line-height: 1;
+      text-shadow: 0 0 8px var(--jp);
+    }
+    @keyframes jpReveal {
+      from { transform: scale(.72); filter: drop-shadow(0 0 16px var(--jp)); opacity: .4; }
+      to   { transform: scale(1); opacity: 1; }
+    }
 
     #symTooltip {
       position: fixed; z-index: 300; background: #0d0d1a;
@@ -3588,95 +3846,117 @@
 
 <!-- Cheat / Debug popup (dev-staging: WS cmd 1999 or REST /debug/cheat) -->
 <div class="modal-overlay" id="modalCheat">
-  <div class="modal" style="max-width:560px">
-    <h2 style="color:var(--yellow)">🛠 CHEAT / DEBUG</h2>
-    <p style="font-size:.72rem;color:var(--dim);margin:-8px 0 12px;line-height:1.45">
-      Gửi cheat tới backend (dev/staging). Ưu tiên <strong style="color:var(--cyan)">WS cmd 1999</strong> khi online;
-      fallback <strong style="color:var(--cyan)">REST /debug/cheat</strong>.
-      Next-spin: dùng <strong style="color:var(--yellow)">Send &amp; Spin</strong>.
-    </p>
+  <div class="modal cheat-modal">
+    <header class="cheat-modal-head">
+      <div>
+        <div class="cheat-kicker">Dev / Staging · cmd 1999</div>
+        <h2>🛠 CHEAT / DEBUG</h2>
+        <p class="cheat-lead">
+          Ưu tiên <strong>WS cmd 1999</strong> khi online; fallback <strong>REST /debug/cheat</strong>.
+          Next-spin: <strong style="color:var(--yellow)">Send &amp; Spin</strong>.
+        </p>
+      </div>
+      <div id="cheatSessionBadge">Session: —</div>
+    </header>
 
-    <div id="cheatSessionBadge">Session: —</div>
+    <div class="cheat-modal-body">
+      <aside class="cheat-modal-side">
+        <div class="cheat-side-label">Presets</div>
+        <div class="cheat-presets" id="cheatPresets"></div>
+      </aside>
 
-    <div class="cheat-presets" id="cheatPresets"></div>
+      <div class="cheat-modal-main">
+        <div class="cheat-ctrl-row">
+          <div class="cheat-field">
+            <label>Transport</label>
+            <select id="cheatTransport">
+              <option value="auto">Auto (WS nếu online, else REST)</option>
+              <option value="ws">WebSocket cmd 1999 only</option>
+              <option value="rest">REST debug only</option>
+            </select>
+          </div>
+          <div class="cheat-field">
+            <label>Cheat code</label>
+            <select id="cheatCode"></select>
+          </div>
+        </div>
 
-    <div class="cheat-field">
-      <label>Transport</label>
-      <select id="cheatTransport">
-        <option value="auto">Auto (WS nếu online, else REST)</option>
-        <option value="ws">WebSocket cmd 1999 only</option>
-        <option value="rest">REST debug only</option>
-      </select>
-    </div>
+        <div class="cheat-workspace">
+          <div id="cheatGridEditor">
+            <div class="grid-head">
+              <span>FORCE_GRID — row × col (ids 1–12)</span>
+              <div class="grid-tools">
+                <button type="button" id="cheatGridFillH" title="All H (8)">All H</button>
+                <button type="button" id="cheatGridFillA" title="All A (1)">All A</button>
+                <button type="button" id="cheatGridFromScreen" title="Copy current reels">From screen</button>
+                <button type="button" id="cheatGridScatter3" title="3 scatters mid reels">3S mid</button>
+                <button type="button" id="cheatGridSyncJson" title="Write grid → JSON">→ JSON</button>
+              </div>
+            </div>
+            <table id="cheatGridTable">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th>
+                </tr>
+              </thead>
+              <tbody id="cheatGridBody"></tbody>
+            </table>
+            <p style="font-size:.62rem;color:var(--dim);margin-top:8px;line-height:1.35">
+              1–10 pay · 11 Wild · 12 Scatter · row-major <code>grid[row][col]</code> · feature chỉ apply trên base spin
+            </p>
+            <div class="cheat-feature-head">
+              <span>Features (optional)</span>
+              <div class="grid-tools">
+                <button type="button" id="cheatFeatAll">All</button>
+                <button type="button" id="cheatFeatNone">None</button>
+              </div>
+            </div>
+            <div class="cheat-feature-list" id="cheatFeatureList"></div>
+          </div>
 
-    <div class="cheat-field">
-      <label>Cheat code</label>
-      <select id="cheatCode"></select>
-    </div>
+          <div class="cheat-field">
+            <label>Value (JSON object)</label>
+            <textarea id="cheatValue" placeholder='{}  e.g. {"scatters":4}  {"multiplier":500}  {"features":["BypassProtocol"]}'>{}</textarea>
+          </div>
+        </div>
 
-    <!-- FORCE_GRID visual editor (row-major 3×5, same as BE CheatGridGenerator) -->
-    <div id="cheatGridEditor">
-      <div class="grid-head">
-        <span>FORCE_GRID — row × col (ids 1–12)</span>
-        <div class="grid-tools">
-          <button type="button" id="cheatGridFillH" title="All H (8)">All H</button>
-          <button type="button" id="cheatGridFillA" title="All A (1)">All A</button>
-          <button type="button" id="cheatGridFromScreen" title="Copy current reels">From screen</button>
-          <button type="button" id="cheatGridScatter3" title="3 scatters mid reels">3S mid</button>
-          <button type="button" id="cheatGridSyncJson" title="Write grid → JSON">→ JSON</button>
+        <details class="cheat-rest">
+          <summary>REST options (local backend)</summary>
+          <div class="cheat-rest-grid">
+            <div class="cheat-field">
+              <label>Debug base URL</label>
+              <input id="cheatDebugBase" value="http://localhost:3000/api/game/zeroday" />
+            </div>
+            <div class="cheat-field">
+              <label>X-Debug-Token</label>
+              <input id="cheatDebugToken" value="zeroday-debug-2024" />
+            </div>
+            <div class="cheat-field">
+              <label>Agency ID <span style="color:var(--cyan);font-weight:400">(từ session)</span></label>
+              <input id="cheatAgencyId" value="" placeholder="auto from session / host" />
+            </div>
+            <div class="cheat-field">
+              <label>User ID <span style="color:var(--cyan);font-weight:400">(từ session)</span></label>
+              <input id="cheatUserId" value="" placeholder="auto from session / login" />
+            </div>
+          </div>
+          <button type="button" class="btn" id="cheatPullSession" style="width:100%;margin-top:10px;font-size:.75rem">
+            Pull agency/user from session
+          </button>
+        </details>
+
+        <div class="cheat-modal-foot">
+          <div class="modal-actions" style="justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px">
+            <button type="button" class="btn" id="cheatClearLog" style="margin-right:auto">Clear log</button>
+            <button type="button" class="btn" id="closeCheat">Close</button>
+            <button type="button" class="btn" id="cheatSend" style="border-color:#1e3a5f;color:var(--text)">Send only</button>
+            <button type="button" class="btn" id="cheatSendSpin" style="border-color:var(--yellow);color:var(--yellow);font-weight:700">Send &amp; Spin</button>
+          </div>
+          <div id="cheatLog">Ready. Chọn preset hoặc code → Send / Send &amp; Spin.</div>
         </div>
       </div>
-      <table id="cheatGridTable">
-        <thead>
-          <tr>
-            <th></th>
-            <th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th>
-          </tr>
-        </thead>
-        <tbody id="cheatGridBody"></tbody>
-      </table>
-      <p style="font-size:.62rem;color:var(--dim);margin-top:6px;line-height:1.35">
-        1–10 pay · 11 Wild · 12 Scatter · row-major <code>grid[row][col]</code>
-      </p>
     </div>
-
-    <div class="cheat-field">
-      <label>Value (JSON object)</label>
-      <textarea id="cheatValue" placeholder='{}  e.g. {"scatters":4}  {"multiplier":500}  {"features":["BypassProtocol"]}'>{}</textarea>
-    </div>
-
-    <details style="margin-bottom:10px">
-      <summary style="cursor:pointer;color:var(--dim);font-size:.75rem;margin-bottom:8px">REST options (local backend)</summary>
-      <div class="cheat-field">
-        <label>Debug base URL</label>
-        <input id="cheatDebugBase" value="http://localhost:3000/api/game/zeroday" />
-      </div>
-      <div class="cheat-field">
-        <label>X-Debug-Token</label>
-        <input id="cheatDebugToken" value="zeroday-debug-2024" />
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div class="cheat-field" style="margin:0">
-          <label>Agency ID <span style="color:var(--cyan);font-weight:400">(từ session)</span></label>
-          <input id="cheatAgencyId" value="" placeholder="auto from session / host" />
-        </div>
-        <div class="cheat-field" style="margin:0">
-          <label>User ID <span style="color:var(--cyan);font-weight:400">(từ session)</span></label>
-          <input id="cheatUserId" value="" placeholder="auto from session / login" />
-        </div>
-      </div>
-      <button type="button" class="btn" id="cheatPullSession" style="width:100%;margin-top:4px;font-size:.75rem">
-        Pull agency/user from session
-      </button>
-    </details>
-
-    <div class="modal-actions" style="justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px">
-      <button type="button" class="btn" id="cheatClearLog" style="margin-right:auto">Clear log</button>
-      <button type="button" class="btn" id="closeCheat">Close</button>
-      <button type="button" class="btn" id="cheatSend" style="border-color:#1e3a5f;color:var(--text)">Send only</button>
-      <button type="button" class="btn" id="cheatSendSpin" style="border-color:var(--yellow);color:var(--yellow);font-weight:700">Send &amp; Spin</button>
-    </div>
-    <div id="cheatLog">Ready. Chọn preset hoặc code → Send / Send &amp; Spin.</div>
   </div>
 </div>
 
@@ -3818,7 +4098,7 @@
 </div>
 
 <div class="modal-overlay" id="modalJackpot">
-  <div class="modal" style="max-width:500px">
+  <div class="modal" style="max-width:560px">
     <h2 style="color:var(--red)">⚡ CORE HACK — MAINFRAME</h2>
     <p style="font-size:.8rem;color:var(--dim);margin-bottom:12px">Decrypt nodes. Match 3 identical fragments to win.</p>
     <div class="jackpot-grid" id="jackpotGrid"></div>
@@ -4255,6 +4535,12 @@ const ALL_BETS = [...BET_LEVELS.low, ...BET_LEVELS.med, ...BET_LEVELS.high];
  * nameVi: tên gọi dễ nhớ · what: feature sẽ làm gì · how: cách ảnh hưởng tiền/grid.
  */
 const FEATURE_EXPLAIN_VI = {
+  corehack: {
+    nameVi: 'Lõi lượng tử (Core Hack)',
+    what: 'Jackpot cố định 4 tier: USER 15×, GHOST 50×, ELITE 500×, GOD 19693× Total Bet.',
+    how: 'RNG trước khi spin xong. Trúng thì tắt 12 mini-feature. Pick 15 node, match-3 để nhận giải.',
+    see: 'Quantum Core phát sáng, kết nối Mainframe, rồi mở lưới 15 Encrypted Nodes.',
+  },
   firewall: {
     nameVi: 'Tường lửa (Firewall Block)',
     what: 'Chặn 1–2 loại biểu tượng thấp (low) ra khỏi vòng quay lần này.',
@@ -4327,6 +4613,18 @@ const FEATURE_EXPLAIN_VI = {
     how: 'Ngoài ways bình thường (L→R), còn cộng thêm ways ngược (R→L) → tổng win có thể gấp phần hai chiều.',
     see: 'Mũi tên luồng dữ liệu chạy hai chiều Trái↔Phải.',
   },
+};
+
+/** Feature Meter slot #1 (GDD §8.2). Not in FEATURES — never RNG-picked with the 12 minis. */
+const CORE_HACK = {
+  id: 'corehack',
+  name: 'Core Hack',
+  color: '#00ff88',
+  timing: 'pre',
+  img: ASSET + 'quantum-core.png',
+  timingLabel: 'Before reels settle',
+  desc: 'Fixed jackpot: USER 15× / GHOST 50× / ELITE 500× / GOD 19693× Total Bet. Disables the 12 mini-features on the same spin.',
+  vfx: 'Quantum Core glows and connects to the Mainframe, then 15 Encrypted Nodes appear.',
 };
 
 const FEATURES = [
@@ -4473,6 +4771,7 @@ const state = {
   txnId: null,
   // Active features this spin
   triggeredFeatures: [],
+  lastJackpotActive: false,
   blockedSymbols: [],
   globalMultiplier: 1,
   bypassProtocol: false,
@@ -5364,12 +5663,22 @@ function renderGrid(highlight = []) {
   }
 }
 
+function meterItems() {
+  return [CORE_HACK, ...FEATURES];
+}
+
+function findMeterFeature(featureId) {
+  return meterItems().find(x => x.id === featureId);
+}
+
 function showFeatureDetail(featureId) {
-  const f = FEATURES.find(x => x.id === featureId);
+  const f = findMeterFeature(featureId);
   if (!f) return;
   const vi = FEATURE_EXPLAIN_VI[f.id] || {};
-  const active = !!(state.triggeredFeatures || []).find(x => x.id === f.id)
-    || !!(state.persistentFeatures || []).find(x => x.id === f.id);
+  const active = f.id === CORE_HACK.id
+    ? !!state.lastJackpotActive
+    : !!(state.triggeredFeatures || []).find(x => x.id === f.id)
+      || !!(state.persistentFeatures || []).find(x => x.id === f.id);
 
   const img = document.getElementById('featDetailImg');
   const title = document.getElementById('featDetailTitle');
@@ -5380,7 +5689,7 @@ function showFeatureDetail(featureId) {
   const status = document.getElementById('featDetailStatus');
   if (!img || !title) return;
 
-  const order = FEATURES.findIndex(x => x.id === f.id) + 1;
+  const order = meterItems().findIndex(x => x.id === f.id) + 1;
   const whenVi =
     f.timing === 'spin' ? 'Lúc quay' :
     f.timing === 'win' ? 'Giai đoạn tính tiền thắng' :
@@ -5422,10 +5731,12 @@ function renderFeatureMeter(activeIds = []) {
   meter.innerHTML = '';
   // has-active → CSS dim các badge không trúng, phóng to badge trúng
   meter.classList.toggle('has-active', ids.length > 0);
-  FEATURES.forEach(f => {
+  meterItems().forEach(f => {
     const badge = document.createElement('span');
     const on = ids.includes(f.id);
-    badge.className = 'feat-badge' + (on ? ' active' : '');
+    badge.className = 'feat-badge'
+      + (f.id === CORE_HACK.id ? ' core-hack' : '')
+      + (on ? ' active' : '');
     const viName = (FEATURE_EXPLAIN_VI[f.id] && FEATURE_EXPLAIN_VI[f.id].nameVi) || f.name;
     badge.title = viName + ' — bấm để xem giải thích' + (on ? ' (đang bật)' : '');
     badge.style.color = f.color;
@@ -6613,6 +6924,77 @@ function jackpotEmoji(tierName) {
   return JACKPOT_TIERS.find(t => t.name === tierName)?.emoji || '◆';
 }
 
+function jackpotTierSvg(tierName) {
+  const t = String(tierName || 'USER').toUpperCase();
+  if (t === 'GHOST') {
+    return '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 8c-11 0-20 8-20 20v26c0 2 2.4 2.2 3.2.4L20 46l5 7c.8 1.1 2.6.4 2.6-1V48l4.4 8c.7 1.2 2.5 1.2 3.2 0L40 48v4c0 1.4 1.8 2.1 2.6 1l5-7 4.8 8.4c.8 1.8 3.2 1.6 3.2-.4V28C52 16 43 8 32 8zm-8 22a3.5 3.5 0 110-7 3.5 3.5 0 010 7zm16 0a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/></svg>';
+  }
+  if (t === 'ELITE') {
+    return '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 8l6.4 13.6L54 24.2 43 34.6l2.8 16.2L32 43.2 18.2 50.8 21 34.6 10 24.2l15.6-2.6z"/></svg>';
+  }
+  if (t === 'GOD') {
+    return '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6l4 12 12-5-3 13 13 3-13 4 5 12-12-6-4 14-4-14-12 6 5-12-13-4 13-3-3-13 12 5z"/></svg>';
+  }
+  return '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="20" r="11"/><path d="M12 56c2-14 10-20 20-20s18 6 20 20z"/></svg>';
+}
+
+/**
+ * 15 nodes: winning tier ≥3; every other tier ≤2 so match-3 chỉ đúng prize BE.
+ * Giữ index server nếu đủ 15; slot trống / decoy thừa → winning tier.
+ */
+function constrainJackpotNodes(rawTiers, winTier) {
+  const win = String(winTier || 'USER').toUpperCase();
+  const names = JACKPOT_TIERS.map(t => t.name);
+  const src = Array.isArray(rawTiers) ? rawTiers.map(t => String(t || '').toUpperCase()) : [];
+  const decoyUsed = {};
+  names.forEach(t => { if (t !== win) decoyUsed[t] = 0; });
+  const out = new Array(15);
+
+  for (let i = 0; i < 15; i++) {
+    const t = src[i];
+    if (t === win) {
+      out[i] = win;
+    } else if (t && names.includes(t) && decoyUsed[t] < 2) {
+      decoyUsed[t] += 1;
+      out[i] = t;
+    }
+  }
+
+  let winCount = out.filter(t => t === win).length;
+  for (let i = 0; i < 15 && winCount < 3; i++) {
+    if (out[i] !== win) {
+      if (out[i] && decoyUsed[out[i]] != null) decoyUsed[out[i]] -= 1;
+      out[i] = win;
+      winCount += 1;
+    }
+  }
+
+  for (let i = 0; i < 15; i++) {
+    if (out[i]) continue;
+    const avail = names.filter(t => t !== win && decoyUsed[t] < 2);
+    if (avail.length && Math.random() < 0.5) {
+      const t = avail[Math.floor(Math.random() * avail.length)];
+      decoyUsed[t] += 1;
+      out[i] = t;
+    } else {
+      out[i] = win;
+    }
+  }
+  return out;
+}
+
+function revealJackpotNode(node, tierName, idx) {
+  const name = String(tierName || 'USER').toUpperCase();
+  const num = String((idx | 0) + 1).padStart(2, '0');
+  node.classList.add('opened', 'jp-' + name);
+  node.innerHTML =
+    '<div class="jp-hex-wrap"><div class="jp-hex-inner">' +
+    '<span class="jp-num">' + num + '</span>' +
+    '<span class="jp-ico">' + jackpotTierSvg(name) + '</span>' +
+    '<span class="jp-name">' + name + '</span>' +
+    '</div></div>';
+}
+
 /**
  * Pick-and-click Core Hack.
  * @param {object|null} serverJp - online: { tier, win, isTriggered, nodes?[{index,tier}] }
@@ -6621,6 +7003,12 @@ function jackpotEmoji(tierName) {
  */
 async function playJackpot(serverJp = null) {
   sfx('charge', { gain: 0.8 });
+  state.lastJackpotActive = true;
+  renderFeatureMeter([
+    CORE_HACK.id,
+    ...((state.persistentFeatures || []).map(f => f.id)),
+    ...((state.triggeredFeatures || []).map(f => f.id)),
+  ].filter((id, i, a) => a.indexOf(id) === i));
   return new Promise(resolve => {
     let nodeTiers = []; // string tier names length 15
     let winAmount = 0;
@@ -6636,24 +7024,13 @@ async function playJackpot(serverJp = null) {
         nodeTiers = nodes.slice(0, 15).map(n => String(n.tier || '').toUpperCase());
       } else if (nodes.length > 0) {
         nodeTiers = nodes.map(n => String(n.tier || '').toUpperCase());
-        while (nodeTiers.length < 15) {
-          const filler = JACKPOT_TIERS[nodeTiers.length % JACKPOT_TIERS.length].name;
-          nodeTiers.push(filler === targetTier ? 'USER' : filler);
-        }
-      } else {
-        // Server omit nodes — still show 15 cells with 3× winning tier
-        nodeTiers = [];
-        for (let i = 0; i < 3; i++) nodeTiers.push(targetTier || 'USER');
-        for (let i = 3; i < 15; i++) {
-          const t = JACKPOT_TIERS[i % JACKPOT_TIERS.length].name;
-          nodeTiers.push(t === targetTier ? 'GHOST' : t);
-        }
-        nodeTiers = shuffle(nodeTiers);
       }
+      nodeTiers = constrainJackpotNodes(nodeTiers, targetTier);
     } else {
-      const fragments = [];
-      JACKPOT_TIERS.forEach(t => { for (let i = 0; i < 3; i++) fragments.push(t.name); });
-      nodeTiers = shuffle(fragments).slice(0, 15);
+      const pick = JACKPOT_TIERS[Math.floor(Math.random() * JACKPOT_TIERS.length)];
+      targetTier = pick.name;
+      winAmount = pick.mult * state.bet;
+      nodeTiers = constrainJackpotNodes([], targetTier);
     }
 
     const picks = {};
@@ -6686,7 +7063,7 @@ async function playJackpot(serverJp = null) {
       })();
     };
 
-    nodeTiers.forEach((tierName) => {
+    nodeTiers.forEach((tierName, idx) => {
       const node = document.createElement('div');
       node.className = 'jackpot-node';
       const coreImg = document.createElement('img');
@@ -6696,9 +7073,7 @@ async function playJackpot(serverJp = null) {
       node.addEventListener('click', () => {
         if (finished || node.classList.contains('opened')) return;
         sfx('tick', { gain: 0.5 });
-        node.classList.add('opened');
-        node.innerHTML = '';
-        node.textContent = jackpotEmoji(tierName);
+        revealJackpotNode(node, tierName, idx);
         picks[tierName] = (picks[tierName] || 0) + 1;
         document.getElementById('jackpotPicks').textContent =
           Object.entries(picks).map(([k, v]) => `${k}: ${v}`).join(' | ');
@@ -6933,6 +7308,8 @@ async function doSpin(forcedScatters = 0) {
   if (!state.inFreeSpins && Math.random() < 0.005) {
     renderGrid();
     jackpotWin = await playJackpot();
+  } else {
+    state.lastJackpotActive = false;
   }
 
   // Calculate wins
@@ -7016,9 +7393,11 @@ async function doSpin(forcedScatters = 0) {
   });
 
   state.spinning = false;
+  state.lastJackpotActive = false;
   document.getElementById('btnSpin').disabled = false;
   updateUI();
   updateAutoUI();
+  renderFeatureMeter((state.inFreeSpins ? (state.persistentFeatures || []) : []).map(f => f.id));
 
   // FS continue / Autospin — chỉ sau settle
   await continueAfterSpin();
@@ -11311,9 +11690,13 @@ async function doOnlineSpin(opts = {}) {
     progressiveJackpot, roundId, spinId, thisMode,
   } = parsed;
 
-  // Feature meter: active (FS persistent) + spin features
+  // Feature meter: Core Hack #1 (if JP) + FS persistent + spin features
   state.triggeredFeatures = featObjs;
+  const jp = progressiveJackpot;
+  const jpOn = !!(jp && (jp.isTriggered === true || jp.isTriggered === 'true' || jp.tier));
+  state.lastJackpotActive = jpOn;
   const meterIds = [
+    ...(jpOn ? [CORE_HACK.id] : []),
     ...((state.persistentFeatures || []).map(f => f.id)),
     ...featObjs.map(f => f.id),
     ...(activeIds || []),
@@ -11396,8 +11779,7 @@ async function doOnlineSpin(opts = {}) {
     renderGrid();
 
     // 5b) Core Hack jackpot — pick-and-click VFX (win đã nằm trong totalWin)
-    const jp = progressiveJackpot;
-    if (jp && (jp.isTriggered === true || jp.isTriggered === 'true' || jp.tier)) {
+    if (jpOn) {
       await playJackpot(jp);
     }
 
@@ -11472,6 +11854,7 @@ async function doOnlineSpin(opts = {}) {
   clearVfxStage();
 
   state.spinning = false;
+  state.lastJackpotActive = false;
   document.getElementById('btnSpin').disabled = false;
   updateUI();
   updateAutoUI();
@@ -11650,6 +12033,21 @@ const CHEAT_SYM_OPTS = [
   { id: 12, label: '12 S' },
 ];
 
+const CHEAT_FEATURE_NAMES = [
+  'FirewallBlock',
+  'DataDecrypt',
+  'TrojanHorse',
+  'DataOverload',
+  'SystemOverclock',
+  'DataCloning',
+  'RootAccess',
+  'PowerSurge',
+  'SystemGlitch',
+  'AlgorithmicScan',
+  'BypassProtocol',
+  'BandwidthMultiplier',
+];
+
 /** Quick presets shown as big buttons */
 const CHEAT_PRESETS = [
   { code: 'FORCE_FREE_SPIN', label: 'FS 3 scatters', value: {} },
@@ -11709,12 +12107,14 @@ function initCheatPanel() {
         if (!p) return;
         sel.value = p.code;
         document.getElementById('cheatValue').value = JSON.stringify(p.value ?? {}, null, 2);
+        setCheatPresetActive(p.code);
         onCheatCodeChanged({ fromPreset: true });
         setCheatLog(`Preset: ${p.code}\n${JSON.stringify(p.value ?? {})}`, '');
       });
     });
 
     buildCheatGridEditor();
+    buildCheatFeaturePicker();
     cheatPanelBuilt = true;
   }
 
@@ -11802,25 +12202,71 @@ function buildCheatGridEditor() {
 
 function setCheatGridEditorVisible(on) {
   document.getElementById('cheatGridEditor')?.classList.toggle('visible', !!on);
+  document.querySelector('#modalCheat .cheat-workspace')?.classList.toggle('has-grid', !!on);
+}
+
+function setCheatPresetActive(code) {
+  document.querySelectorAll('#cheatPresets button[data-preset]').forEach(btn => {
+    const p = CHEAT_PRESETS[Number(btn.dataset.preset)];
+    btn.classList.toggle('is-active', p?.code === code);
+  });
+}
+
+function buildCheatFeaturePicker() {
+  const root = document.getElementById('cheatFeatureList');
+  if (!root || root.dataset.built === '1') return;
+  root.innerHTML = CHEAT_FEATURE_NAMES.map(
+    name =>
+      `<label class="cheat-feature-item" data-feature="${name}">` +
+      `<input type="checkbox" value="${name}" /><span>${name}</span></label>`
+  ).join('');
+  root.dataset.built = '1';
+  root.addEventListener('change', e => {
+    const input = e.target;
+    if (!(input instanceof HTMLInputElement) || input.type !== 'checkbox') return;
+    input.closest('.cheat-feature-item')?.classList.toggle('is-on', input.checked);
+    writeCheatGridToJson();
+  });
+}
+
+function readCheatFeaturesFromEditor() {
+  return [...document.querySelectorAll('#cheatFeatureList input[type="checkbox"]:checked')]
+    .map(el => el.value)
+    .filter(name => CHEAT_FEATURE_NAMES.includes(name));
+}
+
+function applyFeaturesToEditor(features) {
+  const selected = new Set(Array.isArray(features) ? features : []);
+  document.querySelectorAll('#cheatFeatureList .cheat-feature-item').forEach(label => {
+    const on = selected.has(label.dataset.feature);
+    const input = label.querySelector('input');
+    if (input) input.checked = on;
+    label.classList.toggle('is-on', on);
+  });
 }
 
 function onCheatCodeChanged({ fromPreset = false } = {}) {
   const code = document.getElementById('cheatCode')?.value || '';
   const preset = CHEAT_PRESETS.find(p => p.code === code);
+  setCheatPresetActive(code);
   if (code === 'FORCE_GRID') {
     setCheatGridEditorVisible(true);
     try {
       const v = JSON.parse(document.getElementById('cheatValue')?.value || '{}');
       if (Array.isArray(v.grid) && v.grid.length === 3) {
         applyGridToEditor(v.grid);
+        applyFeaturesToEditor(v.features);
       } else if (preset?.value?.grid) {
         document.getElementById('cheatValue').value = JSON.stringify(preset.value, null, 2);
         applyGridToEditor(preset.value.grid);
+        applyFeaturesToEditor(preset.value.features);
       } else {
         fillCheatGrid(8);
+        applyFeaturesToEditor([]);
       }
     } catch (_) {
       fillCheatGrid(8);
+      applyFeaturesToEditor([]);
     }
   } else {
     setCheatGridEditorVisible(false);
@@ -11864,6 +12310,9 @@ function writeCheatGridToJson() {
     value = {};
   }
   value.grid = readCheatGridFromEditor();
+  const features = readCheatFeaturesFromEditor();
+  if (features.length) value.features = features;
+  else delete value.features;
   document.getElementById('cheatValue').value = JSON.stringify(value, null, 2);
 }
 
@@ -12146,6 +12595,14 @@ function bindCheatPanelEvents() {
   document.getElementById('cheatGridSyncJson')?.addEventListener('click', () => {
     writeCheatGridToJson();
     setCheatLog('Grid → JSON synced', 'ok');
+  });
+  document.getElementById('cheatFeatAll')?.addEventListener('click', () => {
+    applyFeaturesToEditor(CHEAT_FEATURE_NAMES);
+    writeCheatGridToJson();
+  });
+  document.getElementById('cheatFeatNone')?.addEventListener('click', () => {
+    applyFeaturesToEditor([]);
+    writeCheatGridToJson();
   });
   window.addEventListener('keydown', e => {
     if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
