@@ -556,8 +556,8 @@ const FEATURES = [
   {
     id: 'decrypt', name: 'Data Decrypt', color: '#00f0ff', timing: 'post', img: ASSET + 'data-decrypt.webp',
     timingLabel: 'After reels stop',
-    desc: 'Picks 1–2 low-paying symbols on the grid and transforms them into high-paying symbols.',
-    vfx: 'Cyan laser scan decrypts low symbols into high symbols.',
+    desc: 'Picks 1–2 low-paying types present on the grid (F/G/H/I/K). Every cell of a chosen type becomes the same high symbol.',
+    vfx: 'Cyan laser scan decrypts each chosen low type into one high symbol.',
   },
   {
     id: 'trojan', name: 'Trojan Horse', color: '#aa44ff', timing: 'post', img: ASSET + 'trojan-horse.webp',
@@ -1424,16 +1424,30 @@ async function applyFirewallBlock() {
 }
 
 async function applyDataDecrypt() {
-  const n = randInt(1, 2);
-  const targets = shuffle(LOWS).slice(0, n);
-  const replacements = shuffle(HIGHS);
+  const present = [];
   for (let c = 0; c < REELS; c++) {
     for (let r = 0; r < ROWS; r++) {
-      const idx = targets.indexOf(state.grid[c][r]);
-      if (idx >= 0) state.grid[c][r] = replacements[idx % replacements.length];
+      const sym = state.grid[c][r];
+      if (LOWS.includes(sym) && !present.includes(sym)) present.push(sym);
     }
   }
-  showToast(`🔵 Data Decrypt: Low → High symbols`, '#00f0ff');
+  if (!present.length) {
+    showToast('🔵 Data Decrypt: no low types on grid', '#00f0ff');
+    await sleep(400);
+    return;
+  }
+  const n = randInt(1, Math.min(2, present.length));
+  const targets = shuffle(present).slice(0, n);
+  const map = {};
+  for (const t of targets) map[t] = rand(HIGHS);
+  for (let c = 0; c < REELS; c++) {
+    for (let r = 0; r < ROWS; r++) {
+      const next = map[state.grid[c][r]];
+      if (next) state.grid[c][r] = next;
+    }
+  }
+  const summary = targets.map(t => `${SYMBOLS[t].name}→${SYMBOLS[map[t]].name}`).join(', ');
+  showToast(`🔵 Data Decrypt: ${summary}`, '#00f0ff');
   await sleep(700);
 }
 
@@ -8791,7 +8805,7 @@ const CHEAT_FEATURE_TUNES = {
   },
   FORCE_DATA_DECRYPT: {
     title: 'DataDecrypt',
-    help: 'Đổi low → high. Chọn ô (FE [col,row]) hoặc count 1–2. toSymbol = high 1–5.',
+    help: 'Chọn 1–2 loại Low đang có trên lưới (F/G/H/I/K). Mọi ô cùng loại → cùng một High (toSymbol 1–5). positions chỉ pin ô (debug); để trống = theo loại.',
     fields: ['count12', 'toHigh', 'positions'],
   },
   FORCE_TROJAN_HORSE: {
@@ -8890,7 +8904,8 @@ function renderCheatTune(code, value) {
       const max = field === 'count36' ? 6 : field === 'reelCount' ? 3 : 2;
       const key = field === 'reelCount' ? 'reelCount' : 'count';
       const val = v[key] != null ? v[key] : (field === 'count36' ? 4 : min);
-      html += `<div class="cheat-tune-row"><label>${key}</label><input type="number" min="${min}" max="${max}" value="${val}" data-tune="${key}"></div>`;
+      const countLabel = code === 'FORCE_DATA_DECRYPT' ? 'count (types)' : key;
+      html += `<div class="cheat-tune-row"><label>${countLabel}</label><input type="number" min="${min}" max="${max}" value="${val}" data-tune="${key}"></div>`;
     } else if (field === 'toHigh' || field === 'revealTo' || field === 'targetPay') {
       const key = field === 'targetPay' ? 'targetSymbol' : field === 'toHigh' ? 'toSymbol' : 'revealTo';
       const min = field === 'toHigh' ? 1 : 1;
