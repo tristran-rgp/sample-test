@@ -1,3074 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>ZERO DAY — Cyberpunk Slot</title>
-  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-  <style>
-    :root {
-      --bg: #0a0e18;
-      --panel: #0d1424;
-      --frame: #1a2a55;
-      --frame-hi: #2a4a8a;
-      --cyan: #00f0ff;
-      --green: #00ff88;
-      --red: #ff2a3a;
-      --yellow: #ffd000;
-      --orange: #ff8800;
-      --purple: #aa44ff;
-      --text: #e8f0ff;
-      --dim: #7a8aaa;
-      --glow-cyan: 0 0 20px rgba(0,240,255,.4);
-      --glow-green: 0 0 20px rgba(0,255,136,.4);
-      --glow-red: 0 0 20px rgba(255,42,58,.5);
-      --glow-yellow: 0 0 16px rgba(255,208,0,.55);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      height: 100%;
-      height: 100dvh;
-      max-height: 100dvh;
-    }
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #02060e;
-      color: var(--text);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-    body.shake {
-      animation: screenShake .45s ease-out;
-    }
-    @keyframes screenShake {
-      0%,100%{ transform: translate(0,0); }
-      20%{ transform: translate(-4px, 2px); }
-      40%{ transform: translate(4px, -3px); }
-      60%{ transform: translate(-3px, -2px); }
-      80%{ transform: translate(3px, 1px); }
-    }
-
-    /* ===== ZERO DAY ambient — deep web / quantum core ===== */
-    #bgScene {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-      background:
-        radial-gradient(ellipse 120% 70% at 50% -15%, rgba(0, 140, 255, .42) 0%, transparent 52%),
-        radial-gradient(ellipse 55% 45% at 8% 55%, rgba(0, 255, 220, .12) 0%, transparent 55%),
-        radial-gradient(ellipse 50% 40% at 92% 48%, rgba(160, 40, 255, .18) 0%, transparent 55%),
-        radial-gradient(ellipse 80% 55% at 50% 105%, rgba(0, 60, 140, .55) 0%, transparent 60%),
-        radial-gradient(circle at 50% 42%, rgba(0, 30, 70, .35) 0%, transparent 45%),
-        linear-gradient(180deg, #01040c 0%, #04101f 28%, #071a32 52%, #030a16 78%, #000204 100%);
-    }
-    /* Deep void + volumetric haze */
-    #bgScene .bg-depth {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 40% 30% at 50% 38%, rgba(0, 200, 255, .08) 0%, transparent 70%),
-        radial-gradient(ellipse 90% 60% at 50% 80%, rgba(20, 0, 60, .35) 0%, transparent 70%);
-      animation: depthBreathe 10s ease-in-out infinite;
-    }
-    @keyframes depthBreathe {
-      0%,100% { opacity: .7; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.04); }
-    }
-    /* Perspective ceiling grid (sky) */
-    #bgScene .bg-ceiling {
-      position: absolute;
-      left: -25%; right: -25%;
-      top: -12%;
-      height: 42%;
-      background:
-        linear-gradient(0deg, transparent 0%, rgba(0, 40, 90, .2) 70%, rgba(0, 20, 50, .45) 100%),
-        repeating-linear-gradient(90deg, transparent 0 55px, rgba(0,240,255,.1) 56px 57px),
-        repeating-linear-gradient(0deg, transparent 0 40px, rgba(0,180,255,.07) 41px 42px);
-      transform: perspective(500px) rotateX(-62deg);
-      transform-origin: center top;
-      mask-image: linear-gradient(0deg, transparent 0%, #000 40%, #000 100%);
-      -webkit-mask-image: linear-gradient(0deg, transparent 0%, #000 40%, #000 100%);
-      opacity: .55;
-      animation: ceilingDrift 12s linear infinite;
-    }
-    @keyframes ceilingDrift {
-      0% { background-position: 0 0, 0 0, 0 0; }
-      100% { background-position: 0 0, 57px 0, 0 42px; }
-    }
-    /* Central quantum core glow */
-    #bgScene .bg-core {
-      position: absolute;
-      left: 50%; top: 36%;
-      width: min(55vw, 420px);
-      height: min(55vw, 420px);
-      transform: translate(-50%, -50%);
-      background:
-        radial-gradient(circle, rgba(0,240,255,.22) 0%, rgba(80,40,200,.12) 28%, transparent 62%),
-        conic-gradient(from 0deg, transparent 0%, rgba(0,240,255,.15) 8%, transparent 18%, rgba(170,60,255,.12) 40%, transparent 55%, rgba(0,255,180,.1) 75%, transparent 100%);
-      filter: blur(2px);
-      animation: coreSpin 24s linear infinite, corePulse 5s ease-in-out infinite;
-      opacity: .85;
-      mix-blend-mode: screen;
-    }
-    #bgScene .bg-core::before {
-      content: '';
-      position: absolute;
-      inset: 22%;
-      border-radius: 50%;
-      border: 1px solid rgba(0,240,255,.2);
-      box-shadow:
-        0 0 30px rgba(0,240,255,.25),
-        inset 0 0 40px rgba(0,240,255,.08);
-      animation: coreRing 8s ease-in-out infinite;
-    }
-    #bgScene .bg-core::after {
-      content: '';
-      position: absolute;
-      inset: 38%;
-      border-radius: 50%;
-      border: 1px dashed rgba(170,80,255,.3);
-      animation: coreSpin 16s linear infinite reverse;
-    }
-    @keyframes coreSpin {
-      from { transform: translate(-50%, -50%) rotate(0deg); }
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-    @keyframes corePulse {
-      0%,100% { filter: blur(2px) brightness(1); }
-      50% { filter: blur(3px) brightness(1.35); }
-    }
-    @keyframes coreRing {
-      0%,100% { transform: scale(1); opacity: .5; }
-      50% { transform: scale(1.08); opacity: 1; }
-    }
-    #bgScene .bg-stars {
-      position: absolute;
-      inset: 0;
-      background-image:
-        radial-gradient(1px 1px at 8% 12%, rgba(180,230,255,.85), transparent),
-        radial-gradient(1px 1px at 22% 28%, rgba(0,240,255,.7), transparent),
-        radial-gradient(1.5px 1.5px at 41% 9%, rgba(255,255,255,.55), transparent),
-        radial-gradient(1px 1px at 58% 18%, rgba(170,100,255,.65), transparent),
-        radial-gradient(1px 1px at 73% 31%, rgba(0,255,180,.55), transparent),
-        radial-gradient(1.5px 1.5px at 91% 14%, rgba(255,220,100,.5), transparent),
-        radial-gradient(1px 1px at 15% 48%, rgba(0,240,255,.45), transparent),
-        radial-gradient(1px 1px at 34% 62%, rgba(255,255,255,.35), transparent),
-        radial-gradient(1px 1px at 67% 55%, rgba(0,200,255,.5), transparent),
-        radial-gradient(1.5px 1.5px at 84% 44%, rgba(200,120,255,.5), transparent),
-        radial-gradient(1px 1px at 5% 78%, rgba(0,255,160,.4), transparent),
-        radial-gradient(1px 1px at 48% 82%, rgba(255,255,255,.3), transparent),
-        radial-gradient(1px 1px at 96% 72%, rgba(0,240,255,.45), transparent),
-        radial-gradient(1px 1px at 28% 8%, rgba(0,255,255,.5), transparent),
-        radial-gradient(1.5px 1.5px at 62% 40%, rgba(255,100,200,.35), transparent),
-        radial-gradient(1px 1px at 78% 65%, rgba(100,200,255,.4), transparent);
-      opacity: .9;
-      animation: starsTwinkle 6s ease-in-out infinite alternate;
-    }
-    @keyframes starsTwinkle {
-      0% { opacity: .5; filter: brightness(.85); }
-      100% { opacity: 1; filter: brightness(1.25); }
-    }
-    /* Dense hex mesh */
-    #bgScene .bg-hex {
-      position: absolute;
-      inset: -15%;
-      opacity: .32;
-      background-image:
-        linear-gradient(30deg, rgba(0,240,255,.09) 12%, transparent 12.5%, transparent 87%, rgba(0,240,255,.09) 87.5%),
-        linear-gradient(150deg, rgba(0,240,255,.09) 12%, transparent 12.5%, transparent 87%, rgba(0,240,255,.09) 87.5%),
-        linear-gradient(90deg, rgba(140,60,255,.07) 12%, transparent 12.5%, transparent 87%, rgba(140,60,255,.07) 87.5%),
-        radial-gradient(circle at 50% 50%, rgba(0,240,255,.04) 0%, transparent 55%);
-      background-size: 48px 84px, 48px 84px, 48px 84px, 100% 100%;
-      mask-image: radial-gradient(ellipse 75% 65% at 50% 42%, #000 15%, transparent 78%);
-      -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 42%, #000 15%, transparent 78%);
-      animation: hexDrift 32s linear infinite;
-    }
-    @keyframes hexDrift {
-      0% { transform: translateY(0) rotate(0.2deg); }
-      100% { transform: translateY(84px) rotate(0.2deg); }
-    }
-    /* Circuit PCB traces */
-    #bgScene .bg-circuits {
-      position: absolute;
-      inset: 0;
-      opacity: .5;
-      background:
-        linear-gradient(90deg, transparent 0%, transparent 47.2%, rgba(0,240,255,.12) 48.8%, rgba(0,255,255,.55) 50%, rgba(0,240,255,.12) 51.2%, transparent 52.8%, transparent 100%),
-        linear-gradient(0deg, transparent 0%, transparent 58%, rgba(0,200,255,.1) 61%, rgba(0,240,255,.4) 63%, rgba(0,200,255,.1) 65%, transparent 68%, transparent 100%),
-        linear-gradient(115deg, transparent 0%, transparent 30%, rgba(170,80,255,.08) 42%, rgba(170,80,255,.28) 45%, transparent 48%, transparent 100%),
-        linear-gradient(250deg, transparent 0%, transparent 55%, rgba(0,255,180,.1) 62%, rgba(0,255,180,.3) 64%, transparent 68%, transparent 100%),
-        radial-gradient(circle at 18% 22%, rgba(0,255,200,.45) 0 2px, transparent 3px),
-        radial-gradient(circle at 78% 18%, rgba(170,80,255,.5) 0 2.5px, transparent 4px),
-        radial-gradient(circle at 12% 68%, rgba(0,240,255,.45) 0 2px, transparent 3px),
-        radial-gradient(circle at 88% 72%, rgba(255,200,80,.4) 0 2px, transparent 3px),
-        radial-gradient(circle at 50% 12%, rgba(0,255,136,.4) 0 2.5px, transparent 4px),
-        radial-gradient(circle at 35% 45%, rgba(0,240,255,.35) 0 1.5px, transparent 3px),
-        radial-gradient(circle at 65% 58%, rgba(255,80,180,.3) 0 1.5px, transparent 3px);
-      mask-image: radial-gradient(ellipse 85% 75% at 50% 40%, #000 8%, transparent 72%);
-      -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 40%, #000 8%, transparent 72%);
-      animation: circuitFlicker 7s ease-in-out infinite;
-    }
-    @keyframes circuitFlicker {
-      0%,100% { opacity: .4; filter: brightness(1); }
-      40% { opacity: .55; filter: brightness(1.15); }
-      42% { opacity: .35; }
-      70% { opacity: .6; filter: brightness(1.25); }
-    }
-    /* Wireframe city / rack silhouettes */
-    #bgScene .bg-city {
-      position: absolute;
-      left: 0; right: 0; bottom: 0;
-      height: 42%;
-      background:
-        linear-gradient(90deg,
-          transparent 0%,
-          rgba(0,40,80,.5) 2%, rgba(0,60,100,.35) 4%, transparent 6%,
-          rgba(0,30,70,.4) 12%, transparent 14%,
-          rgba(20,10,50,.45) 22%, transparent 25%,
-          rgba(0,40,90,.3) 38%, transparent 41%,
-          rgba(30,0,60,.4) 58%, transparent 62%,
-          rgba(0,50,90,.45) 72%, transparent 76%,
-          rgba(40,10,70,.4) 88%, transparent 92%,
-          rgba(0,40,80,.5) 96%, transparent 100%);
-      opacity: .55;
-      mask-image: linear-gradient(180deg, transparent 0%, #000 35%, #000 100%);
-      -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 35%, #000 100%);
-    }
-    #bgScene .bg-city::before,
-    #bgScene .bg-city::after {
-      content: '';
-      position: absolute;
-      bottom: 8%;
-      width: 2px;
-      background: linear-gradient(180deg, rgba(0,240,255,.6), transparent);
-      box-shadow: 0 0 12px rgba(0,240,255,.5);
-      animation: towerBeacon 3s ease-in-out infinite;
-    }
-    #bgScene .bg-city::before { left: 14%; height: 55%; animation-delay: 0s; }
-    #bgScene .bg-city::after { right: 18%; height: 70%; background: linear-gradient(180deg, rgba(170,80,255,.65), transparent); box-shadow: 0 0 12px rgba(170,80,255,.5); animation-delay: -1.5s; }
-    @keyframes towerBeacon {
-      0%,100% { opacity: .35; filter: brightness(1); }
-      50% { opacity: 1; filter: brightness(1.6); }
-    }
-    /* Perspective cyber floor — deeper */
-    #bgScene .bg-floor {
-      position: absolute;
-      left: -30%;
-      right: -30%;
-      bottom: -14%;
-      height: 58%;
-      background:
-        linear-gradient(180deg, transparent 0%, rgba(0, 50, 100, .12) 20%, rgba(0, 30, 70, .45) 55%, rgba(0, 10, 30, .75) 100%),
-        repeating-linear-gradient(90deg, transparent 0 38px, rgba(0, 240, 255, .18) 39px 40px),
-        repeating-linear-gradient(0deg, transparent 0 28px, rgba(0, 200, 255, .12) 29px 30px);
-      transform: perspective(380px) rotateX(62deg);
-      transform-origin: center bottom;
-      mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 100%);
-      -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 100%);
-      animation: floorPulse 4.5s ease-in-out infinite;
-      box-shadow: 0 -40px 80px rgba(0, 120, 255, .12);
-    }
-    #bgScene .bg-floor::after {
-      content: '';
-      position: absolute;
-      left: 20%; right: 20%; top: 0; height: 3px;
-      background: linear-gradient(90deg, transparent, rgba(0,255,255,.5), transparent);
-      filter: blur(1px);
-      animation: floorWave 3s linear infinite;
-    }
-    @keyframes floorPulse {
-      0%,100% { opacity: .65; filter: brightness(1); }
-      50% { opacity: 1; filter: brightness(1.35); }
-    }
-    @keyframes floorWave {
-      0% { transform: translateY(0); opacity: .3; }
-      100% { transform: translateY(120px); opacity: 0; }
-    }
-    /* Neon horizon + secondary glow band */
-    #bgScene .bg-horizon {
-      position: absolute;
-      left: 0; right: 0;
-      bottom: 36%;
-      height: 3px;
-      background: linear-gradient(90deg,
-        transparent 0%,
-        rgba(0,240,255,.2) 10%,
-        rgba(0,255,255,.95) 48%,
-        rgba(200,80,255,.85) 58%,
-        rgba(0,240,255,.2) 90%,
-        transparent 100%);
-      box-shadow:
-        0 0 16px rgba(0,240,255,.85),
-        0 0 48px rgba(0,180,255,.55),
-        0 0 100px rgba(140,40,220,.4),
-        0 8px 40px rgba(0,100,200,.3);
-      animation: horizonGlow 3.5s ease-in-out infinite;
-    }
-    #bgScene .bg-horizon::before {
-      content: '';
-      position: absolute;
-      left: 15%; right: 15%; top: -28px; height: 56px;
-      background: radial-gradient(ellipse at center, rgba(0,200,255,.2) 0%, transparent 70%);
-      filter: blur(4px);
-    }
-    @keyframes horizonGlow {
-      0%,100% { opacity: .7; filter: brightness(1); }
-      50% { opacity: 1; filter: brightness(1.5); }
-    }
-    /* Binary / matrix columns */
-    #bgScene .bg-matrix {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-      opacity: .28;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 11px;
-      line-height: 1.15;
-      color: rgba(0, 255, 180, .55);
-      text-shadow: 0 0 8px rgba(0,255,160,.4);
-      mask-image: radial-gradient(ellipse 70% 80% at 50% 40%, #000 10%, transparent 75%);
-      -webkit-mask-image: radial-gradient(ellipse 70% 80% at 50% 40%, #000 10%, transparent 75%);
-    }
-    #bgScene .bg-matrix span {
-      position: absolute;
-      top: -40%;
-      white-space: pre;
-      writing-mode: vertical-rl;
-      text-orientation: upright;
-      letter-spacing: 2px;
-      animation: matrixFall linear infinite;
-      opacity: .7;
-    }
-    #bgScene .bg-matrix span:nth-child(1)  { left: 4%;  animation-duration: 14s; animation-delay: 0s; color: rgba(0,255,200,.5); }
-    #bgScene .bg-matrix span:nth-child(2)  { left: 11%; animation-duration: 18s; animation-delay: -3s; color: rgba(0,200,255,.4); }
-    #bgScene .bg-matrix span:nth-child(3)  { left: 19%; animation-duration: 12s; animation-delay: -6s; }
-    #bgScene .bg-matrix span:nth-child(4)  { left: 28%; animation-duration: 16s; animation-delay: -2s; color: rgba(170,100,255,.4); }
-    #bgScene .bg-matrix span:nth-child(5)  { left: 37%; animation-duration: 13s; animation-delay: -8s; }
-    #bgScene .bg-matrix span:nth-child(6)  { left: 46%; animation-duration: 15s; animation-delay: -4s; color: rgba(0,255,255,.45); }
-    #bgScene .bg-matrix span:nth-child(7)  { left: 55%; animation-duration: 17s; animation-delay: -1s; color: rgba(170,80,255,.35); }
-    #bgScene .bg-matrix span:nth-child(8)  { left: 64%; animation-duration: 11s; animation-delay: -7s; }
-    #bgScene .bg-matrix span:nth-child(9)  { left: 73%; animation-duration: 19s; animation-delay: -5s; color: rgba(0,240,255,.4); }
-    #bgScene .bg-matrix span:nth-child(10) { left: 82%; animation-duration: 14s; animation-delay: -9s; color: rgba(0,255,160,.4); }
-    #bgScene .bg-matrix span:nth-child(11) { left: 90%; animation-duration: 16s; animation-delay: -2.5s; }
-    #bgScene .bg-matrix span:nth-child(12) { left: 97%; animation-duration: 13s; animation-delay: -6.5s; color: rgba(255,100,200,.3); }
-    @keyframes matrixFall {
-      0%   { transform: translateY(0); opacity: 0; }
-      10%  { opacity: .8; }
-      90%  { opacity: .5; }
-      100% { transform: translateY(160vh); opacity: 0; }
-    }
-    /* Vertical neon data beams */
-    #bgScene .bg-rain {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-      opacity: .55;
-      mask-image: linear-gradient(180deg, #000 0%, #000 50%, transparent 90%);
-      -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 50%, transparent 90%);
-    }
-    #bgScene .bg-rain span {
-      position: absolute;
-      top: -120%;
-      width: 1.5px;
-      height: 55%;
-      background: linear-gradient(180deg,
-        transparent 0%,
-        rgba(0,240,255,.08) 15%,
-        rgba(0,255,220,.65) 65%,
-        rgba(255,255,255,1) 100%);
-      animation: dataRain linear infinite;
-      border-radius: 2px;
-      filter: blur(.3px);
-      box-shadow: 0 0 8px rgba(0,240,255,.4);
-    }
-    #bgScene .bg-rain span:nth-child(1)  { left: 6%;  animation-duration: 8s;  animation-delay: 0s;   height: 48%; opacity: .55; }
-    #bgScene .bg-rain span:nth-child(2)  { left: 14%; animation-duration: 10s; animation-delay: -2s;  height: 60%; opacity: .4; }
-    #bgScene .bg-rain span:nth-child(3)  { left: 23%; animation-duration: 7s;  animation-delay: -4s;  height: 42%; opacity: .65; width: 2px; }
-    #bgScene .bg-rain span:nth-child(4)  { left: 31%; animation-duration: 12s; animation-delay: -1s;  height: 70%; opacity: .35; }
-    #bgScene .bg-rain span:nth-child(5)  { left: 42%; animation-duration: 9s;  animation-delay: -6s;  height: 50%; opacity: .5; }
-    #bgScene .bg-rain span:nth-child(6)  { left: 51%; animation-duration: 6.5s;animation-delay: -3s;  height: 58%; opacity: .7; width: 2px;
-      background: linear-gradient(180deg, transparent, rgba(170,80,255,.5) 50%, rgba(255,220,255,1)); box-shadow: 0 0 10px rgba(170,80,255,.5); }
-    #bgScene .bg-rain span:nth-child(7)  { left: 59%; animation-duration: 11s; animation-delay: -5s;  height: 45%; opacity: .4; }
-    #bgScene .bg-rain span:nth-child(8)  { left: 68%; animation-duration: 8.5s;animation-delay: -7s;  height: 62%; opacity: .55; }
-    #bgScene .bg-rain span:nth-child(9)  { left: 77%; animation-duration: 7.5s;animation-delay: -2.5s;height: 52%; opacity: .45; }
-    #bgScene .bg-rain span:nth-child(10) { left: 86%; animation-duration: 10.5s;animation-delay:-4.5s;height: 66%; opacity: .5; width: 2px; }
-    #bgScene .bg-rain span:nth-child(11) { left: 93%; animation-duration: 9s;  animation-delay: -1.5s;height: 40%; opacity: .4; }
-    #bgScene .bg-rain span:nth-child(12) { left: 3%;  animation-duration: 13s; animation-delay: -8s;  height: 72%; opacity: .3; }
-    @keyframes dataRain {
-      0%   { transform: translateY(0); opacity: 0; }
-      8%   { opacity: 1; }
-      90%  { opacity: .7; }
-      100% { transform: translateY(280%); opacity: 0; }
-    }
-    /* Floating nodes + link lines */
-    #bgScene .bg-orbs {
-      position: absolute;
-      inset: 0;
-    }
-    #bgScene .bg-orbs i {
-      position: absolute;
-      border-radius: 50%;
-      animation: orbFloat ease-in-out infinite;
-    }
-    #bgScene .bg-orbs i:nth-child(1) {
-      width: 10px; height: 10px; left: 10%; top: 28%;
-      background: radial-gradient(circle, #fff 0%, #00f0ff 40%, transparent 70%);
-      box-shadow: 0 0 20px #00f0ff, 0 0 40px rgba(0,240,255,.4);
-      animation-duration: 8s; animation-delay: 0s;
-    }
-    #bgScene .bg-orbs i:nth-child(2) {
-      width: 7px; height: 7px; left: 82%; top: 22%;
-      background: radial-gradient(circle, #fff 0%, #aa44ff 45%, transparent 70%);
-      box-shadow: 0 0 18px #aa44ff, 0 0 36px rgba(170,68,255,.4);
-      animation-duration: 10s; animation-delay: -2s;
-    }
-    #bgScene .bg-orbs i:nth-child(3) {
-      width: 8px; height: 8px; left: 18%; top: 58%;
-      background: radial-gradient(circle, #fff 0%, #00ff88 45%, transparent 70%);
-      box-shadow: 0 0 16px #00ff88;
-      animation-duration: 9s; animation-delay: -4s;
-    }
-    #bgScene .bg-orbs i:nth-child(4) {
-      width: 12px; height: 12px; left: 90%; top: 55%;
-      background: radial-gradient(circle, #fff 0%, #ffd000 40%, transparent 70%);
-      box-shadow: 0 0 22px rgba(255,208,0,.7);
-      animation-duration: 11s; animation-delay: -1s; opacity: .8;
-    }
-    #bgScene .bg-orbs i:nth-child(5) {
-      width: 5px; height: 5px; left: 48%; top: 16%;
-      background: radial-gradient(circle, #fff, transparent 70%);
-      box-shadow: 0 0 14px #00f0ff;
-      animation-duration: 7s; animation-delay: -3s;
-    }
-    #bgScene .bg-orbs i:nth-child(6) {
-      width: 9px; height: 9px; left: 72%; top: 70%;
-      background: radial-gradient(circle, #fff 0%, #00f0ff 40%, transparent 70%);
-      box-shadow: 0 0 18px rgba(0,240,255,.9);
-      animation-duration: 12s; animation-delay: -5s;
-    }
-    #bgScene .bg-orbs i:nth-child(7) {
-      width: 6px; height: 6px; left: 30%; top: 38%;
-      background: radial-gradient(circle, #0ff, transparent 70%);
-      box-shadow: 0 0 14px #0ff;
-      animation-duration: 9.5s; animation-delay: -6s;
-    }
-    #bgScene .bg-orbs i:nth-child(8) {
-      width: 5px; height: 5px; left: 60%; top: 48%;
-      background: radial-gradient(circle, #f0f, transparent 70%);
-      box-shadow: 0 0 12px #f0f;
-      animation-duration: 8.5s; animation-delay: -1.5s;
-    }
-    @keyframes orbFloat {
-      0%,100% { transform: translate(0, 0) scale(1); opacity: .55; }
-      50% { transform: translate(14px, -22px) scale(1.35); opacity: 1; }
-    }
-    /* Radar rings */
-    #bgScene .bg-radar {
-      position: absolute;
-      left: 50%; top: 42%;
-      width: min(70vw, 560px);
-      height: min(70vw, 560px);
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      border: 1px solid rgba(0,240,255,.12);
-      box-shadow:
-        inset 0 0 40px rgba(0,100,180,.08),
-        0 0 1px rgba(0,240,255,.2);
-      opacity: .7;
-    }
-    #bgScene .bg-radar::before,
-    #bgScene .bg-radar::after {
-      content: '';
-      position: absolute;
-      inset: 18%;
-      border-radius: 50%;
-      border: 1px solid rgba(0,240,255,.1);
-      animation: radarPulse 6s ease-out infinite;
-    }
-    #bgScene .bg-radar::after {
-      inset: 36%;
-      border-color: rgba(170,80,255,.12);
-      animation-delay: -3s;
-    }
-    @keyframes radarPulse {
-      0% { transform: scale(.85); opacity: .7; }
-      100% { transform: scale(1.35); opacity: 0; }
-    }
-    /* Sweeping scan + diagonal laser */
-    #bgScene .bg-scan {
-      position: absolute;
-      left: 0; right: 0;
-      height: 22%;
-      background: linear-gradient(180deg,
-        transparent 0%,
-        rgba(0,240,255,.05) 35%,
-        rgba(0,255,255,.18) 50%,
-        rgba(0,240,255,.05) 65%,
-        transparent 100%);
-      animation: scanSweep 7s ease-in-out infinite;
-      mix-blend-mode: screen;
-    }
-    #bgScene .bg-laser {
-      position: absolute;
-      top: -20%; left: 30%;
-      width: 2px; height: 140%;
-      background: linear-gradient(180deg, transparent, rgba(0,255,255,.35), transparent);
-      transform: rotate(18deg);
-      filter: blur(.5px);
-      animation: laserSweep 11s linear infinite;
-      opacity: .5;
-      mix-blend-mode: screen;
-    }
-    #bgScene .bg-laser.alt {
-      left: 62%;
-      transform: rotate(-22deg);
-      background: linear-gradient(180deg, transparent, rgba(170,80,255,.3), transparent);
-      animation-duration: 14s; animation-delay: -4s;
-    }
-    @keyframes scanSweep {
-      0%   { top: -25%; opacity: 0; }
-      12%  { opacity: 1; }
-      88%  { opacity: .75; }
-      100% { top: 105%; opacity: 0; }
-    }
-    @keyframes laserSweep {
-      0% { transform: rotate(18deg) translateX(-40px); opacity: .2; }
-      50% { opacity: .55; }
-      100% { transform: rotate(18deg) translateX(80px); opacity: .2; }
-    }
-    /* CRT scanlines + noise grain + vignette */
-    #bgScene .bg-scanlines {
-      position: absolute;
-      inset: 0;
-      background:
-        repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,.14) 2px 3px),
-        repeating-linear-gradient(90deg, transparent 0 3px, rgba(0,240,255,.015) 3px 4px);
-      opacity: .55;
-      mix-blend-mode: multiply;
-    }
-    #bgScene .bg-noise {
-      position: absolute;
-      inset: 0;
-      opacity: .04;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      background-size: 180px 180px;
-      animation: noiseShift 0.4s steps(2) infinite;
-      mix-blend-mode: overlay;
-    }
-    @keyframes noiseShift {
-      0% { transform: translate(0,0); }
-      100% { transform: translate(-2%, 1%); }
-    }
-    #bgScene .bg-vignette {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 70% 65% at 50% 42%, transparent 28%, rgba(0, 2, 10, .78) 100%),
-        linear-gradient(90deg, rgba(0, 4, 12, .7) 0%, transparent 14%, transparent 86%, rgba(0, 4, 12, .7) 100%),
-        linear-gradient(180deg, rgba(0, 8, 20, .45) 0%, transparent 18%, transparent 82%, rgba(0, 4, 12, .65) 100%);
-    }
-    /* Corner HUD */
-    #bgScene .bg-hud {
-      position: absolute;
-      inset: 0;
-    }
-    #bgScene .bg-hud b {
-      position: absolute;
-      width: 56px;
-      height: 56px;
-      border-color: rgba(0, 240, 255, .45);
-      border-style: solid;
-      opacity: .85;
-      filter: drop-shadow(0 0 6px rgba(0,240,255,.35));
-    }
-    #bgScene .bg-hud b:nth-child(1) {
-      top: 10px; left: 10px;
-      border-width: 2px 0 0 2px;
-      box-shadow: -2px -2px 14px rgba(0,240,255,.2);
-    }
-    #bgScene .bg-hud b:nth-child(2) {
-      top: 10px; right: 10px;
-      border-width: 2px 2px 0 0;
-      box-shadow: 2px -2px 14px rgba(0,240,255,.2);
-    }
-    #bgScene .bg-hud b:nth-child(3) {
-      bottom: 10px; left: 10px;
-      border-width: 0 0 2px 2px;
-      box-shadow: -2px 2px 14px rgba(0,240,255,.2);
-    }
-    #bgScene .bg-hud b:nth-child(4) {
-      bottom: 10px; right: 10px;
-      border-width: 0 2px 2px 0;
-      box-shadow: 2px 2px 14px rgba(0,240,255,.2);
-    }
-    #bgScene .bg-hud .hud-tag {
-      position: absolute;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 9px;
-      letter-spacing: 1.8px;
-      color: rgba(0, 240, 255, .5);
-      text-transform: uppercase;
-      font-weight: 700;
-      text-shadow: 0 0 10px rgba(0,240,255,.35);
-    }
-    #bgScene .bg-hud .hud-tag.tl { top: 16px; left: 72px; }
-    #bgScene .bg-hud .hud-tag.tr { top: 16px; right: 72px; }
-    #bgScene .bg-hud .hud-tag.bl { bottom: 16px; left: 72px; color: rgba(0,255,136,.45); }
-    #bgScene .bg-hud .hud-tag.br { bottom: 16px; right: 72px; color: rgba(170,80,255,.5); }
-    #bgScene .bg-hud .hud-live {
-      position: absolute;
-      top: 36px; left: 72px;
-      font-family: ui-monospace, Menlo, monospace;
-      font-size: 8px;
-      letter-spacing: 1px;
-      color: rgba(0,255,136,.4);
-      animation: liveBlink 1.6s step-end infinite;
-    }
-    @keyframes liveBlink {
-      0%,100% { opacity: 1; }
-      50% { opacity: .25; }
-    }
-    /* Server rack towers */
-    #bgScene .bg-towers {
-      position: absolute;
-      inset: 0;
-      opacity: .7;
-    }
-    #bgScene .bg-towers::before,
-    #bgScene .bg-towers::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      width: min(20vw, 180px);
-      height: 62%;
-      background:
-        repeating-linear-gradient(0deg, transparent 0 10px, rgba(0,240,255,.09) 10px 11px),
-        repeating-linear-gradient(90deg, transparent 0 18px, rgba(0,200,255,.04) 18px 19px),
-        linear-gradient(180deg, transparent 0%, rgba(0, 40, 80, .5) 35%, rgba(0, 15, 40, .85) 100%);
-      border-left: 1px solid rgba(0,240,255,.2);
-      border-right: 1px solid rgba(0,240,255,.12);
-      box-shadow: inset 0 0 40px rgba(0,150,255,.08);
-      mask-image: linear-gradient(180deg, transparent 0%, #000 32%);
-      -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 32%);
-    }
-    #bgScene .bg-towers::before {
-      left: 0;
-      border-radius: 0 10px 0 0;
-      box-shadow: inset -24px 0 50px rgba(0,120,200,.12), 4px 0 30px rgba(0,100,200,.1);
-    }
-    #bgScene .bg-towers::after {
-      right: 0;
-      border-radius: 10px 0 0 0;
-      border-color: rgba(170,80,255,.25);
-      background:
-        repeating-linear-gradient(0deg, transparent 0 10px, rgba(170,80,255,.1) 10px 11px),
-        repeating-linear-gradient(90deg, transparent 0 18px, rgba(140,60,220,.05) 18px 19px),
-        linear-gradient(180deg, transparent 0%, rgba(40, 10, 70, .5) 35%, rgba(15, 5, 30, .85) 100%);
-      box-shadow: inset 24px 0 50px rgba(120,40,200,.12), -4px 0 30px rgba(100,40,180,.1);
-    }
-    /* Packet stream labels */
-    #bgScene .bg-packets {
-      position: absolute;
-      inset: 0;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 10px;
-      color: rgba(0, 240, 255, .22);
-      letter-spacing: 1.2px;
-      overflow: hidden;
-    }
-    #bgScene .bg-packets em {
-      position: absolute;
-      font-style: normal;
-      white-space: nowrap;
-      animation: packetDrift linear infinite;
-      text-shadow: 0 0 10px rgba(0,240,255,.3);
-    }
-    #bgScene .bg-packets em:nth-child(1) { top: 18%; left: -12%; animation-duration: 26s; animation-delay: 0s; }
-    #bgScene .bg-packets em:nth-child(2) { top: 32%; left: -18%; animation-duration: 32s; animation-delay: -8s; color: rgba(170,80,255,.2); }
-    #bgScene .bg-packets em:nth-child(3) { top: 48%; left: -10%; animation-duration: 28s; animation-delay: -14s; color: rgba(0,255,136,.18); }
-    #bgScene .bg-packets em:nth-child(4) { top: 64%; left: -14%; animation-duration: 34s; animation-delay: -4s; }
-    #bgScene .bg-packets em:nth-child(5) { top: 10%; left: -22%; animation-duration: 38s; animation-delay: -20s; color: rgba(255,208,0,.15); }
-    #bgScene .bg-packets em:nth-child(6) { top: 76%; left: -16%; animation-duration: 30s; animation-delay: -11s; color: rgba(0,200,255,.18); }
-    @keyframes packetDrift {
-      0%   { transform: translateX(0); opacity: 0; }
-      8%   { opacity: 1; }
-      90%  { opacity: .65; }
-      100% { transform: translateX(125vw); opacity: 0; }
-    }
-
-    /* Keep chrome above ambient (#bgScene is z-index:0) */
-    #connBar, #game { position: relative; z-index: 1; }
-
-    /* Splash */
-    #splash {
-      position: fixed; inset: 0; z-index: 9999;
-      background: #050810;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      transition: opacity .6s;
-    }
-    #splash.hidden { opacity: 0; pointer-events: none; }
-    .splash-logo {
-      font-size: 3rem; font-weight: 900; letter-spacing: 8px;
-      background: linear-gradient(135deg, var(--cyan), var(--yellow));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 30px rgba(0,240,255,.5));
-      margin-bottom: 1rem;
-    }
-    .splash-sub { color: var(--dim); font-size: .9rem; letter-spacing: 3px; margin-bottom: 3rem; }
-    .splash-bar { width: 200px; height: 3px; background: #1a1a2e; border-radius: 2px; overflow: hidden; }
-    .splash-fill { height: 100%; background: var(--cyan); width: 0%; transition: width .1s; box-shadow: var(--glow-cyan); }
-
-    /* ===== AFK-style stage layout ===== */
-    #connBar {
-      flex-shrink: 0;
-      width: 100%;
-    }
-    #game {
-      display: none;
-      flex: 1 1 auto;
-      min-height: 0;
-      width: 100%;
-      max-width: 100%;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-    }
-    #game.visible { display: flex; }
-
-    .top-chrome {
-      height: 28px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 14px;
-      background: rgba(0,0,0,.75);
-      font-size: .7rem; color: #aaa; letter-spacing: .5px;
-      z-index: 20;
-    }
-    .top-chrome .title-right { color: #ccc; }
-
-    .stage {
-      flex: 1 1 auto;
-      display: grid;
-      grid-template-columns: clamp(64px, 8vw, 100px) minmax(0, 1fr);
-      grid-template-rows: auto minmax(0, 1fr);
-      gap: clamp(6px, 1vh, 12px) clamp(8px, 1.2vw, 16px);
-      padding: clamp(6px, 1.2vh, 14px) clamp(10px, 1.5vw, 20px) clamp(4px, 0.8vh, 10px);
-      max-width: min(1400px, 100%);
-      width: 100%;
-      margin: 0 auto;
-      align-items: stretch;
-      justify-content: center;
-      min-height: 0;
-      overflow: hidden;
-    }
-
-    .logo-badge {
-      grid-column: 1; grid-row: 1;
-      width: clamp(56px, 7vw, 96px);
-      height: clamp(56px, 7vw, 96px);
-      background: linear-gradient(160deg, #ffe14a 0%, #f5b800 100%);
-      color: #111;
-      border-radius: 10px;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      font-weight: 900; line-height: 1.05;
-      box-shadow: var(--glow-yellow), 0 4px 0 #b88600;
-      text-align: center;
-      user-select: none;
-      justify-self: center;
-    }
-    .logo-badge .logo-main { font-size: clamp(.72rem, 1.1vw, 1.05rem); letter-spacing: 1px; }
-    .logo-badge .logo-sub { font-size: clamp(.38rem, 0.55vw, .52rem); letter-spacing: .5px; margin-top: 2px; font-weight: 800; }
-
-    .playfield {
-      grid-column: 2; grid-row: 1 / span 2;
-      display: flex; flex-direction: column;
-      min-height: 0;
-      height: 100%;
-      width: 100%;
-      max-width: 100%;
-      align-self: stretch;
-      justify-self: stretch;
-      align-items: center;
-      overflow: hidden;
-    }
-
-    .game-frame {
-      flex: 1 1 auto;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      max-width: min(920px, 100%);
-      max-height: 100%;
-      margin: 0 auto;
-      overflow: hidden;
-    }
-
-    .meter-shell {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      grid-template-rows: auto auto;
-      gap: 0;
-      background: linear-gradient(180deg, #0c1424 0%, #0a1220 100%);
-      border: 3px solid #1a3568;
-      border-bottom: none;
-      border-radius: 12px 12px 0 0;
-      overflow: visible;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.1),
-        0 0 0 1px rgba(0,200,255,.1),
-        0 8px 28px rgba(0,0,0,.35);
-      flex-shrink: 0;
-      width: 100%;
-    }
-    .feature-meter {
-      grid-column: 1 / span 2;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: clamp(2px, 0.5vw, 8px);
-      padding: clamp(6px, 1vh, 12px) clamp(4px, 0.8vw, 10px);
-      height: clamp(64px, 10vh, 110px);
-      width: 100%;
-      overflow: visible; /* cho badge active scale không bị cắt */
-      background: transparent;
-    }
-    .feat-badge {
-      flex: 1 1 0;
-      min-width: 0;
-      width: auto;
-      height: clamp(48px, 8vh, 88px);
-      max-height: 100%;
-      border: none;
-      border-radius: 6px;
-      background: transparent;
-      opacity: .7;
-      transition:
-        opacity .3s ease,
-        filter .3s ease,
-        transform .3s cubic-bezier(.2,1.2,.3,1),
-        box-shadow .3s ease;
-      display: flex; align-items: center; justify-content: center;
-      padding: 0;
-      cursor: pointer;
-      filter: none;
-      transform: scale(1);
-      position: relative;
-      z-index: 1;
-      transform-origin: center center;
-    }
-    .feat-badge:hover {
-      opacity: 1;
-      filter: brightness(1.15) drop-shadow(0 0 8px rgba(0,240,255,.45));
-    }
-    .feat-badge:focus-visible {
-      outline: 2px solid var(--cyan);
-      outline-offset: 2px;
-    }
-    .feat-badge img {
-      width: auto;
-      height: 100%;
-      max-width: 100%;
-      max-height: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: contain;
-      object-position: center center;
-      display: block;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,.45));
-      transition: filter .3s ease;
-      pointer-events: none;
-    }
-    .feat-badge span { display: none; }
-
-    /* Khi có feature trúng: các badge không trúng tối + thu nhỏ */
-    .feature-meter.has-active .feat-badge:not(.active) {
-      opacity: .22;
-      transform: scale(0.78);
-      filter: grayscale(.65) brightness(.4);
-      z-index: 0;
-    }
-    .feature-meter.has-active .feat-badge:not(.active) img {
-      filter: grayscale(.5) brightness(.55);
-    }
-
-    /* Feature trúng: phóng to + sáng */
-    .feat-badge.active {
-      opacity: 1;
-      transform: scale(1.28);
-      z-index: 5;
-      filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 18px rgba(0,240,255,.75));
-      animation: featPulse 1.1s ease-in-out infinite;
-    }
-    .feat-badge.active img {
-      filter:
-        drop-shadow(0 0 6px currentColor)
-        drop-shadow(0 0 12px rgba(0,255,200,.65))
-        brightness(1.15);
-    }
-    @keyframes featPulse {
-      0%,100% {
-        transform: scale(1.24);
-        filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 14px rgba(0,240,255,.55));
-      }
-      50% {
-        transform: scale(1.36);
-        filter: drop-shadow(0 0 14px currentColor) drop-shadow(0 0 26px rgba(0,240,255,.95));
-      }
-    }
-
-    .info-bar {
-      grid-column: 1;
-      background: #05080f;
-      color: #9ad4ff;
-      height: 30px;
-      display: flex; align-items: center;
-      padding: 0 12px;
-      overflow: hidden;
-      font-size: .78rem; font-weight: 600;
-      border-top: 1px solid rgba(255,255,255,.1);
-      letter-spacing: .3px;
-    }
-    .info-bar .marquee { white-space: nowrap; animation: marquee 14s linear infinite; }
-    @keyframes marquee { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
-    .info-bar.win-result {
-      color: #7dffb0;
-      justify-content: center;
-      font-size: 1rem;
-      font-weight: 800;
-      animation: none;
-      text-shadow: 0 0 12px rgba(0,255,136,.55);
-    }
-
-    .mult-box {
-      grid-column: 2; grid-row: 2;
-      width: clamp(64px, 8vw, 96px);
-      background: #05080f;
-      border-left: 1px solid rgba(255,255,255,.12);
-      border-top: 1px solid rgba(255,255,255,.08);
-      display: flex; align-items: center; justify-content: center;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: clamp(1.15rem, 1.8vw, 1.7rem); font-weight: 800;
-      color: #fff;
-      letter-spacing: 1px;
-      text-shadow: 0 0 14px rgba(0,240,255,.55);
-      position: relative;
-    }
-    .mult-box.bump { animation: multBump .35s ease; }
-    @keyframes multBump {
-      0%{ transform: scale(1); }
-      40%{ transform: scale(1.25); color: var(--yellow); }
-      100%{ transform: scale(1); }
-    }
-    .mult-box .x { color: var(--cyan); font-size: 1rem; margin-right: 1px; }
-
-    .fs-banner {
-      display: none; text-align: center; padding: 6px;
-      background: linear-gradient(90deg, #1a0033, #0a2040, #1a0033);
-      border-left: 3px solid #0d2048;
-      border-right: 3px solid #0d2048;
-      font-weight: 700; color: var(--purple);
-      letter-spacing: 2px; font-size: .75rem;
-      animation: fsPulse 2s infinite;
-      flex-shrink: 0;
-    }
-    .fs-banner.visible { display: block; }
-    @keyframes fsPulse { 0%,100%{opacity:1} 50%{opacity:.7} }
-
-    .reels-wrapper {
-      position: relative;
-      background: linear-gradient(180deg, #07111f 0%, #040a14 100%);
-      border: 3px solid #1a3568;
-      border-top: none;
-      border-bottom: none;
-      border-radius: 0;
-      padding: clamp(4px, 0.6vh, 10px);
-      box-shadow: inset 0 0 40px rgba(0,40,100,.4);
-      flex: 1 1 auto;
-      min-height: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      max-width: 100%;
-      margin: 0;
-      overflow: hidden;
-      container-type: size;
-      container-name: reels;
-    }
-    .reels-wrapper.dim-win .cell:not(.win):not(.scatter-win) {
-      opacity: .28;
-      filter: grayscale(.4) brightness(.7);
-      transition: opacity .35s, filter .35s;
-    }
-    .reels-wrapper::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: linear-gradient(180deg, rgba(0,200,255,.04), transparent 18%, transparent 82%, rgba(0,0,0,.2));
-      z-index: 3;
-    }
-    .reels-wrapper.tease-dim { filter: brightness(.72); }
-    .reels-wrapper.tease-dim .reel.tease { filter: brightness(1.25); z-index: 2; }
-
-    .spin-controls {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: clamp(12px, 2.5vw, 28px);
-      padding: clamp(4px, 0.8vh, 10px) clamp(10px, 2vw, 16px);
-      min-height: clamp(52px, 8vh, 84px);
-      height: auto;
-      background: linear-gradient(180deg, #07111f 0%, #040a14 100%);
-      border: 3px solid #1a3568;
-      border-top: 1px solid rgba(45,92,173,.45);
-      border-radius: 0 0 12px 12px;
-      box-shadow: 0 10px 28px rgba(0,0,0,.45);
-      flex-shrink: 0;
-      width: 100%;
-      max-width: 100%;
-      margin: 0;
-    }
-    .reels-grid {
-      --reels-ar: 5 / 3.05;
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: clamp(1px, 0.25vw, 3px);
-      aspect-ratio: var(--reels-ar);
-      /* Fit inside reels-wrapper without stretching on tall/wide screens */
-      width: min(100%, 100cqi, calc(100cqb * 5 / 3.05));
-      height: min(100%, 100cqb, calc(100cqi * 3.05 / 5));
-      max-width: 100%;
-      max-height: 100%;
-      min-width: 0;
-      min-height: 0;
-      position: relative;
-      z-index: 1;
-      align-self: center;
-      margin: 0 auto;
-      flex: 0 0 auto;
-    }
-    @supports not (width: 1cqi) {
-      .reels-grid {
-        width: 100%;
-        height: auto;
-        max-height: 100%;
-      }
-    }
-    .reel {
-      display: flex; flex-direction: column; gap: 1px;
-      background: rgba(0,0,0,.2);
-      border: none;
-      border-radius: 4px;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      min-height: 0;
-      min-width: 0;
-      position: relative;
-      overflow: hidden;
-      justify-content: space-between;
-    }
-    .reel:last-child { border-right: none; }
-    .reel.spinning-reel {
-      box-shadow: inset 0 0 18px rgba(0,180,255,.12);
-    }
-    .reel-mask {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-      border-radius: 4px;
-    }
-    .reel-mask::before,
-    .reel-mask::after {
-      content: '';
-      position: absolute;
-      left: 0; right: 0;
-      height: 14%;
-      z-index: 2;
-      pointer-events: none;
-    }
-    .reel-mask::before {
-      top: 0;
-      background: linear-gradient(180deg, rgba(4,10,20,.75), transparent);
-    }
-    .reel-mask::after {
-      bottom: 0;
-      background: linear-gradient(0deg, rgba(4,10,20,.75), transparent);
-    }
-    .reel-strip {
-      position: absolute;
-      left: 0; right: 0; top: 0;
-      will-change: transform;
-      transform: translate3d(0, 0, 0);
-      backface-visibility: hidden;
-    }
-    .reel.spinning-reel .reel-strip {
-      filter: blur(0.55px) brightness(1.05);
-    }
-    .reel.stopping .reel-strip {
-      filter: blur(0.15px) brightness(1.02);
-      transition: filter .2s ease;
-    }
-    .strip-cell {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2px;
-      box-sizing: border-box;
-      overflow: hidden;
-    }
-    .strip-cell img.sym-img {
-      width: 88%;
-      height: 88%;
-      max-width: 88%;
-      max-height: 88%;
-      object-fit: contain;
-      object-position: center center;
-      display: block;
-      pointer-events: none;
-      transform: none;
-    }
-    .reel.landing .reel-strip {
-      animation: reelLandBounce .32s cubic-bezier(.22,1.4,.36,1);
-    }
-    @keyframes reelLandBounce {
-      0% { filter: brightness(1.15); }
-      40% { transform: translate3d(0, var(--land-y, 0px), 0) translateY(6px); }
-      100% { transform: translate3d(0, var(--land-y, 0px), 0) translateY(0); filter: brightness(1); }
-    }
-    .reel.tease {
-      outline: 2px solid var(--cyan);
-      outline-offset: -2px;
-      box-shadow: 0 0 22px rgba(0,240,255,.55), inset 0 0 18px rgba(0,240,255,.18);
-      animation: teasePulse 1s ease-in-out infinite;
-    }
-    @keyframes teasePulse {
-      0%,100% { box-shadow: 0 0 14px rgba(0,240,255,.4), inset 0 0 12px rgba(0,240,255,.12); }
-      50% { box-shadow: 0 0 28px rgba(0,240,255,.75), inset 0 0 22px rgba(0,240,255,.25); }
-    }
-    .reel.tease .reel-strip { filter: blur(0.2px) drop-shadow(0 0 8px rgba(0,240,255,.45)); }
-
-    .cell {
-      flex: 1 1 0;
-      min-height: 0;
-      min-width: 0;
-      /* Không ép aspect-ratio ở cell — grid 5×3 đã giữ ô vuông */
-      aspect-ratio: auto;
-      max-height: none;
-      background: transparent;
-      border: none;
-      border-radius: 0;
-      display: flex; align-items: center; justify-content: center;
-      position: relative;
-      transition: opacity .3s, filter .3s, transform .2s;
-      cursor: default;
-      user-select: none;
-      overflow: hidden;
-      padding: 0;
-    }
-    .cell img.sym-img {
-      width: 88%;
-      height: 88%;
-      max-width: 88%;
-      max-height: 88%;
-      object-fit: contain;
-      object-position: center center;
-      pointer-events: none;
-      display: block;
-      filter: none;
-      transform: none;
-      transition: filter .25s, transform .25s;
-    }
-    /* Split Symbol = 2 icons in one cell (GDD: tách đôi) */
-    .cell.split {
-      background: radial-gradient(ellipse at center, rgba(0,255,160,.12) 0%, transparent 70%);
-      box-shadow: inset 0 0 0 1px rgba(0,255,160,.35), 0 0 10px rgba(0,255,136,.2);
-    }
-    .cell.split .split-pair {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 2%;
-      width: 100%;
-      height: 100%;
-      position: relative;
-      z-index: 1;
-    }
-    .cell.split .split-pair::before {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 12%;
-      bottom: 12%;
-      width: 1px;
-      transform: translateX(-50%);
-      background: linear-gradient(180deg, transparent, rgba(0,255,200,.75), transparent);
-      box-shadow: 0 0 6px rgba(0,255,180,.55);
-      z-index: 2;
-      pointer-events: none;
-    }
-    .cell.split .split-pair img.sym-img {
-      width: 46%;
-      height: 82%;
-      max-width: 46%;
-      max-height: 82%;
-      flex: 0 0 46%;
-    }
-    .cell.split .split-pair img.sym-img.split-a {
-      transform-origin: right center;
-    }
-    .cell.split .split-pair img.sym-img.split-b {
-      transform-origin: left center;
-    }
-    .cell.split .split-badge {
-      position: absolute;
-      bottom: 2px;
-      right: 3px;
-      z-index: 4;
-      font-size: clamp(.5rem, 1.1vw, .62rem);
-      font-weight: 900;
-      color: #b8ffe0;
-      background: rgba(0,40,30,.88);
-      border: 1px solid rgba(0,255,160,.65);
-      padding: 1px 4px;
-      border-radius: 4px;
-      line-height: 1.1;
-      text-shadow: 0 0 6px rgba(0,255,160,.7);
-      box-shadow: 0 0 8px rgba(0,255,136,.35);
-      pointer-events: none;
-    }
-    .cell.vfx-split {
-      animation: vfxSplit .55s ease-out;
-      z-index: 5;
-    }
-    .cell.vfx-split .split-pair img.split-a {
-      animation: splitPopLeft .5s cubic-bezier(.2,1.2,.3,1);
-    }
-    .cell.vfx-split .split-pair img.split-b {
-      animation: splitPopRight .5s cubic-bezier(.2,1.2,.3,1);
-    }
-    @keyframes splitPopLeft {
-      0% { transform: translateX(45%) scale(1.15); opacity: .3; filter: brightness(2); }
-      55% { transform: translateX(-4%) scale(1.05); opacity: 1; }
-      100% { transform: translateX(0) scale(1); filter: none; }
-    }
-    @keyframes splitPopRight {
-      0% { transform: translateX(-45%) scale(1.15); opacity: .3; filter: brightness(2); }
-      55% { transform: translateX(4%) scale(1.05); opacity: 1; }
-      100% { transform: translateX(0) scale(1); filter: none; }
-    }
-    .cell.win { z-index: 4; }
-    .cell.win img {
-      animation: winImgGlow 1s ease-in-out infinite;
-      max-width: 88%;
-      max-height: 88%;
-    }
-    @keyframes winImgGlow {
-      0%,100% {
-        filter: drop-shadow(0 0 4px #00ff88) drop-shadow(0 0 12px rgba(0,255,136,.8));
-        transform: scale(1);
-      }
-      50% {
-        filter: drop-shadow(0 0 8px #7dffb0) drop-shadow(0 0 22px rgba(0,255,136,1));
-        transform: scale(1.06);
-      }
-    }
-    .cell.win::before {
-      content: '';
-      position: absolute;
-      inset: -2px;
-      border-radius: 8px;
-      border: 2px solid rgba(0,255,136,.85);
-      box-shadow: 0 0 14px rgba(0,255,136,.55), inset 0 0 10px rgba(0,255,136,.15);
-      animation: winRing 1s ease-in-out infinite;
-      pointer-events: none;
-      z-index: 1;
-    }
-    @keyframes winRing {
-      0%,100% { opacity: .7; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.03); }
-    }
-    .cell.scatter-win img { animation: scatterImgGlow 1s infinite; }
-    @keyframes scatterImgGlow {
-      0%,100% { filter: drop-shadow(0 0 6px rgba(255,42,58,.85)); transform: scale(1); }
-      50% { filter: drop-shadow(0 0 18px rgba(255,80,100,1)); transform: scale(1.07); }
-    }
-    .cell.mystery img { filter: drop-shadow(0 0 8px rgba(170,68,255,.7)); }
-    /* Live VFX — featureSteps (docs/FE_SPIN_VFX_GUIDE.md) */
-    .cell.vfx-hit {
-      z-index: 5;
-      animation: vfxHit .55s ease-out;
-    }
-    .cell.vfx-hit::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 6px;
-      border: 2px solid rgba(0,240,255,.9);
-      box-shadow: 0 0 16px rgba(0,240,255,.55), inset 0 0 12px rgba(0,240,255,.2);
-      pointer-events: none;
-      z-index: 2;
-      animation: vfxRing .55s ease-out;
-    }
-    /* .cell.vfx-split keyframes defined with dual-symbol styles above */
-    .cell.vfx-mult::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 6px;
-      border: 2px solid rgba(255,136,0,.95);
-      box-shadow: 0 0 14px rgba(255,136,0,.55);
-      pointer-events: none;
-      z-index: 2;
-    }
-    .reels-grid.vfx-glitch {
-      animation: vfxGlitch .45s steps(2, end);
-    }
-    /* Full cinematic VFX layer (online featureSteps) */
-    .reels-wrapper { position: relative; }
-    #vfxLayer {
-      position: absolute; inset: 0; z-index: 12; pointer-events: none;
-      overflow: hidden; border-radius: inherit;
-    }
-    #vfxCanvas {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      z-index: 1; pointer-events: none;
-    }
-    #vfxStage {
-      position: absolute; inset: 0; z-index: 2; pointer-events: none;
-    }
-    #vfxLayer .vfx-banner {
-      position: absolute; top: 8px; left: 50%; transform: translate(-50%, -8px);
-      z-index: 20; max-width: 92%;
-      padding: 7px 16px; border-radius: 999px;
-      font-size: clamp(.62rem, 1.4vw, .8rem); font-weight: 800; letter-spacing: .7px;
-      text-transform: uppercase; color: #fff;
-      background: rgba(0,0,0,.82); border: 1px solid rgba(0,240,255,.5);
-      box-shadow: 0 0 22px rgba(0,240,255,.3); opacity: 0;
-      transition: opacity .22s, transform .22s;
-      text-align: center; line-height: 1.35; white-space: nowrap;
-    }
-    #vfxLayer .vfx-banner.show { opacity: 1; transform: translate(-50%, 0); }
-    #vfxLayer .vfx-banner.firewall { border-color: #ff3355; box-shadow: 0 0 22px rgba(255,51,85,.55); color: #ffb3bf; }
-    #vfxLayer .vfx-banner.decrypt { border-color: #00f0ff; color: #b8fcff; }
-    #vfxLayer .vfx-banner.trojan { border-color: #aa44ff; color: #e0c0ff; }
-    #vfxLayer .vfx-banner.overload { border-color: #ff8800; color: #ffd0a0; }
-    #vfxLayer .vfx-banner.overclock { border-color: #ff8800; color: #ffcc88; }
-    #vfxLayer .vfx-banner.cloning { border-color: #00ff88; color: #b8ffd8; }
-    #vfxLayer .vfx-banner.root { border-color: #00ff88; color: #b8ffd8; }
-    #vfxLayer .vfx-banner.surge { border-color: #ffff00; color: #ffffaa; }
-    #vfxLayer .vfx-banner.glitch { border-color: #aa44ff; color: #e0c0ff; }
-    #vfxLayer .vfx-banner.scan { border-color: #00f0ff; color: #b8fcff; }
-    #vfxLayer .vfx-banner.bandwidth { border-color: #ff8800; color: #ffcc88; }
-    #vfxLayer .vfx-banner.bypass { border-color: #00f0ff; color: #b8fcff; }
-    #vfxCenterHud {
-      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-      z-index: 18; display: flex; flex-direction: column; align-items: center; gap: 8px;
-      width: min(82%, 320px); pointer-events: none;
-    }
-    #vfxBwBar {
-      display: none; width: 100%;
-      height: 14px; border-radius: 8px; background: rgba(0,0,0,.72);
-      border: 1px solid rgba(255,136,0,.65); overflow: hidden;
-      box-shadow: 0 0 20px rgba(255,136,0,.35);
-    }
-    #vfxBwBar.show { display: block; }
-    #vfxBwFill {
-      height: 100%; width: 0%;
-      background: linear-gradient(90deg, #ff6a00, #ffd000 55%, #fff2a8);
-      box-shadow: 0 0 16px rgba(255,180,0,.85);
-    }
-    #vfxBwLabel {
-      display: none; font-size: 1.35rem; font-weight: 900; color: #ffd000;
-      text-shadow: 0 0 16px rgba(255,136,0,.95), 0 2px 8px #000;
-      letter-spacing: 2px;
-    }
-    #vfxBwLabel.show { display: block; }
-    #vfxCpuBadge {
-      display: none; padding: 10px 18px; border-radius: 12px;
-      font-size: .85rem; font-weight: 900; letter-spacing: 1.5px;
-      color: #ffcc88; background: linear-gradient(160deg, rgba(40,20,0,.92), rgba(10,5,0,.9));
-      border: 2px solid #ff8800; box-shadow: 0 0 28px rgba(255,136,0,.55), inset 0 0 18px rgba(255,136,0,.15);
-      animation: cpuPulse 1s ease-in-out infinite;
-    }
-    #vfxCpuBadge.show { display: block; }
-    @keyframes cpuPulse {
-      0%,100% { transform: scale(1); filter: brightness(1); }
-      50% { transform: scale(1.06); filter: brightness(1.25); }
-    }
-    #vfxBypassArrows {
-      display: none; position: absolute; inset: 0; z-index: 16;
-      align-items: center; justify-content: space-between;
-      padding: 0 3%; font-size: clamp(.85rem, 2.2vw, 1.15rem); font-weight: 900;
-      color: rgba(0,240,255,.92); text-shadow: 0 0 16px rgba(0,240,255,.8);
-      letter-spacing: 1px;
-    }
-    #vfxBypassArrows.show { display: flex; }
-    #vfxBypassArrows .arr-l { animation: arrowL .75s ease-in-out infinite; }
-    #vfxBypassArrows .arr-r { animation: arrowR .75s ease-in-out infinite; }
-    #vfxBypassArrows .flow-mid {
-      padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(0,240,255,.5);
-      background: rgba(0,20,30,.75); animation: bypassPulse 1s ease-in-out infinite;
-    }
-    @keyframes bypassPulse { 0%,100% { opacity: .65; } 50% { opacity: 1; } }
-    @keyframes arrowL { 0%,100% { transform: translateX(0); } 50% { transform: translateX(10px); } }
-    @keyframes arrowR { 0%,100% { transform: translateX(0); } 50% { transform: translateX(-10px); } }
-    #vfxFlash {
-      position: absolute; inset: 0; z-index: 15; opacity: 0; pointer-events: none;
-      background: radial-gradient(ellipse at center, rgba(0,240,255,.28), transparent 70%);
-      transition: opacity .12s;
-    }
-    #vfxFlash.show { opacity: 1; }
-    #vfxFlash.red { background: radial-gradient(ellipse at center, rgba(255,42,58,.4), transparent 70%); }
-    #vfxFlash.orange { background: radial-gradient(ellipse at center, rgba(255,136,0,.38), transparent 70%); }
-    #vfxFlash.purple { background: radial-gradient(ellipse at center, rgba(170,68,255,.4), transparent 70%); }
-    #vfxFlash.green { background: radial-gradient(ellipse at center, rgba(0,255,136,.32), transparent 70%); }
-    #vfxFlash.yellow { background: radial-gradient(ellipse at center, rgba(255,255,0,.35), transparent 70%); }
-    /* Scene pieces injected into #vfxStage */
-    .vfx-fire-wall {
-      position: absolute; left: 0; right: 0; bottom: 0; height: 0%;
-      background:
-        linear-gradient(180deg, transparent 0%, rgba(255,80,0,.15) 20%, rgba(255,40,0,.55) 55%, rgba(255,200,40,.75) 100%),
-        repeating-linear-gradient(90deg, transparent 0 8px, rgba(255,60,0,.12) 8px 12px);
-      box-shadow: 0 -12px 40px rgba(255,40,0,.55), inset 0 10px 30px rgba(255,200,0,.25);
-      z-index: 5; transition: height .55s cubic-bezier(.2,.8,.2,1);
-    }
-    .vfx-fire-wall.up { height: 108%; }
-    .vfx-fire-wall::before {
-      content: ''; position: absolute; left: 0; right: 0; top: -14px; height: 28px;
-      background: radial-gradient(ellipse at center, rgba(255,220,80,.85), transparent 70%);
-      filter: blur(2px); animation: flameTip .25s linear infinite alternate;
-    }
-    @keyframes flameTip { from { opacity: .7; transform: scaleY(1); } to { opacity: 1; transform: scaleY(1.35); } }
-    .vfx-laser-beam {
-      position: absolute; left: 0; right: 0; height: 3px; top: 0;
-      background: linear-gradient(90deg, transparent, #00f0ff, #fff, #00f0ff, transparent);
-      box-shadow: 0 0 18px #00f0ff, 0 0 40px rgba(0,240,255,.7);
-      z-index: 8; opacity: 0;
-    }
-    .vfx-laser-grid {
-      position: absolute; inset: 0; z-index: 6; opacity: 0;
-      background:
-        repeating-linear-gradient(0deg, transparent 0 18px, rgba(0,240,255,.08) 18px 19px),
-        repeating-linear-gradient(90deg, transparent 0 18px, rgba(0,240,255,.08) 18px 19px);
-      mix-blend-mode: screen;
-    }
-    .vfx-laser-grid.on { opacity: 1; animation: laserGridPulse .5s ease-in-out infinite; }
-    @keyframes laserGridPulse { 0%,100% { opacity: .35; } 50% { opacity: .7; } }
-    .vfx-drop-pkg {
-      position: absolute; z-index: 10; width: 36px; height: 36px;
-      margin-left: -18px; margin-top: -18px;
-      border-radius: 8px;
-      background: linear-gradient(145deg, #6b2fb8, #2a1050);
-      border: 2px solid #d080ff;
-      box-shadow: 0 0 16px rgba(170,68,255,.8), inset 0 0 10px rgba(255,255,255,.15);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem; color: #f0d0ff;
-      animation: pkgDrop .55s cubic-bezier(.2,.9,.3,1.2) forwards;
-    }
-    .vfx-drop-pkg.boom {
-      animation: pkgBoom .45s ease-out forwards;
-    }
-    @keyframes pkgDrop {
-      0% { transform: translateY(-120px) scale(.4) rotate(-12deg); opacity: 0; }
-      70% { opacity: 1; }
-      100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
-    }
-    @keyframes pkgBoom {
-      0% { transform: scale(1); opacity: 1; filter: brightness(1); }
-      40% { transform: scale(1.55); filter: brightness(2); box-shadow: 0 0 30px #fff; }
-      100% { transform: scale(0.2); opacity: 0; }
-    }
-    .vfx-shock-ring {
-      position: absolute; border-radius: 50%; z-index: 9;
-      border: 2px solid rgba(255,255,80,.9);
-      box-shadow: 0 0 20px rgba(255,220,0,.7), inset 0 0 12px rgba(255,255,100,.35);
-      animation: shockExpand .55s ease-out forwards;
-      pointer-events: none;
-    }
-    @keyframes shockExpand {
-      0% { width: 8px; height: 8px; opacity: 1; margin: -4px 0 0 -4px; }
-      100% { width: 140px; height: 140px; opacity: 0; margin: -70px 0 0 -70px; }
-    }
-    .vfx-stamp {
-      position: absolute; z-index: 11; font-weight: 900; font-size: .95rem;
-      color: #ff8800; text-shadow: 0 0 12px #ff8800, 0 2px 4px #000;
-      padding: 3px 8px; border: 2px solid #ff8800; border-radius: 6px;
-      background: rgba(20,8,0,.75);
-      animation: stampIn .4s cubic-bezier(.2,.9,.2,1.4) forwards;
-      transform: scale(2.2) rotate(-12deg); opacity: 0;
-    }
-    @keyframes stampIn {
-      0% { transform: scale(2.4) rotate(-18deg); opacity: 0; }
-      60% { transform: scale(.92) rotate(4deg); opacity: 1; }
-      100% { transform: scale(1) rotate(0); opacity: 1; }
-    }
-    .vfx-clone-ghost {
-      position: absolute; z-index: 7; opacity: .55; pointer-events: none;
-      filter: drop-shadow(0 0 8px #00ff88) hue-rotate(40deg);
-      animation: cloneMitosis .55s ease-out forwards;
-    }
-    @keyframes cloneMitosis {
-      0% { transform: translateX(0) scale(1); opacity: .7; }
-      100% { transform: translateX(14px) scale(.92); opacity: 0; }
-    }
-    .vfx-glitch-bars {
-      position: absolute; inset: 0; z-index: 7; overflow: hidden; opacity: 0;
-    }
-    .vfx-glitch-bars.on { opacity: 1; }
-    .vfx-glitch-bars span {
-      position: absolute; left: -5%; right: -5%; height: 3px;
-      background: linear-gradient(90deg, transparent, #f0f, #0ff, transparent);
-      mix-blend-mode: screen; animation: glitchBar .12s steps(2) infinite;
-    }
-    @keyframes glitchBar {
-      0% { transform: translateX(-4%); }
-      50% { transform: translateX(4%); }
-      100% { transform: translateX(-2%); }
-    }
-    .cell.vfx-shake {
-      animation: cellShake .35s ease-in-out;
-    }
-    @keyframes cellShake {
-      0%,100% { transform: translate(0,0); }
-      20% { transform: translate(-3px,1px); }
-      40% { transform: translate(3px,-2px); }
-      60% { transform: translate(-2px,-1px); }
-      80% { transform: translate(2px,2px); }
-    }
-    .cell.vfx-wild-glow {
-      box-shadow: 0 0 22px rgba(255,220,0,.9), inset 0 0 14px rgba(255,200,0,.35);
-      animation: wildGlow .7s ease-in-out;
-    }
-    @keyframes wildGlow {
-      0%,100% { filter: brightness(1.1); }
-      50% { filter: brightness(1.8); }
-    }
-    .reel.vfx-wild-col {
-      box-shadow: inset 0 0 28px rgba(255,200,40,.55), 0 0 18px rgba(255,160,0,.45);
-      animation: colSurge .8s ease-out;
-    }
-    .reels-grid.vfx-glitch-hard {
-      animation: vfxGlitchHard .55s steps(3, end);
-    }
-    @keyframes vfxGlitchHard {
-      0%,100% { filter: none; transform: translate(0,0); }
-      15% { filter: hue-rotate(90deg) contrast(1.6) saturate(1.8); transform: translate(-3px,1px) skewX(2deg); }
-      35% { filter: hue-rotate(-80deg) invert(.08); transform: translate(3px,-2px); }
-      55% { filter: contrast(1.8) brightness(1.3); transform: translate(-2px,0) skewX(-2deg); }
-      75% { filter: hue-rotate(40deg); transform: translate(2px,1px); }
-    }
-    .cell.vfx-morph {
-      animation: vfxMorph .55s ease-out;
-    }
-    .cell.vfx-decrypt::after {
-      content: ''; position: absolute; left: 0; right: 0; top: -10%; height: 30%;
-      background: linear-gradient(180deg, transparent, rgba(0,240,255,.55), transparent);
-      animation: decryptScan .55s linear; pointer-events: none; z-index: 4;
-    }
-    .cell.vfx-lock::before {
-      content: '◎'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem; color: rgba(0,240,255,.9); z-index: 4;
-      animation: lockPulse .5s ease-out; text-shadow: 0 0 10px #00f0ff; pointer-events: none;
-    }
-    .cell.vfx-surge {
-      animation: surgeStrike .55s ease-out;
-      box-shadow: 0 0 16px rgba(255,255,0,.7);
-    }
-    .cell.vfx-firewall {
-      filter: brightness(.35) saturate(.2);
-      transition: filter .35s;
-    }
-    .cell.vfx-firewall.scrub {
-      animation: firewallBurn .6s ease-out;
-    }
-    .reel.vfx-col-surge {
-      animation: colSurge .7s ease-out;
-      box-shadow: inset 0 0 20px rgba(255,136,0,.55), 0 0 12px rgba(255,136,0,.4);
-      z-index: 3;
-    }
-    .reel.vfx-col-root {
-      animation: colRoot .7s ease-out;
-      box-shadow: inset 0 0 18px rgba(0,255,136,.45);
-      z-index: 3;
-    }
-    .feat-badge.vfx-active {
-      transform: scale(1.18) !important;
-      filter: drop-shadow(0 0 12px currentColor) brightness(1.25) !important;
-      opacity: 1 !important;
-      outline: 2px solid rgba(255,255,255,.55);
-      outline-offset: 2px;
-    }
-    .cell.win-rtl {
-      box-shadow: 0 0 0 2px rgba(0,240,255,.85), 0 0 12px rgba(0,240,255,.45);
-    }
-    .cell.win-ltr {
-      box-shadow: 0 0 0 2px rgba(0,255,136,.85), 0 0 12px rgba(0,255,136,.4);
-    }
-    @keyframes vfxHit {
-      0% { filter: brightness(2); transform: scale(1.12); }
-      100% { filter: brightness(1); transform: scale(1); }
-    }
-    @keyframes vfxRing {
-      0% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-    @keyframes vfxSplit {
-      0% { filter: brightness(1.8) hue-rotate(40deg); }
-      50% { transform: scale(1.08); }
-      100% { filter: none; transform: scale(1); }
-    }
-    @keyframes vfxGlitch {
-      0%,100% { filter: none; transform: translate(0,0); }
-      25% { filter: hue-rotate(90deg) contrast(1.4); transform: translate(-2px,1px); }
-      50% { filter: hue-rotate(-60deg) saturate(1.6); transform: translate(2px,-1px); }
-      75% { filter: invert(.08); transform: translate(-1px,0); }
-    }
-    @keyframes vfxMorph {
-      0% { filter: brightness(2.2) contrast(1.3); transform: scale(1.15) rotate(3deg); }
-      40% { filter: brightness(1.6) hue-rotate(40deg); transform: scale(.92); }
-      100% { filter: none; transform: scale(1) rotate(0); }
-    }
-    @keyframes decryptScan {
-      0% { top: -20%; opacity: 0; }
-      20% { opacity: 1; }
-      100% { top: 90%; opacity: 0; }
-    }
-    @keyframes lockPulse {
-      0% { opacity: 0; transform: scale(1.6); }
-      40% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(.8); }
-    }
-    @keyframes surgeStrike {
-      0% { filter: brightness(3); }
-      50% { filter: brightness(1.5) drop-shadow(0 0 10px #ff0); }
-      100% { filter: none; }
-    }
-    @keyframes firewallBurn {
-      0% { filter: brightness(1.8) sepia(1) hue-rotate(-40deg); }
-      100% { filter: brightness(.3) saturate(.1); opacity: .4; }
-    }
-    @keyframes colSurge {
-      0% { filter: brightness(1); }
-      40% { filter: brightness(1.6) drop-shadow(0 0 12px #ff8800); }
-      100% { filter: brightness(1); }
-    }
-    @keyframes colRoot {
-      0% { filter: brightness(1); }
-      50% { filter: brightness(1.4) hue-rotate(40deg); }
-      100% { filter: brightness(1); }
-    }
-    /* ── Pro polish: intro / bloom / shake ── */
-    #vfxFeatureIntro {
-      position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(.4);
-      z-index: 22; display: none; flex-direction: column; align-items: center; gap: 8px;
-      opacity: 0; pointer-events: none;
-    }
-    #vfxFeatureIntro.show {
-      display: flex; animation: featIntroIn .45s cubic-bezier(.2,.85,.2,1.15) forwards;
-    }
-    #vfxFeatureIntro.hide {
-      display: flex; animation: featIntroOut .28s ease-in forwards;
-    }
-    #vfxFeatureIntro .intro-ring {
-      position: absolute; width: 110px; height: 110px; border-radius: 50%;
-      border: 2px solid rgba(0,240,255,.55);
-      box-shadow: 0 0 28px rgba(0,240,255,.35), inset 0 0 20px rgba(0,240,255,.12);
-      animation: introRingSpin 1.2s linear infinite;
-    }
-    #vfxFeatureIntro img {
-      width: 72px; height: 72px; object-fit: contain; position: relative; z-index: 1;
-      filter: drop-shadow(0 0 18px rgba(0,240,255,.75));
-    }
-    #vfxFeatureIntro .intro-name {
-      position: relative; z-index: 1; font-size: .72rem; font-weight: 900;
-      letter-spacing: 1.2px; text-transform: uppercase; color: #e8f0ff;
-      text-shadow: 0 0 12px rgba(0,240,255,.6), 0 2px 6px #000;
-      padding: 4px 12px; border-radius: 999px;
-      background: rgba(0,0,0,.72); border: 1px solid rgba(0,240,255,.4);
-      white-space: nowrap;
-    }
-    @keyframes featIntroIn {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(.35) rotate(-8deg); }
-      70% { opacity: 1; transform: translate(-50%, -50%) scale(1.08) rotate(2deg); }
-      100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); }
-    }
-    @keyframes featIntroOut {
-      0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -60%) scale(1.25); }
-    }
-    @keyframes introRingSpin {
-      from { transform: rotate(0deg); } to { transform: rotate(360deg); }
-    }
-    #vfxBloom {
-      position: absolute; inset: -10%; z-index: 14; pointer-events: none; opacity: 0;
-      background: radial-gradient(ellipse at center, rgba(255,255,255,.22), transparent 55%);
-      mix-blend-mode: screen; transition: opacity .12s;
-    }
-    #vfxBloom.show { opacity: 1; }
-    #vfxBloom.cyan { background: radial-gradient(ellipse at center, rgba(0,240,255,.28), transparent 55%); }
-    #vfxBloom.red { background: radial-gradient(ellipse at center, rgba(255,50,60,.32), transparent 55%); }
-    #vfxBloom.orange { background: radial-gradient(ellipse at center, rgba(255,140,0,.3), transparent 55%); }
-    #vfxBloom.purple { background: radial-gradient(ellipse at center, rgba(180,70,255,.32), transparent 55%); }
-    #vfxBloom.green { background: radial-gradient(ellipse at center, rgba(0,255,140,.28), transparent 55%); }
-    #vfxBloom.yellow { background: radial-gradient(ellipse at center, rgba(255,255,80,.3), transparent 55%); }
-    #vfxVignette {
-      position: absolute; inset: 0; z-index: 13; pointer-events: none; opacity: 0;
-      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,.55) 100%);
-      transition: opacity .2s;
-    }
-    #vfxVignette.show { opacity: 1; }
-    .reels-wrapper.vfx-hit-shake {
-      animation: wrapHitShake .38s ease-out;
-    }
-    .reels-wrapper.vfx-hit-shake-sm {
-      animation: wrapHitShakeSm .28s ease-out;
-    }
-    @keyframes wrapHitShake {
-      0%,100% { transform: translate(0,0); }
-      15% { transform: translate(-5px, 2px) rotate(-0.4deg); }
-      35% { transform: translate(5px, -3px) rotate(0.4deg); }
-      55% { transform: translate(-3px, -1px); }
-      75% { transform: translate(3px, 2px); }
-    }
-    @keyframes wrapHitShakeSm {
-      0%,100% { transform: translate(0,0); }
-      30% { transform: translate(-2px,1px); }
-      60% { transform: translate(2px,-1px); }
-    }
-    .feat-badge.vfx-charge {
-      animation: badgeCharge .55s ease-out;
-    }
-    @keyframes badgeCharge {
-      0% { transform: scale(1); filter: brightness(1); }
-      40% { transform: scale(1.35); filter: brightness(1.6) drop-shadow(0 0 16px currentColor); }
-      100% { transform: scale(1.18); filter: brightness(1.25) drop-shadow(0 0 12px currentColor); }
-    }
-    /* Feature Explain Mode card */
-    #vfxExplainCard {
-      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.92);
-      z-index: 24; display: none; width: min(92%, 340px);
-      padding: 14px 16px 12px;
-      border-radius: 14px;
-      background: linear-gradient(165deg, rgba(8,14,28,.96), rgba(4,8,16,.97));
-      border: 1px solid rgba(0,240,255,.45);
-      box-shadow: 0 0 40px rgba(0,240,255,.28), 0 12px 32px rgba(0,0,0,.65);
-      opacity: 0; pointer-events: none;
-    }
-    #vfxExplainCard.show {
-      display: block;
-      animation: explainIn .35s cubic-bezier(.2,.85,.2,1.1) forwards;
-    }
-    #vfxExplainCard.hide {
-      display: block;
-      animation: explainOut .28s ease-in forwards;
-    }
-    @keyframes explainIn {
-      0% { opacity: 0; transform: translate(-50%, -46%) scale(.88); }
-      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    }
-    @keyframes explainOut {
-      0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -54%) scale(1.04); }
-    }
-    #vfxExplainCard .explain-head {
-      display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
-    }
-    #vfxExplainCard img {
-      width: 56px; height: 56px; object-fit: contain; flex-shrink: 0;
-      filter: drop-shadow(0 0 12px rgba(0,240,255,.55));
-    }
-    #vfxExplainCard .explain-kicker {
-      font-size: .62rem; letter-spacing: 1.4px; font-weight: 800;
-      color: rgba(0,240,255,.85); text-transform: uppercase;
-    }
-    #vfxExplainCard .explain-name {
-      font-size: .95rem; font-weight: 900; letter-spacing: .5px;
-      color: #fff; margin-top: 2px; line-height: 1.2;
-    }
-    #vfxExplainCard .explain-label {
-      font-size: .62rem; font-weight: 800; letter-spacing: .8px;
-      text-transform: uppercase; color: rgba(0,240,255,.7);
-      margin: 8px 0 4px;
-    }
-    #vfxExplainCard .explain-label:first-of-type { margin-top: 0; }
-    #vfxExplainCard .explain-body,
-    #vfxExplainCard .explain-how {
-      font-size: .8rem; line-height: 1.55; color: #dce6f5;
-      padding: 10px 12px; border-radius: 10px;
-      background: rgba(0,240,255,.06); border: 1px solid rgba(0,240,255,.15);
-    }
-    #vfxExplainCard .explain-how {
-      background: rgba(0,255,136,.05); border-color: rgba(0,255,136,.18);
-      color: #d0f5e4;
-    }
-    #vfxExplainCard .explain-tip {
-      display: none; margin-top: 10px; font-size: .74rem; line-height: 1.45;
-      color: #ffd080; font-weight: 600;
-      padding: 8px 10px; border-radius: 8px;
-      background: rgba(255,180,40,.08); border: 1px solid rgba(255,180,40,.25);
-    }
-    #vfxExplainCard .explain-tip.show { display: block; }
-    #vfxExplainCard .explain-foot {
-      margin-top: 10px; font-size: .62rem; letter-spacing: .4px;
-      color: var(--dim); text-align: center;
-    }
-    #btnExplainFeat.active {
-      filter: drop-shadow(0 0 10px rgba(0,240,255,.85));
-      box-shadow: 0 0 0 2px rgba(0,240,255,.45);
-    }
-    /* ── Ambient living playfield ── */
-    .game-frame {
-      box-shadow:
-        0 0 0 1px rgba(0,240,255,.12),
-        0 0 40px rgba(0,120,200,.12),
-        inset 0 0 60px rgba(0,40,80,.15);
-      animation: frameAmbient 6s ease-in-out infinite;
-    }
-    @keyframes frameAmbient {
-      0%,100% { box-shadow: 0 0 0 1px rgba(0,240,255,.12), 0 0 36px rgba(0,100,180,.1), inset 0 0 50px rgba(0,30,60,.12); }
-      50% { box-shadow: 0 0 0 1px rgba(0,240,255,.22), 0 0 56px rgba(0,160,220,.18), inset 0 0 70px rgba(0,50,90,.18); }
-    }
-    .reels-wrapper.ambient-on::before {
-      content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
-      background:
-        repeating-linear-gradient(0deg, transparent 0 3px, rgba(0,240,255,.025) 3px 4px);
-      mix-blend-mode: screen; opacity: .7;
-      animation: scanDrift 8s linear infinite;
-    }
-    @keyframes scanDrift {
-      0% { background-position: 0 0; }
-      100% { background-position: 0 40px; }
-    }
-    .feature-meter {
-      animation: meterBreathe 4s ease-in-out infinite;
-    }
-    @keyframes meterBreathe {
-      0%,100% { filter: brightness(1); }
-      50% { filter: brightness(1.08) drop-shadow(0 0 8px rgba(0,240,255,.15)); }
-    }
-    /* Skip VFX bar */
-    /* ═══════════════════════════════════════════════════════════
-       ART NEW pack theme — matrix green stage for neon framed icons
-       (classic pack keeps original blue chrome)
-       ═══════════════════════════════════════════════════════════ */
-    body.pack-art-new {
-      --frame: #0d3a2a;
-      --frame-hi: #1a6b4a;
-      --cyan: #00ff9c;
-      --glow-cyan: 0 0 20px rgba(0,255,140,.4);
-    }
-    /* Background: quieter blue core, more void + matrix green */
-    body.pack-art-new #bgScene {
-      background:
-        radial-gradient(ellipse 100% 55% at 50% -10%, rgba(0, 80, 50, .35) 0%, transparent 50%),
-        radial-gradient(ellipse 50% 40% at 10% 55%, rgba(0, 255, 140, .06) 0%, transparent 55%),
-        radial-gradient(ellipse 45% 35% at 90% 48%, rgba(0, 120, 80, .1) 0%, transparent 55%),
-        radial-gradient(ellipse 80% 50% at 50% 105%, rgba(0, 40, 30, .5) 0%, transparent 60%),
-        linear-gradient(180deg, #010605 0%, #02100c 30%, #031510 55%, #010806 80%, #000302 100%);
-    }
-    body.pack-art-new #bgScene .bg-core {
-      opacity: .35;
-      filter: blur(4px) hue-rotate(70deg) saturate(.7);
-    }
-    body.pack-art-new #bgScene .bg-ceiling,
-    body.pack-art-new #bgScene .bg-city,
-    body.pack-art-new #bgScene .bg-horizon {
-      opacity: .28;
-      filter: hue-rotate(55deg) saturate(.65);
-    }
-    body.pack-art-new #bgScene .bg-radar { opacity: .25; filter: hue-rotate(80deg); }
-    body.pack-art-new #bgScene .bg-scan { opacity: .2; }
-    body.pack-art-new #bgScene .bg-laser { opacity: .15; }
-    body.pack-art-new #bgScene .bg-orbs i {
-      filter: hue-rotate(60deg) saturate(.8);
-      opacity: .55;
-    }
-    body.pack-art-new #bgScene .bg-vignette {
-      background: radial-gradient(ellipse 70% 65% at 50% 45%, transparent 30%, rgba(0,0,0,.75) 100%);
-    }
-    /* Playfield chrome → deep terminal green */
-    body.pack-art-new .meter-shell {
-      background: linear-gradient(180deg, #06140f 0%, #040e0b 100%);
-      border-color: #14503a;
-      box-shadow:
-        inset 0 1px 0 rgba(0,255,160,.12),
-        0 0 0 1px rgba(0,255,140,.08),
-        0 8px 28px rgba(0,0,0,.45);
-    }
-    body.pack-art-new .info-bar {
-      background: #030a08;
-      color: #8dffc8;
-      border-top-color: rgba(0,255,140,.12);
-    }
-    body.pack-art-new .mult-box {
-      background: #030a08;
-      border-left-color: rgba(0,255,140,.15);
-      text-shadow: 0 0 14px rgba(0,255,140,.5);
-    }
-    body.pack-art-new .mult-box .x { color: #00ff9c; }
-    body.pack-art-new .game-frame {
-      box-shadow:
-        0 0 0 1px rgba(0,255,140,.1),
-        0 0 48px rgba(0,120,70,.14),
-        inset 0 0 60px rgba(0,30,20,.2);
-      animation: frameAmbientGreen 7s ease-in-out infinite;
-    }
-    @keyframes frameAmbientGreen {
-      0%,100% {
-        box-shadow:
-          0 0 0 1px rgba(0,255,140,.08),
-          0 0 36px rgba(0,90,55,.12),
-          inset 0 0 50px rgba(0,20,14,.15);
-      }
-      50% {
-        box-shadow:
-          0 0 0 1px rgba(0,255,160,.18),
-          0 0 60px rgba(0,160,100,.2),
-          inset 0 0 70px rgba(0,40,28,.2);
-      }
-    }
-    /* Reels stage: black void so neon icons pop */
-    body.pack-art-new .reels-wrapper {
-      background:
-        radial-gradient(ellipse 90% 80% at 50% 45%, rgba(0, 40, 28, .55) 0%, transparent 70%),
-        linear-gradient(180deg, #020806 0%, #010504 55%, #000302 100%);
-      border-color: #14503a;
-      box-shadow:
-        inset 0 0 50px rgba(0, 0, 0, .65),
-        inset 0 0 80px rgba(0, 80, 50, .12),
-        0 0 30px rgba(0, 255, 140, .06);
-    }
-    body.pack-art-new .reels-wrapper::after {
-      background:
-        radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, rgba(0,0,0,.35) 100%),
-        linear-gradient(180deg, rgba(0,255,140,.03), transparent 20%, transparent 80%, rgba(0,0,0,.35));
-    }
-    body.pack-art-new .reels-wrapper.ambient-on::before {
-      background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(0,255,140,.02) 3px 4px);
-      opacity: .45;
-    }
-    body.pack-art-new .spin-controls {
-      background: linear-gradient(180deg, #020806 0%, #010504 100%);
-      border-color: #14503a;
-      border-top-color: rgba(0,255,140,.2);
-      box-shadow: 0 10px 28px rgba(0,0,0,.5);
-    }
-    /* Soft reel wells + subtle column dividers */
-    body.pack-art-new .reel {
-      background:
-        linear-gradient(180deg, rgba(0,20,14,.5) 0%, rgba(0,8,6,.7) 100%);
-      border-radius: 8px;
-      box-shadow:
-        inset 0 0 0 1px rgba(0,255,140,.06),
-        inset 0 0 18px rgba(0,0,0,.45);
-    }
-    body.pack-art-new .reel-mask {
-      border-radius: 8px;
-    }
-    body.pack-art-new .reel-mask::before {
-      background: linear-gradient(180deg, rgba(1,6,4,.85), transparent);
-    }
-    body.pack-art-new .reel-mask::after {
-      background: linear-gradient(0deg, rgba(1,6,4,.85), transparent);
-    }
-    /* Cell pad: deep glass dock under self-framed icons */
-    body.pack-art-new .cell {
-      margin: 2px;
-      border-radius: 10px;
-      background:
-        radial-gradient(ellipse 70% 65% at 50% 48%, rgba(0, 35, 25, .55) 0%, rgba(0, 8, 6, .25) 70%, transparent 100%);
-      box-shadow:
-        inset 0 0 0 1px rgba(0,255,140,.05),
-        inset 0 2px 8px rgba(0,0,0,.35);
-    }
-    body.pack-art-new .cell img.sym-img,
-    body.pack-art-new .strip-cell img.sym-img {
-      width: 94%;
-      height: 94%;
-      max-width: 94%;
-      max-height: 94%;
-      filter:
-        drop-shadow(0 2px 4px rgba(0,0,0,.55))
-        drop-shadow(0 0 10px rgba(0,255,140,.18));
-    }
-    body.pack-art-new .strip-cell {
-      padding: 3px;
-    }
-    body.pack-art-new .cell.win::before {
-      border-color: rgba(0,255,160,.9);
-      box-shadow: 0 0 16px rgba(0,255,140,.55), inset 0 0 12px rgba(0,255,140,.18);
-      border-radius: 12px;
-    }
-    body.pack-art-new .cell.win img {
-      filter:
-        drop-shadow(0 0 6px #00ff9c)
-        drop-shadow(0 0 16px rgba(0,255,140,.85)) !important;
-    }
-    body.pack-art-new .reels-grid {
-      gap: clamp(3px, 0.4vw, 6px);
-    }
-    body.pack-art-new .feature-meter {
-      filter: saturate(1.05);
-    }
-    body.pack-art-new .spin-btn {
-      filter: drop-shadow(0 0 12px rgba(0,255,140,.35));
-    }
-
-    #vfxSkipBar {
-      position: absolute; right: 8px; bottom: 8px; z-index: 30;
-      display: none; gap: 6px; align-items: center;
-      pointer-events: auto;
-    }
-    #vfxSkipBar.show { display: flex; }
-    #vfxSkipBar button {
-      pointer-events: auto; cursor: pointer;
-      font-size: .68rem; font-weight: 800; letter-spacing: .5px;
-      padding: 7px 12px; border-radius: 999px;
-      border: 1px solid rgba(0,240,255,.55);
-      background: rgba(0,10,20,.88); color: #9ef0ff;
-      box-shadow: 0 0 14px rgba(0,240,255,.25);
-    }
-    #vfxSkipBar button:hover { background: rgba(0,40,60,.95); color: #fff; }
-    #vfxExplainContinue {
-      display: none; width: 100%; margin-top: 12px;
-      padding: 10px; border-radius: 10px; cursor: pointer; pointer-events: auto;
-      font-weight: 900; font-size: .85rem; letter-spacing: .5px;
-      border: 1px solid rgba(0,255,136,.55);
-      background: linear-gradient(135deg, rgba(0,80,50,.9), rgba(0,40,30,.95));
-      color: #9fffd0; box-shadow: 0 0 16px rgba(0,255,136,.25);
-    }
-    #vfxExplainCard.show #vfxExplainContinue { display: block; }
-    #vfxExplainContinue:hover { filter: brightness(1.15); }
-    /* Hit punch: zoom + chromatic */
-    .reels-wrapper.vfx-hit-zoom {
-      animation: wrapHitZoom .32s ease-out;
-    }
-    @keyframes wrapHitZoom {
-      0% { transform: scale(1); }
-      30% { transform: scale(1.035); filter: contrast(1.15) saturate(1.2); }
-      100% { transform: scale(1); filter: none; }
-    }
-    .reels-wrapper.vfx-chroma {
-      animation: wrapChroma .28s steps(2, end);
-    }
-    @keyframes wrapChroma {
-      0% { filter: none; }
-      25% { filter: drop-shadow(-2px 0 #f0f) drop-shadow(2px 0 #0ff) contrast(1.2); }
-      50% { filter: drop-shadow(2px 0 #f0f) drop-shadow(-2px 0 #0ff); }
-      100% { filter: none; }
-    }
-    #vfxWhiteFlash {
-      position: absolute; inset: 0; z-index: 16; pointer-events: none;
-      background: #fff; opacity: 0;
-    }
-    #vfxWhiteFlash.show { animation: whiteFlash .18s ease-out; }
-    @keyframes whiteFlash {
-      0% { opacity: .55; }
-      100% { opacity: 0; }
-    }
-    /* Fly icon meter → center */
-    #vfxFlyIcon {
-      position: fixed; z-index: 500; pointer-events: none;
-      width: 48px; height: 48px; object-fit: contain;
-      filter: drop-shadow(0 0 16px rgba(0,240,255,.9));
-      opacity: 0; display: none;
-    }
-    #vfxFlyIcon.fly {
-      display: block;
-      transition: left .45s cubic-bezier(.2,.8,.2,1), top .45s cubic-bezier(.2,.8,.2,1),
-        transform .45s cubic-bezier(.2,.8,.2,1), opacity .2s;
-    }
-    /* Balance pulse on win */
-    #balanceDisplay.win-pulse {
-      animation: balPulse .9s ease-out;
-      color: #00ff88 !important;
-      text-shadow: 0 0 12px rgba(0,255,136,.7);
-    }
-    #headerWin.win-pulse {
-      animation: balPulse .9s ease-out;
-    }
-    @keyframes balPulse {
-      0% { transform: scale(1); filter: brightness(1); }
-      35% { transform: scale(1.12); filter: brightness(1.4); }
-      100% { transform: scale(1); filter: brightness(1); }
-    }
-    .cell .win-float {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: .7rem;
-      font-weight: 900;
-      color: #fff;
-      text-shadow: 0 0 8px #00ff88, 0 2px 4px #000;
-      white-space: nowrap;
-      z-index: 6;
-      pointer-events: none;
-      animation: floatWin .55s ease-out forwards;
-    }
-    @keyframes floatWin {
-      0% { opacity: 0; transform: translate(-50%, 10%); }
-      25% { opacity: 1; }
-      100% { opacity: 0; transform: translate(-50%, -120%); }
-    }
-    /* split badge is a real DOM node (.split-badge) — see renderGrid */
-    .cell .mult-tag {
-      position: absolute; top: 2px; left: 3px;
-      font-size: .55rem; font-weight: 800; color: var(--orange);
-      background: rgba(0,0,0,.7); padding: 1px 3px; border-radius: 3px; z-index: 2;
-    }
-
-    /* Side controls */
-    .side-left {
-      display: flex; flex-direction: column;
-      align-items: center; gap: clamp(8px, 1.2vh, 14px);
-      padding-top: 4px;
-      min-height: 0;
-      overflow: hidden;
-    }
-    .side-left { grid-column: 1; grid-row: 2; justify-content: space-between; }
-
-    .side-stack { display: flex; flex-direction: column; align-items: center; gap: clamp(8px, 1.2vh, 14px); }
-    .side-row { display: flex; gap: clamp(6px, 0.8vw, 10px); align-items: center; flex-wrap: wrap; justify-content: center; }
-
-    .circle-btn {
-      width: clamp(40px, 5.5vw, 58px);
-      height: clamp(40px, 5.5vw, 58px);
-      border-radius: 50%;
-      border: 3px solid rgba(255,255,255,.35);
-      background: rgba(20,28,48,.9);
-      color: #fff;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: clamp(1rem, 1.4vw, 1.25rem);
-      transition: transform .12s, box-shadow .12s, border-color .12s;
-      box-shadow: 0 3px 0 rgba(0,0,0,.45);
-      padding: 0;
-      flex-shrink: 0;
-    }
-    .circle-btn img {
-      width: 60%;
-      height: 60%;
-      object-fit: contain;
-    }
-    .circle-btn:hover:not(:disabled) { transform: translateY(-1px); }
-    .circle-btn:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 1px 0 rgba(0,0,0,.45); }
-    .circle-btn:disabled { opacity: .4; cursor: not-allowed; }
-    .circle-btn.active { border-color: var(--cyan); box-shadow: var(--glow-cyan); }
-
-    .circle-btn.buy {
-      background: linear-gradient(160deg, #ffe14a, #f0b400);
-      border-color: #fff6a0;
-      color: #111;
-      box-shadow: var(--glow-yellow), 0 3px 0 #b88600;
-      font-size: 1.35rem;
-    }
-    .circle-btn.turbo {
-      background: linear-gradient(160deg, #ff4a55, #c01020);
-      border-color: #ff9aa0;
-      box-shadow: var(--glow-red), 0 3px 0 #7a0810;
-      width: clamp(42px, 6vw, 60px);
-      height: clamp(42px, 6vw, 60px);
-      font-size: clamp(1.05rem, 1.5vw, 1.3rem);
-    }
-    .circle-btn.bet-coin {
-      background: linear-gradient(160deg, #f5f5f5, #c8c8c8);
-      border-color: #fff;
-      color: #222;
-      font-size: 1.2rem;
-    }
-    .circle-btn.sound {
-      background: linear-gradient(160deg, #ffe14a, #e0a800);
-      border-color: #fff6a0;
-      color: #111;
-      box-shadow: 0 3px 0 #b88600;
-    }
-
-    .spin-btn {
-      width: clamp(48px, min(9vh, 8vw), 76px);
-      height: clamp(48px, min(9vh, 8vw), 76px);
-      border: none;
-      border-radius: 0;
-      background: transparent;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: none;
-      padding: 0;
-      transition: transform .12s, filter .12s;
-      flex-shrink: 0;
-    }
-    .spin-btn img { width: 100%; height: 100%; object-fit: contain; display: block; }
-    .spin-btn:hover:not(:disabled) { transform: scale(1.06); filter: drop-shadow(0 0 10px rgba(0,240,255,.5)); }
-    .spin-btn:active:not(:disabled) { transform: scale(.98); }
-    .spin-btn:disabled { opacity: .4; cursor: not-allowed; filter: grayscale(.5); }
-
-    .spin-controls .circle-btn {
-      width: clamp(40px, min(7.5vh, 6.5vw), 60px);
-      height: clamp(40px, min(7.5vh, 6.5vw), 60px);
-      border: none;
-      background: transparent;
-      box-shadow: none;
-      padding: 0;
-    }
-    .spin-controls .circle-btn img {
-      width: 100%; height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-    .spin-controls #btnAuto {
-      width: clamp(52px, min(9.5vh, 8vw), 78px) !important;
-      height: clamp(52px, min(9.5vh, 8vw), 78px) !important;
-      max-width: none;
-    }
-    .spin-controls #btnAuto img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      transform: scale(1.08);
-    }
-    .spin-controls .circle-btn.turbo {
-      background: transparent;
-      box-shadow: none;
-      font-size: clamp(1.1rem, 2.8vh, 1.6rem);
-      width: clamp(40px, min(7.5vh, 6.5vw), 60px);
-      height: clamp(40px, min(7.5vh, 6.5vw), 60px);
-    }
-    .spin-controls .circle-btn:hover:not(:disabled) { transform: scale(1.08); filter: drop-shadow(0 0 8px rgba(0,240,255,.45)); }
-    .spin-controls .circle-btn.active { filter: drop-shadow(0 0 10px rgba(0,255,136,.8)); }
-
-    .bottom-bar {
-      flex-shrink: 0;
-      height: clamp(36px, 5vh, 48px);
-      background: #000;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 clamp(12px, 2vw, 24px);
-      font-size: clamp(.78rem, 1.1vw, 1rem); font-weight: 700;
-      letter-spacing: .5px;
-      z-index: 20;
-      width: 100%;
-    }
-    .bottom-bar .label { color: #888; font-weight: 600; margin-right: 6px; font-size: .75rem; }
-    .bottom-bar .val { color: #fff; font-variant-numeric: tabular-nums; }
-    .bottom-bar .win-slot { color: var(--green); }
-
-    /* Shared modal / overlay styles */
-    .btn {
-      background: #1a1a2e; border: 1px solid #1e3a5f;
-      color: var(--text); padding: 8px 14px; border-radius: 8px;
-      cursor: pointer; font-size: .8rem; font-weight: 600;
-      transition: all .15s; letter-spacing: .5px; white-space: nowrap;
-    }
-    .btn:hover:not(:disabled) { border-color: var(--cyan); color: var(--cyan); }
-    .btn:disabled { opacity: .4; cursor: not-allowed; }
-    .btn.active { border-color: var(--green); color: var(--green); box-shadow: var(--glow-green); }
-    .btn-primary {
-      background: linear-gradient(135deg, #003344, #005566);
-      border-color: var(--cyan); color: var(--cyan);
-      font-size: 1rem; padding: 14px 36px;
-      box-shadow: var(--glow-cyan);
-    }
-    .form-group { margin-bottom: 10px; }
-    .form-group label { display:block; font-size:.65rem; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px; }
-    .pay-sym img.sym-img {
-      width: 56px;
-      height: 56px;
-      max-width: 56px;
-      max-height: 56px;
-      aspect-ratio: 1 / 1;
-      object-fit: fill;
-      object-position: center center;
-      display: block;
-      margin: 0 auto;
-    }
-    .jackpot-node img { width: 70%; height: 70%; object-fit: contain; }
-
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.8);
-      z-index: 1000; display: none; align-items: center; justify-content: center;
-      padding: 16px;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal {
-      background: var(--panel); border: 1px solid #1e3a5f;
-      border-radius: 12px; padding: 24px; max-width: 480px; width: 100%;
-      max-height: 90vh; overflow-y: auto;
-      box-shadow: 0 0 60px rgba(0,240,255,.1);
-    }
-    .modal h2 { color: var(--cyan); margin-bottom: 16px; font-size: 1.1rem; letter-spacing: 2px; }
-    .modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
-    .option-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 10px; border: 1px solid #1e3a5f; border-radius: 8px;
-      margin-bottom: 8px; cursor: pointer; transition: all .15s;
-    }
-    .option-row:hover, .option-row.selected { border-color: var(--cyan); background: rgba(0,240,255,.05); }
-    .option-name { font-weight: 600; font-size: .9rem; }
-    .option-cost { color: var(--orange); font-size: .85rem; }
-    .option-desc { font-size: .75rem; color: var(--dim); margin-top: 2px; }
-
-    /* Cheat debug panel */
-    .cheat-presets {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-    .cheat-presets button {
-      text-align: left;
-      padding: 8px 10px;
-      font-size: .72rem;
-      line-height: 1.25;
-      background: #0a1220;
-      border: 1px solid #1e3a5f;
-      border-radius: 8px;
-      color: var(--text);
-      cursor: pointer;
-      font-family: inherit;
-    }
-    .cheat-presets button:hover {
-      border-color: var(--cyan);
-      background: rgba(0,240,255,.08);
-    }
-    .cheat-presets button strong {
-      display: block;
-      color: var(--cyan);
-      font-size: .7rem;
-      letter-spacing: .3px;
-      margin-bottom: 2px;
-    }
-    .cheat-field { margin-bottom: 10px; }
-    .cheat-field label {
-      display: block;
-      font-size: .68rem;
-      color: var(--dim);
-      margin-bottom: 4px;
-      letter-spacing: .4px;
-      text-transform: uppercase;
-    }
-    .cheat-field input,
-    .cheat-field select,
-    .cheat-field textarea {
-      width: 100%;
-      padding: 8px 10px;
-      background: #0a0a0f;
-      border: 1px solid #1e3a5f;
-      border-radius: 8px;
-      color: var(--text);
-      font-size: .8rem;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    }
-    .cheat-field textarea { min-height: 72px; resize: vertical; }
-    #cheatLog {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      background: #050810;
-      border: 1px solid #1e3a5f;
-      font-size: .72rem;
-      color: var(--dim);
-      max-height: 120px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    }
-    #cheatLog.ok { color: var(--green); border-color: rgba(0,255,136,.35); }
-    #cheatLog.err { color: var(--red); border-color: rgba(255,42,58,.35); }
-    #cheatGridEditor {
-      display: none;
-      margin-bottom: 12px;
-      padding: 10px;
-      border: 1px solid #1e3a5f;
-      border-radius: 10px;
-      background: rgba(0,0,0,.35);
-    }
-    #cheatGridEditor.visible { display: block; }
-    #cheatGridEditor .grid-head {
-      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-      justify-content: space-between; margin-bottom: 8px;
-    }
-    #cheatGridEditor .grid-head span {
-      font-size: .68rem; color: var(--dim); letter-spacing: .4px; text-transform: uppercase;
-    }
-    #cheatGridEditor .grid-tools { display: flex; flex-wrap: wrap; gap: 4px; }
-    #cheatGridEditor .grid-tools button {
-      font-size: .65rem; padding: 4px 8px; border-radius: 6px;
-      border: 1px solid #1e3a5f; background: #0a1220; color: var(--text);
-      cursor: pointer; font-family: inherit;
-    }
-    #cheatGridEditor .grid-tools button:hover { border-color: var(--cyan); color: var(--cyan); }
-    #cheatGridTable {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-    #cheatGridTable th {
-      font-size: .6rem; color: var(--dim); font-weight: 600; padding: 2px;
-    }
-    #cheatGridTable td { padding: 2px; }
-    #cheatGridTable select {
-      width: 100%;
-      padding: 4px 2px;
-      font-size: .68rem;
-      background: #0a0a0f;
-      border: 1px solid #1e3a5f;
-      border-radius: 6px;
-      color: var(--text);
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    }
-    #cheatSessionBadge {
-      font-size: .68rem; color: var(--dim); margin-bottom: 10px;
-      padding: 6px 8px; border-radius: 6px; background: rgba(0,240,255,.05);
-      border: 1px dashed #1e3a5f; line-height: 1.4;
-    }
-    #cheatSessionBadge strong { color: var(--cyan); }
-    #btnCheatFab {
-      position: fixed;
-      right: 12px;
-      bottom: 56px;
-      z-index: 900;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 1px solid rgba(255,208,0,.45);
-      background: rgba(10,14,24,.9);
-      color: var(--yellow);
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: 0 0 16px rgba(255,208,0,.2);
-      display: none;
-    }
-    #btnCheatFab.visible { display: flex; align-items: center; justify-content: center; }
-    #btnCheatFab:hover { border-color: var(--yellow); box-shadow: var(--glow-yellow); }
-
-    .paytable-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .pay-sym { text-align: center; padding: 8px; background: #0d0d1a; border-radius: 8px; border: 1px solid #1e3a5f; }
-    .pay-sym .name { font-size: .65rem; color: var(--dim); margin: 4px 0; }
-    .pay-sym .pays { font-size: .7rem; color: var(--green); }
-
-    .history-item {
-      padding: 10px; border-bottom: 1px solid #1e3a5f;
-      font-size: .8rem; cursor: pointer;
-    }
-    .history-item:hover { background: rgba(0,240,255,.05); }
-    .history-profit-pos { color: var(--green); }
-    .history-profit-neg { color: var(--red); }
-
-    #winOverlay {
-      position: fixed; inset: 0; z-index: 500;
-      display: none; align-items: center; justify-content: center;
-      flex-direction: column; gap: 10px;
-      pointer-events: none;
-      background: radial-gradient(ellipse at center, rgba(0,0,0,.55) 0%, rgba(0,0,0,.2) 55%, transparent 75%);
-    }
-    #winOverlay.show { display: flex; }
-    .win-text {
-      font-size: clamp(2rem, 7vw, 3.4rem); font-weight: 900; letter-spacing: 4px;
-      animation: winPop .55s cubic-bezier(.2,1.2,.3,1);
-      text-shadow: 0 0 40px currentColor, 0 4px 0 rgba(0,0,0,.45);
-      text-align: center;
-    }
-    .win-amount-fx {
-      font-size: clamp(1.4rem, 4vw, 2.2rem);
-      font-weight: 800;
-      color: #fff;
-      text-shadow: 0 0 18px rgba(0,255,136,.8), 0 2px 6px #000;
-      animation: winPop .55s cubic-bezier(.2,1.2,.3,1) .08s both;
-    }
-    .win-big { color: #00e5ff; }
-    .win-mega { color: #c44dff; }
-    .win-legendary { color: #ff9a1a; }
-    @keyframes winPop { 0%{transform:scale(.35);opacity:0} 60%{transform:scale(1.12)} 100%{transform:scale(1);opacity:1} }
-
-    #featToast {
-      position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
-      background: rgba(10,10,30,.95); border: 1px solid var(--cyan);
-      padding: 10px 20px; border-radius: 8px; z-index: 400;
-      font-size: .85rem; font-weight: 600; color: var(--cyan);
-      display: none; box-shadow: var(--glow-cyan);
-      white-space: nowrap;
-    }
-    #featToast.show { display: block; animation: toastIn .3s; }
-    @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(-10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
-
-    .jackpot-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-    .jackpot-node {
-      aspect-ratio: 1; background: #1a0a2a; border: 2px solid var(--red);
-      border-radius: 8px; display: flex; align-items: center; justify-content: center;
-      font-size: 1.5rem; cursor: pointer; transition: all .2s;
-    }
-    .jackpot-node:hover:not(.opened) { box-shadow: var(--glow-red); }
-    .jackpot-node.opened { cursor: default; border-color: var(--dim); }
-
-    #symTooltip {
-      position: fixed; z-index: 300; background: #0d0d1a;
-      border: 1px solid var(--cyan); border-radius: 8px;
-      padding: 10px; font-size: .75rem; display: none;
-      pointer-events: none; box-shadow: var(--glow-cyan);
-    }
-
-    @media (max-width: 720px) {
-      .stage {
-        grid-template-columns: 56px minmax(0, 1fr);
-        gap: 4px;
-        padding: 6px;
-        max-width: 100%;
-      }
-      .logo-badge { width: 52px; height: 52px; }
-      .logo-badge .logo-main { font-size: .7rem; }
-      .logo-badge .logo-sub { font-size: .38rem; }
-      .circle-btn { width: 40px; height: 40px; font-size: .95rem; }
-      .circle-btn img { width: 22px; height: 22px; }
-      .playfield { max-width: 100%; }
-      .game-frame { max-width: 100%; }
-      .feature-meter {
-        height: clamp(56px, 11vh, 80px);
-        gap: 2px;
-        padding-left: 4px;
-        padding-right: 4px;
-      }
-      .feat-badge { height: clamp(42px, 8vh, 60px); }
-      .spin-controls { min-height: clamp(50px, 9vh, 64px); height: auto; }
-      .spin-btn { width: clamp(44px, 8.5vh, 58px); height: clamp(44px, 8.5vh, 58px); }
-      .spin-controls .circle-btn { width: clamp(36px, 7vh, 48px); height: clamp(36px, 7vh, 48px); }
-      .spin-controls #btnAuto { width: clamp(48px, 9vh, 62px) !important; height: clamp(48px, 9vh, 62px) !important; }
-      .reels-grid {
-        --reels-ar: 5 / 3.1;
-        aspect-ratio: 5 / 3.1;
-        width: min(100%, 100cqi, calc(100cqb * 5 / 3.1));
-        height: min(100%, 100cqb, calc(100cqi * 3.1 / 5));
-      }
-      .mult-box { width: 54px; font-size: 1rem; }
-      .bottom-bar { font-size: .75rem; padding: 0 10px; height: 36px; }
-    }
-
-    /* Tablet / desktop rộng: giữ tỉ lệ, scale frame lớn hơn, không kéo giãn reels */
-    @media (min-width: 900px) {
-      .game-frame { max-width: min(980px, 70vw); }
-      .stage { max-width: min(1400px, 100%); }
-      .mult-box { width: clamp(72px, 6vw, 96px); font-size: clamp(1.35rem, 1.6vw, 1.7rem); }
-      .info-bar { height: clamp(28px, 3.5vh, 36px); font-size: clamp(.78rem, 1vw, .9rem); }
-    }
-
-    @media (min-width: 1200px) and (min-height: 720px) {
-      .game-frame { max-width: min(1080px, 62vw); }
-      .feature-meter { height: clamp(84px, 9vh, 120px); }
-      .feat-badge { height: clamp(68px, 7.5vh, 100px); }
-      .spin-controls { min-height: clamp(68px, 8vh, 92px); }
-    }
-
-    /* Màn ngang thấp: ưu tiên chiều cao reels, thu gọn chrome */
-    @media (max-height: 640px) and (min-width: 721px) {
-      .top-chrome { height: 22px; font-size: .62rem; }
-      .feature-meter { height: clamp(48px, 12vh, 68px); padding-top: 4px; padding-bottom: 4px; }
-      .feat-badge { height: clamp(40px, 10vh, 56px); }
-      .info-bar { height: 24px; font-size: .7rem; }
-      .spin-controls { min-height: clamp(44px, 10vh, 58px); padding-top: 2px; padding-bottom: 2px; }
-      .bottom-bar { height: 32px; font-size: .75rem; }
-      .logo-badge { width: 52px; height: 52px; }
-      .side-left { gap: 6px; }
-      .side-stack { gap: 6px; }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Ambient cyber stage (behind UI) -->
-  <div id="bgScene" aria-hidden="true">
-    <div class="bg-depth"></div>
-    <div class="bg-ceiling"></div>
-    <div class="bg-core"></div>
-    <div class="bg-radar"></div>
-    <div class="bg-stars"></div>
-    <div class="bg-hex"></div>
-    <div class="bg-circuits"></div>
-    <div class="bg-towers"></div>
-    <div class="bg-city"></div>
-    <div class="bg-floor"></div>
-    <div class="bg-horizon"></div>
-    <div class="bg-matrix">
-      <span>01001110 11010010 00110101 10101001 01110011</span>
-      <span>0xDEAD 0xBEEF 0xZERO 0xDAY 0xHACK 0xROOT</span>
-      <span>10110010 01011100 11100001 00101110 10010110</span>
-      <span>INFILTRATE · DECRYPT · BYPASS · OVERCLOCK</span>
-      <span>00101011 11001100 01010101 10101010 11110000</span>
-      <span>FIREWALL · TROJAN · SCAN · QUANTUM</span>
-      <span>11010110 00110011 10011001 01100110 11111100</span>
-      <span>0xA7F2 0xC0DE 0xF00D 0xCAFE 0xBABE</span>
-      <span>01010101 10101010 00110011 11001100 00001111</span>
-      <span>CORE_HACK · NODE_12 · SEC_LAYER_04</span>
-      <span>11100011 00011100 10110110 01001001 10010010</span>
-      <span>YAMA_01023 · DEEP_WEB · ZERO_DAY</span>
-    </div>
-    <div class="bg-rain">
-      <span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span>
-    </div>
-    <div class="bg-orbs">
-      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-    </div>
-    <div class="bg-scan"></div>
-    <div class="bg-laser"></div>
-    <div class="bg-laser alt"></div>
-    <div class="bg-packets">
-      <em>0xZERO · INFILTRATE · SEC_LAYER_04</em>
-      <em>PKT 0xA7F2 → ROOT · BYPASS_OK</em>
-      <em>CORE_HACK · NODE 12 · DECRYPT…</em>
-      <em>fw_block ↓ · trojan.seed · SCAN</em>
-      <em>QUANTUM_POOL · ELITE · GOD</em>
-      <em>BANDWIDTH × · SYSTEM_OVERCLOCK · LIVE</em>
-    </div>
-    <div class="bg-scanlines"></div>
-    <div class="bg-noise"></div>
-    <div class="bg-vignette"></div>
-    <div class="bg-hud">
-      <b></b><b></b><b></b><b></b>
-      <span class="hud-tag tl">SYS // ZERO-DAY</span>
-      <span class="hud-tag tr">NET · SECURE</span>
-      <span class="hud-tag bl">DEEP WEB OPS</span>
-      <span class="hud-tag br">YAMA_01023</span>
-      <span class="hud-live">● LINK ACTIVE · ENCRYPT AES-256</span>
-    </div>
-  </div>
-
-  <!-- Login Overlay -->
-  <div id="loginOverlay" class="modal-overlay" style="display:flex;z-index:10000">
-    <div class="modal" style="max-width:400px">
-      <h2 style="text-align:center;font-family:'Orbitron',monospace;letter-spacing:3px">ZERO DAY</h2>
-      <p style="text-align:center;color:var(--dim);font-size:.8rem;margin-bottom:16px">Connect to server</p>
-      <div class="form-group">
-        <label>Server</label>
-        <input id="srvUrl" value="https://agency001.relaxwmestu.xyz" style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
-      </div>
-      <div class="form-group">
-        <label>Username</label>
-        <input id="loginUser" value="Tris12" style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input id="loginPass" type="password" value="T12345678" style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
-      </div>
-      <div class="form-group" style="margin-top:4px">
-        <label>WS URL</label>
-        <input id="wsUrl" value="wss://gob02-ws.relaxwmestu.xyz/websocket" style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
-      </div>
-      <div class="form-group" style="margin-top:4px">
-        <label>Game ID</label>
-        <input id="gameId" value="yama_01023" style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
-      </div>
-      <div style="display:flex;gap:8px;margin-top:14px">
-        <button id="btnPlayOnline" class="btn" style="flex:1;padding:12px;background:linear-gradient(135deg,#003344,#005566);border-color:var(--cyan);color:var(--cyan);font-size:1rem;font-weight:700;box-shadow:var(--glow-cyan)">Play Online</button>
-        <button id="btnPlayOffline" class="btn" style="flex:1;padding:12px;background:#1a1a2e;border-color:#555;color:#aaa;font-size:1rem">Play Offline</button>
-      </div>
-      <div id="loginStatus" style="margin-top:10px;font-size:.8rem;color:var(--dim);text-align:center"></div>
-    </div>
-  </div>
-
-  <!-- Connection Status Bar -->
-  <div id="connBar" style="display:none;height:24px;background:rgba(0,0,0,.85);border-bottom:1px solid #1e3a5f;flex-shrink:0;align-items:center;padding:0 14px;font-size:.7rem;color:var(--dim);gap:12px;z-index:20">
-    <span id="connDot" style="display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px"></span>
-    <span id="connText">Disconnected</span>
-    <span id="sessionLabel" style="margin-left:auto;color:#555"></span>
-    <button id="btnDisconnect" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.65rem">✕</button>
-  </div>
-
-  <!-- Splash -->
-  <div id="splash">
-    <div class="splash-logo">ZERO DAY</div>
-    <div class="splash-sub">DEEP WEB INFILTRATION</div>
-    <div class="splash-bar"><div class="splash-fill" id="splashFill"></div></div>
-  </div>
-
-<!-- Game -->
-<div id="game">
-  <div class="top-chrome">
-    <span id="clockLabel">PLAYING FOR FUN</span>
-    <span class="title-right">ZERO DAY</span>
-  </div>
-
-  <div class="stage">
-    <div class="logo-badge" title="ZERO DAY">
-      <div class="logo-main">ZERO</div>
-      <div class="logo-sub">DAY HACK</div>
-    </div>
-
-    <div class="playfield">
-      <div class="game-frame">
-        <div class="meter-shell">
-          <div class="feature-meter" id="featureMeter"></div>
-          <div class="info-bar" id="infoBar">
-            <div class="marquee" id="infoMarquee">Win up to 19,693× Bet &nbsp;•&nbsp; 3 Scatters trigger Deep Web Infiltration &nbsp;•&nbsp; 12 Hacking Features &nbsp;•&nbsp; Good luck, hacker</div>
-          </div>
-          <div class="mult-box"><span class="x">x</span><span id="multDisplay">01</span></div>
-        </div>
-
-        <div class="fs-banner" id="fsBanner">⚡ DEEP WEB INFILTRATION — SPINS LEFT: <span id="fsCount">0</span></div>
-
-        <div class="reels-wrapper ambient-on" id="reelsWrapper">
-          <div class="reels-grid" id="reelsGrid"></div>
-          <div id="vfxLayer" aria-hidden="true">
-            <canvas id="vfxCanvas"></canvas>
-            <div id="vfxStage"></div>
-            <div id="vfxVignette"></div>
-            <div id="vfxBloom"></div>
-            <div id="vfxFeatureIntro">
-              <div class="intro-ring"></div>
-              <img id="vfxIntroImg" src="" alt="">
-              <div class="intro-name" id="vfxIntroName">FEATURE</div>
-            </div>
-            <div id="vfxExplainCard">
-              <div class="explain-head">
-                <img id="vfxExplainImg" src="" alt="">
-                <div class="explain-titles">
-                  <div class="explain-kicker">TÍNH NĂNG ĐANG KÍCH HOẠT</div>
-                  <div class="explain-name" id="vfxExplainName">—</div>
-                </div>
-              </div>
-              <div class="explain-label" id="vfxExplainLabelWhat">Feature sẽ làm gì?</div>
-              <div class="explain-body" id="vfxExplainBody">—</div>
-              <div class="explain-label" id="vfxExplainLabelHow">Ảnh hưởng thế nào?</div>
-              <div class="explain-how" id="vfxExplainHow">—</div>
-              <div class="explain-tip" id="vfxExplainTip"></div>
-              <button type="button" id="vfxExplainContinue">Tiếp tục ▶</button>
-              <div class="explain-foot">Bấm «Tiếp tục» hoặc đợi hết giờ · 📖 tắt chế độ này</div>
-            </div>
-            <div class="vfx-banner" id="vfxBanner"></div>
-            <div id="vfxCenterHud">
-              <div id="vfxBwBar"><div id="vfxBwFill"></div></div>
-              <div id="vfxBwLabel">×01</div>
-              <div id="vfxCpuBadge">⚡ OVERCLOCK</div>
-            </div>
-            <div id="vfxBypassArrows">
-              <span class="arr-l">◀ DATA</span>
-              <span class="flow-mid">⟷ BOTH WAYS ⟷</span>
-              <span class="arr-r">DATA ▶</span>
-            </div>
-            <div id="vfxFlash"></div>
-            <div id="vfxWhiteFlash"></div>
-            <div id="vfxSkipBar">
-              <button type="button" id="btnSkipVfx" title="Bỏ qua phần hiệu ứng còn lại">⏭ Bỏ qua VFX</button>
-            </div>
-          </div>
-        </div>
-<img id="vfxFlyIcon" alt="" draggable="false">
-
-        <div class="spin-controls">
-          <button class="circle-btn turbo" id="btnFast" title="Fast Spin">⚡</button>
-          <button class="circle-btn" id="btnExplainFeat" title="Feature Explain Mode — pause & show what each feature does">📖</button>
-          <button class="spin-btn" id="btnSpin" title="SPIN">
-            <img src="assert/spin.png" alt="SPIN">
-          </button>
-          <button class="circle-btn" id="btnAuto" title="Autospin"><img src="assert/auto-spin.png" alt="Auto"></button>
-        </div>
-      </div>
-    </div>
-
-    <div class="side-left">
-      <div class="side-stack">
-        <button class="circle-btn buy" id="btnBuyFeature" title="Execute Script / Buy Feature">★</button>
-        <button class="circle-btn" id="btnBuyFS" title="Buy Free Spin"><img src="assert/buy-free-spin.png" alt="Buy FS"></button>
-        <button class="circle-btn" id="btnMenu" title="Menu">☰</button>
-      </div>
-      <div class="side-row">
-        <button class="circle-btn sound" id="btnSound" title="Sound">🔊</button>
-        <button class="circle-btn bet-coin" id="betDisplay" title="Change Bet">◎</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="bottom-bar">
-    <div><span class="label">BET</span><span class="val" id="betAmount">$1.00</span></div>
-    <div><span class="label">WIN</span><span class="val win-slot" id="headerWin">0.00</span></div>
-    <div><span class="label">BALANCE</span><span class="val" id="balanceDisplay">0010000.00</span></div>
-  </div>
-</div>
-
-<!-- Modals -->
-<div class="modal-overlay" id="modalBet">
-  <div class="modal">
-    <h2>SELECT BET LEVEL</h2>
-    <div id="betOptions"></div>
-    <div class="modal-actions"><button class="btn" id="closeBet">Close</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalMenu">
-  <div class="modal">
-    <h2>MENU</h2>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="btn" id="menuPaytable">📋 Paytable</button>
-      <button class="btn" id="menuRules">📖 Game Rules</button>
-      <button class="btn" id="menuSymbolPack" title="Đổi bộ symbol art">🎨 Symbols: Classic</button>
-      <button class="btn" id="menuSound">🔊 Sound: ON</button>
-      <button class="btn" id="menuMusic">🎵 Music: ON</button>
-      <button class="btn" id="menuHistory">📜 History</button>
-      <button class="btn" id="menuJackpotHistory">🏆 Jackpot History</button>
-      <button class="btn" id="menuCheat" style="border-color:rgba(255,208,0,.4);color:var(--yellow)">🛠 Cheat / Debug</button>
-    </div>
-    <div class="modal-actions"><button class="btn" id="closeMenu">Close</button></div>
-  </div>
-</div>
-
-<!-- Cheat / Debug popup (dev-staging: WS cmd 1999 or REST /debug/cheat) -->
-<div class="modal-overlay" id="modalCheat">
-  <div class="modal" style="max-width:560px">
-    <h2 style="color:var(--yellow)">🛠 CHEAT / DEBUG</h2>
-    <p style="font-size:.72rem;color:var(--dim);margin:-8px 0 12px;line-height:1.45">
-      Gửi cheat tới backend (dev/staging). Ưu tiên <strong style="color:var(--cyan)">WS cmd 1999</strong> khi online;
-      fallback <strong style="color:var(--cyan)">REST /debug/cheat</strong>.
-      Next-spin: dùng <strong style="color:var(--yellow)">Send &amp; Spin</strong>.
-    </p>
-
-    <div id="cheatSessionBadge">Session: —</div>
-
-    <div class="cheat-presets" id="cheatPresets"></div>
-
-    <div class="cheat-field">
-      <label>Transport</label>
-      <select id="cheatTransport">
-        <option value="auto">Auto (WS nếu online, else REST)</option>
-        <option value="ws">WebSocket cmd 1999 only</option>
-        <option value="rest">REST debug only</option>
-      </select>
-    </div>
-
-    <div class="cheat-field">
-      <label>Cheat code</label>
-      <select id="cheatCode"></select>
-    </div>
-
-    <!-- FORCE_GRID visual editor (row-major 3×5, same as BE CheatGridGenerator) -->
-    <div id="cheatGridEditor">
-      <div class="grid-head">
-        <span>FORCE_GRID — row × col (ids 1–12)</span>
-        <div class="grid-tools">
-          <button type="button" id="cheatGridFillH" title="All H (8)">All H</button>
-          <button type="button" id="cheatGridFillA" title="All A (1)">All A</button>
-          <button type="button" id="cheatGridFromScreen" title="Copy current reels">From screen</button>
-          <button type="button" id="cheatGridScatter3" title="3 scatters mid reels">3S mid</button>
-          <button type="button" id="cheatGridSyncJson" title="Write grid → JSON">→ JSON</button>
-        </div>
-      </div>
-      <table id="cheatGridTable">
-        <thead>
-          <tr>
-            <th></th>
-            <th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th>
-          </tr>
-        </thead>
-        <tbody id="cheatGridBody"></tbody>
-      </table>
-      <p style="font-size:.62rem;color:var(--dim);margin-top:6px;line-height:1.35">
-        1–10 pay · 11 Wild · 12 Scatter · row-major <code>grid[row][col]</code>
-      </p>
-    </div>
-
-    <div class="cheat-field">
-      <label>Value (JSON object)</label>
-      <textarea id="cheatValue" placeholder='{}  e.g. {"scatters":4}  {"multiplier":500}  {"features":["BypassProtocol"]}'>{}</textarea>
-    </div>
-
-    <details style="margin-bottom:10px">
-      <summary style="cursor:pointer;color:var(--dim);font-size:.75rem;margin-bottom:8px">REST options (local backend)</summary>
-      <div class="cheat-field">
-        <label>Debug base URL</label>
-        <input id="cheatDebugBase" value="http://localhost:3000/api/game/zeroday" />
-      </div>
-      <div class="cheat-field">
-        <label>X-Debug-Token</label>
-        <input id="cheatDebugToken" value="zeroday-debug-2024" />
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div class="cheat-field" style="margin:0">
-          <label>Agency ID <span style="color:var(--cyan);font-weight:400">(từ session)</span></label>
-          <input id="cheatAgencyId" value="" placeholder="auto from session / host" />
-        </div>
-        <div class="cheat-field" style="margin:0">
-          <label>User ID <span style="color:var(--cyan);font-weight:400">(từ session)</span></label>
-          <input id="cheatUserId" value="" placeholder="auto from session / login" />
-        </div>
-      </div>
-      <button type="button" class="btn" id="cheatPullSession" style="width:100%;margin-top:4px;font-size:.75rem">
-        Pull agency/user from session
-      </button>
-    </details>
-
-    <div class="modal-actions" style="justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px">
-      <button type="button" class="btn" id="cheatClearLog" style="margin-right:auto">Clear log</button>
-      <button type="button" class="btn" id="closeCheat">Close</button>
-      <button type="button" class="btn" id="cheatSend" style="border-color:#1e3a5f;color:var(--text)">Send only</button>
-      <button type="button" class="btn" id="cheatSendSpin" style="border-color:var(--yellow);color:var(--yellow);font-weight:700">Send &amp; Spin</button>
-    </div>
-    <div id="cheatLog">Ready. Chọn preset hoặc code → Send / Send &amp; Spin.</div>
-  </div>
-</div>
-
-<button type="button" id="btnCheatFab" title="Cheat panel (Ctrl+Shift+C)" aria-label="Open cheat panel">🛠</button>
-
-<div class="modal-overlay" id="modalPaytable">
-  <div class="modal" style="max-width:600px">
-    <h2>PAYTABLE</h2>
-    <div class="paytable-grid" id="paytableGrid"></div>
-    <p style="font-size:.75rem;color:var(--dim);margin-top:12px">W = Wild (substitutes all) &nbsp;|&nbsp; S = Scatter (3+ triggers Free Spins) &nbsp;|&nbsp; Win Cap: 19,693× Bet</p>
-    <div class="modal-actions"><button class="btn" id="closePaytable">Close</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalRules">
-  <div class="modal">
-    <h2>GAME RULES</h2>
-    <div style="font-size:.8rem;line-height:1.6;color:var(--dim)">
-      <p><strong style="color:var(--text)">243 Ways to Win</strong> — Wins start from Reel 1, consecutive reels, any row position.</p>
-      <p style="margin-top:8px"><strong style="color:var(--text)">Win Formula:</strong> Win Count × Cx × Bet × Multipliers. Capped at 19,693× Bet.</p>
-      <p style="margin-top:8px"><strong style="color:var(--text)">12 Features</strong> randomly trigger. Multiple features execute in fixed order.</p>
-      <p style="margin-top:8px"><strong style="color:var(--text)">Free Spins:</strong> 3/4/5 Scatters → 7 spins with 1/2/3 persistent features. +1 spin per new feature.</p>
-    </div>
-    <div class="modal-actions"><button class="btn" id="closeRules">Close</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalFeatureDetail">
-  <div class="modal" style="max-width:420px">
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-      <img id="featDetailImg" src="" alt="" style="width:72px;height:72px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 0 12px rgba(0,240,255,.45))">
-      <div style="min-width:0">
-        <h2 id="featDetailTitle" style="margin:0 0 6px;font-size:1.05rem;letter-spacing:1px"></h2>
-        <div id="featDetailTiming" style="font-size:.72rem;color:var(--dim);letter-spacing:.3px"></div>
-      </div>
-    </div>
-    <div id="featDetailStatus" style="display:none;margin-bottom:10px;padding:6px 10px;border-radius:8px;font-size:.75rem;font-weight:700;letter-spacing:.5px"></div>
-    <p style="font-size:.68rem;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:800">Feature sẽ làm gì?</p>
-    <p id="featDetailDesc" style="font-size:.88rem;line-height:1.55;color:var(--text);margin-bottom:12px"></p>
-    <p style="font-size:.68rem;color:rgba(0,255,136,.85);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:800">Ảnh hưởng thế nào?</p>
-    <p id="featDetailHow" style="font-size:.84rem;line-height:1.55;color:#c8e8d8;margin-bottom:12px;padding:10px 12px;border-radius:10px;background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.15)"></p>
-    <p style="font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:800">Hiệu ứng trên màn</p>
-    <p id="featDetailVfx" style="font-size:.8rem;line-height:1.5;color:var(--dim);margin-bottom:0"></p>
-    <div class="modal-actions"><button class="btn" id="closeFeatureDetail">Đóng</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalHistory">
-  <div class="modal" style="max-width:560px">
-    <h2>SPIN HISTORY <span style="font-size:.65rem;color:var(--dim)" id="historySubtitle">(30 days)</span></h2>
-    <div id="historyList"></div>
-    <div class="modal-actions"><button class="btn" id="closeHistory">Close</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalSpinDetail">
-  <div class="modal" style="max-width:520px">
-    <h2>SPIN DETAIL</h2>
-    <div id="spinDetailBody" style="font-size:.8rem;line-height:1.55;color:var(--dim);max-height:55vh;overflow:auto"></div>
-    <div class="modal-actions">
-      <button class="btn" id="btnSessionRounds" style="display:none">Package rounds</button>
-      <button class="btn" id="closeSpinDetail">Close</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalJackpotHistory">
-  <div class="modal" style="max-width:560px">
-    <h2>JACKPOT HISTORY</h2>
-    <div id="jackpotHistoryList"></div>
-    <div class="modal-actions"><button class="btn" id="closeJackpotHistory">Close</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalBuyFeature">
-  <div class="modal">
-    <h2>EXECUTE SCRIPT — BUY FEATURES</h2>
-    <p style="font-size:.75rem;color:var(--dim);margin:-8px 0 12px;line-height:1.45">
-      Online: WS <code style="color:var(--cyan)">cmd 1501</code> +
-      <code style="color:var(--cyan)">scatterBooster</code> /
-      <code style="color:var(--cyan)">3Features</code> /
-      <code style="color:var(--cyan)">12Features</code>
-      — server trừ phí và chạy 1 spin ngay.
-    </p>
-    <div id="buyFeatureOptions"></div>
-    <div class="modal-actions">
-      <button class="btn" id="cancelBuyFeature">Cancel</button>
-      <button class="btn btn-primary" id="confirmBuyFeature">Confirm</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalBuyFS">
-  <div class="modal">
-    <h2>UNKNOWN PAYLOAD — BUY FREE SPIN</h2>
-    <p style="font-size:.75rem;color:var(--dim);margin:-8px 0 12px;line-height:1.45">
-      Online: WS <code style="color:var(--cyan)">cmd 1501</code> + <code style="color:var(--cyan)">feature: FS1–FS4</code>.
-      Server trừ phí (80× / 240× / 500× / 212× bet) và trả feature spin.
-    </p>
-    <div id="buyFSOptions"></div>
-    <div class="modal-actions">
-      <button class="btn" id="cancelBuyFS">Cancel</button>
-      <button class="btn btn-primary" id="confirmBuyFS">Confirm</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalAuto">
-  <div class="modal">
-    <h2>AUTOSPIN</h2>
-    <div id="autoOptions"></div>
-    <div class="modal-actions"><button class="btn" id="closeAuto">Cancel</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalFS">
-  <div class="modal" style="text-align:center">
-    <h2 style="color:var(--purple)">⚡ SYSTEM COMPROMISED</h2>
-    <p style="font-size:1.1rem;margin:16px 0">Deep Web Infiltration Activated!</p>
-    <p id="fsTriggerInfo" style="color:var(--dim);font-size:.85rem;margin-bottom:20px"></p>
-    <button class="btn btn-primary" id="startFS">START</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalFSSummary">
-  <div class="modal" style="text-align:center">
-    <h2 style="color:var(--green)">MISSION COMPLETE</h2>
-    <p style="font-size:1.2rem;margin:16px 0">Total Win: <span id="fsTotalWin" style="color:var(--green)">$0.00</span></p>
-    <button class="btn btn-primary" id="closeFSSummary">CONTINUE</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalMaxWin">
-  <div class="modal" style="text-align:center">
-    <h2 style="color:var(--orange)">MAXIMUM WIN CAP REACHED</h2>
-    <p id="maxWinMsg" style="margin:16px 0;font-size:1rem"></p>
-    <button class="btn btn-primary" id="closeMaxWin">OK</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalJackpot">
-  <div class="modal" style="max-width:500px">
-    <h2 style="color:var(--red)">⚡ CORE HACK — MAINFRAME</h2>
-    <p style="font-size:.8rem;color:var(--dim);margin-bottom:12px">Decrypt nodes. Match 3 identical fragments to win.</p>
-    <div class="jackpot-grid" id="jackpotGrid"></div>
-    <div id="jackpotPicks" style="text-align:center;margin-top:10px;font-size:.85rem;color:var(--dim)"></div>
-  </div>
-</div>
-
-<div id="winOverlay">
-  <div class="win-text" id="winText"></div>
-  <div class="win-amount-fx" id="winAmountFx"></div>
-</div>
-<div id="featToast"></div>
-<div id="symTooltip"></div>
-
-<script>
 // ═══════════════════════════════════════════════════════════════
 // ZERO DAY — Slot Game Engine
 // ═══════════════════════════════════════════════════════════════
 
 const ASSET = 'assert/';
+
+/** Canonical path stays .png; swap to .webp when canvas probe said yes. */
+function toPngPath(path) {
+  return String(path || '').replace(/\.webp(\?|#|$)/i, '.png$1');
+}
+function assetUrl(path) {
+  const png = toPngPath(path);
+  if (!png || window.__ZD_WEBP === false) return png;
+  return png.replace(/\.png(\?|#|$)/i, '.webp$1');
+}
+function setImgSrc(el, path) {
+  if (!el) return;
+  const png = toPngPath(path);
+  const href = assetUrl(png);
+  el.src = href;
+  if (href && href !== png) {
+    el.onerror = () => {
+      el.onerror = null;
+      window.__ZD_WEBP = false;
+      document.documentElement.classList.remove('webp');
+      el.src = png;
+    };
+  }
+}
+function imgTag(path, extra = '') {
+  const png = toPngPath(path);
+  const href = assetUrl(png);
+  const fb = href && href !== png ? ` onerror="this.onerror=null;this.src='${png}'"` : '';
+  return `<img src="${href}"${fb}${extra ? ' ' + extra : ''}>`;
+}
+
 /** Letter symbols shared by both art packs (A–K, W, S). Mystery uses pack file name. */
 const LETTER_SYMS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'W', 'S'];
 const MYSTERY_FILE = 'trojan-horse-mystery.png';
@@ -3076,7 +41,7 @@ const SYMBOL_PACKS = {
   classic: { id: 'classic', label: 'Classic', base: ASSET },
   artNew:  { id: 'artNew',  label: 'Art New', base: ASSET + 'art-new/' },
 };
-const DEFAULT_SYMBOL_PACK = 'classic';
+const DEFAULT_SYMBOL_PACK = 'artNew';
 
 const SYMBOLS = {
   A: { img: ASSET + 'A.png', name: 'Master Hacker', type: 'high', pays: [0,0,0.75,1.00,1.50] },
@@ -3109,9 +74,9 @@ function applySymbolPack(packId, { persist = true, toast = false, rerender = tru
   const pack = SYMBOL_PACKS[packId] || SYMBOL_PACKS.classic;
   if (state) state.symbolPack = pack.id;
   for (const k of LETTER_SYMS) {
-    if (SYMBOLS[k]) SYMBOLS[k].img = pack.base + k + '.png';
+    if (SYMBOLS[k]) SYMBOLS[k].img = assetUrl(pack.base + k + '.png');
   }
-  if (SYMBOLS.M) SYMBOLS.M.img = pack.base + MYSTERY_FILE;
+  if (SYMBOLS.M) SYMBOLS.M.img = assetUrl(pack.base + MYSTERY_FILE);
   if (persist) {
     try { localStorage.setItem('zd_symbol_pack', pack.id); } catch (_) { /* ignore */ }
   }
@@ -3120,6 +85,10 @@ function applySymbolPack(packId, { persist = true, toast = false, rerender = tru
   // Theme playfield to match art pack (classic = blue chrome, artNew = matrix green)
   document.body.classList.toggle('pack-art-new', pack.id === 'artNew');
   document.body.classList.toggle('pack-classic', pack.id === 'classic');
+  if (pack.id === 'artNew') {
+    ensureSpritePackTicker();
+    preloadSpritePack();
+  }
   if (rerender) {
     if (typeof renderPaytable === 'function') renderPaytable();
     if (typeof renderGrid === 'function' && state?.grid?.length) renderGrid();
@@ -3146,6 +115,338 @@ function cycleSymbolPack() {
   applySymbolPack(next, { toast: true });
 }
 
+/**
+ * Per-symbol aura — mỗi loại tỏa 1 màu riêng (idle trên reels).
+ * high = ấm/rực · low = lạnh/neon · special = đậm đặc trưng
+ */
+const SYM_AURA = {
+  A: { glow: '#ff4d6d', glow2: 'rgba(255,60,100,.35)',  hue: 0,   sat: 1.12, bright: 1.06 }, // Master Hacker — đỏ hồng
+  B: { glow: '#00e5ff', glow2: 'rgba(0,220,255,.35)',   hue: 0,   sat: 1.1,  bright: 1.05 }, // AI Core — cyan
+  C: { glow: '#b388ff', glow2: 'rgba(160,100,255,.35)', hue: 0,   sat: 1.12, bright: 1.05 }, // VR — tím
+  D: { glow: '#69f0ae', glow2: 'rgba(80,240,160,.32)',  hue: 0,   sat: 1.08, bright: 1.04 }, // Drone — mint
+  E: { glow: '#ffab40', glow2: 'rgba(255,160,40,.35)',  hue: 0,   sat: 1.12, bright: 1.05 }, // EMP — cam
+  F: { glow: '#ffd54f', glow2: 'rgba(255,200,50,.32)',  hue: 0,   sat: 1.1,  bright: 1.04 }, // Bitcoin — vàng
+  G: { glow: '#64ffda', glow2: 'rgba(80,255,200,.3)',   hue: 0,   sat: 1.08, bright: 1.03 }, // Terminal — teal
+  H: { glow: '#40c4ff', glow2: 'rgba(50,180,255,.32)',  hue: 0,   sat: 1.08, bright: 1.03 }, // Code — sky
+  I: { glow: '#ea80fc', glow2: 'rgba(220,100,255,.32)', hue: 0,   sat: 1.1,  bright: 1.04 }, // ETH — magenta
+  K: { glow: '#00ff9c', glow2: 'rgba(0,255,140,.32)',   hue: 0,   sat: 1.1,  bright: 1.04 }, // Microchip — matrix green
+  W: { glow: '#76ff03', glow2: 'rgba(100,255,40,.4)',   hue: 8,   sat: 1.18, bright: 1.08 }, // Wild — lime
+  S: { glow: '#ff1744', glow2: 'rgba(255,30,70,.42)',   hue: 0,   sat: 1.15, bright: 1.06 }, // Scatter — đỏ
+  M: { glow: '#d500f9', glow2: 'rgba(200,0,255,.4)',    hue: 0,   sat: 1.2,  bright: 1.06 }, // Mystery — purple
+};
+
+function idleAuraFx(sym) {
+  const a = SYM_AURA[sym];
+  if (!a) return null;
+  return {
+    scale: 1,
+    hue: a.hue ?? 0,
+    sat: a.sat ?? 1.08,
+    bright: a.bright ?? 1.04,
+    contrast: 1,
+    glow: a.glow,
+    glowSize: 11,
+    glow2: a.glow2 || 'transparent',
+    glow2Size: 18,
+  };
+}
+
+/**
+ * Symbol visual FX presets (PNG art kept; look driven by CSS vars / classes).
+ * Use setSymbolFx(imgEl, 'surge') or setSymbolFx(imgEl, { hue: 90, scale: 1.2, glow: '#f0f' }).
+ */
+const SYM_FX = {
+  none:      { scale: 1, hue: 0, sat: 1, bright: 1, contrast: 1, glow: 'transparent', glowSize: 0, glow2: 'transparent', glow2Size: 0 },
+  wild:      { scale: 1.03, hue: 8, sat: 1.2, bright: 1.08, glow: '#76ff03', glowSize: 12, glow2: 'rgba(100,255,40,.4)', glow2Size: 20 },
+  scatter:   { scale: 1.04, hue: 0, sat: 1.15, bright: 1.05, glow: '#ff1744', glowSize: 12, glow2: 'rgba(255,30,70,.4)', glow2Size: 20 },
+  mystery:   { scale: 1, hue: 0, sat: 1.2, bright: 1.05, glow: '#d500f9', glowSize: 12, glow2: 'rgba(200,0,255,.4)', glow2Size: 20 },
+  win:       { scale: 1.06, hue: 0, sat: 1.2, bright: 1.1, glow: '#00ff88', glowSize: 14 },
+  decrypt:   { scale: 1.05, hue: 175, sat: 1.45, bright: 1.2, glow: '#00f0ff', glowSize: 14 },
+  surge:     { scale: 1.08, hue: 45, sat: 1.5, bright: 1.25, glow: '#ffff00', glowSize: 16 },
+  overclock: { scale: 1.05, hue: -25, sat: 1.35, bright: 1.15, glow: '#ff8800', glowSize: 12 },
+  glitch:    { scale: 1, hue: 275, sat: 1.55, bright: 1.1, glow: '#aa44ff', glowSize: 10 },
+  dim:       { scale: 0.94, hue: 0, sat: 0.45, bright: 0.62, glow: 'transparent', glowSize: 0 },
+  hot:       { scale: 1.08, hue: -18, sat: 1.4, bright: 1.18, glow: '#ff4400', glowSize: 14 },
+  ice:       { scale: 1, hue: 185, sat: 0.95, bright: 1.15, glow: '#88eeff', glowSize: 12 },
+  pulse:     { scale: 1, hue: 0, sat: 1.1, bright: 1.05, glow: '#00ff9c', glowSize: 8 },
+};
+
+const SYM_FX_CLASS = {
+  wild: 'fx-wild', decrypt: 'fx-decrypt', surge: 'fx-surge', overclock: 'fx-overclock',
+  glitch: 'fx-glitch', dim: 'fx-dim', hot: 'fx-hot', ice: 'fx-ice', pulse: 'fx-pulse',
+};
+
+function resolveSymFx(fx) {
+  if (!fx || fx === 'none') return { ...SYM_FX.none };
+  if (typeof fx === 'string') return { ...SYM_FX.none, ...(SYM_FX[fx] || {}) };
+  return { ...SYM_FX.none, ...fx };
+}
+
+/** Apply FX to a .sym-img element. Pass null/'none' to reset. */
+function setSymbolFx(el, fx) {
+  if (!el) return;
+  // strip named fx classes
+  Object.values(SYM_FX_CLASS).forEach(c => el.classList.remove(c));
+  el.classList.remove('fx-aura-breathe', 'fx-pulse');
+  if (!fx || fx === 'none') {
+    ['--sym-scale', '--sym-hue', '--sym-sat', '--sym-bright', '--sym-contrast',
+      '--sym-glow', '--sym-glow-size', '--sym-glow2', '--sym-glow2-size'].forEach(k => el.style.removeProperty(k));
+    delete el.dataset.symFx;
+    el.style.animation = '';
+    el.style.animationDelay = '';
+    return;
+  }
+  const p = resolveSymFx(fx);
+  el.style.setProperty('--sym-scale', String(p.scale ?? 1));
+  el.style.setProperty('--sym-hue', `${p.hue ?? 0}deg`);
+  el.style.setProperty('--sym-sat', String(p.sat ?? 1));
+  el.style.setProperty('--sym-bright', String(p.bright ?? 1));
+  el.style.setProperty('--sym-contrast', String(p.contrast ?? 1));
+  el.style.setProperty('--sym-glow', p.glow || 'transparent');
+  el.style.setProperty('--sym-glow-size', `${p.glowSize ?? 0}px`);
+  el.style.setProperty('--sym-glow2', p.glow2 || 'transparent');
+  el.style.setProperty('--sym-glow2-size', `${p.glow2Size ?? 0}px`);
+  const name = typeof fx === 'string' ? fx : 'custom';
+  el.dataset.symFx = name;
+  if (typeof fx === 'string' && SYM_FX_CLASS[fx]) {
+    el.classList.add(SYM_FX_CLASS[fx]);
+  }
+  if (name === 'pulse' || p.pulse) {
+    el.classList.add('fx-pulse');
+  }
+}
+
+/** Apply same FX to all .sym-img inside a cell / container. */
+function setCellSymbolFx(cellOrSel, fx) {
+  const root = typeof cellOrSel === 'string' ? document.querySelector(cellOrSel) : cellOrSel;
+  if (!root) return;
+  root.querySelectorAll('.sym-img').forEach(img => setSymbolFx(img, fx));
+}
+
+/**
+ * Animation-pack sprite sheets (Art New only).
+ * Source: assert/art-new/animation-pack/ — optimized *-sprite.png (6×6).
+ */
+const SPRITE_PACK_BASE = ASSET + 'art-new/animation-pack/';
+const SYM_SPRITES = {
+  W: { file: 'wild-sprite.png', cols: 6, rows: 6, frames: 36, idleFps: 10, winFps: 18 },
+  A: { file: 'A-sprite.png',    cols: 6, rows: 6, frames: 36, idleFps: 8,  winFps: 14 },
+  D: { file: 'D-sprite.png',    cols: 6, rows: 6, frames: 36, idleFps: 10, winFps: 16 },
+  E: { file: 'E-sprite.png',    cols: 6, rows: 6, frames: 36, idleFps: 10, winFps: 16 },
+  S: { file: 'S-sprite.png',    cols: 6, rows: 6, frames: 36, idleFps: 9,  winFps: 16 },
+  M: { file: 'M-sprite.png',    cols: 6, rows: 6, frames: 36, idleFps: 8,  winFps: 14 },
+};
+// Compat alias
+const WILD_SPRITE = SYM_SPRITES.W;
+
+const _spriteState = {}; // sym → { frame, lastTs }
+let _spriteRaf = 0;
+let _spriteBoostUntil = 0;
+
+function useSpritePackAnim() {
+  return getSymbolPackId() === 'artNew';
+}
+/** @deprecated use useSpritePackAnim */
+function useWildSpriteAnim() {
+  return useSpritePackAnim();
+}
+
+function spriteFrameToPos(cfg, frame) {
+  const f = ((frame % cfg.frames) + cfg.frames) % cfg.frames;
+  const c = f % cfg.cols;
+  const r = Math.floor(f / cfg.cols) % cfg.rows;
+  const x = cfg.cols <= 1 ? 0 : (c / (cfg.cols - 1)) * 100;
+  const y = cfg.rows <= 1 ? 0 : (r / (cfg.rows - 1)) * 100;
+  return { x, y, f };
+}
+
+function setSpriteCssFrame(sym, frame) {
+  const cfg = SYM_SPRITES[sym];
+  if (!cfg) return;
+  const { x, y } = spriteFrameToPos(cfg, frame);
+  const root = document.documentElement;
+  root.style.setProperty(`--sp-${sym}-fx`, `${x}%`);
+  root.style.setProperty(`--sp-${sym}-fy`, `${y}%`);
+  // compat for old --wild-* vars
+  if (sym === 'W') {
+    root.style.setProperty('--wild-fx', `${x}%`);
+    root.style.setProperty('--wild-fy', `${y}%`);
+  }
+}
+
+function spriteShouldBoost(sym) {
+  if (performance.now() < _spriteBoostUntil) return true;
+  const sel =
+    `.cell.win .sym-sprite-${sym},` +
+    `.cell.scatter-win .sym-sprite-${sym},` +
+    `.cell.mystery .sym-sprite-${sym},` +
+    `.cell.vfx-wild-glow .sym-sprite-${sym},` +
+    `.reel.vfx-wild-col .sym-sprite-${sym},` +
+    `.cell.vfx-surge .sym-sprite-${sym},` +
+    `.cell.vfx-hit .sym-sprite-${sym}`;
+  // also old wild class
+  if (sym === 'W') {
+    return !!document.querySelector(
+      sel + ',.cell.win .sym-wild-sprite,.cell.vfx-wild-glow .sym-wild-sprite,.reel.vfx-wild-col .sym-wild-sprite'
+    );
+  }
+  return !!document.querySelector(sel);
+}
+
+let _spriteScanTs = 0;
+const _spritePresent = {};
+const _spriteBoosting = {};
+
+function refreshSpritePresence(now) {
+  if (now - _spriteScanTs < 180) return;
+  _spriteScanTs = now;
+  for (const sym of Object.keys(SYM_SPRITES)) {
+    const present =
+      !!document.querySelector(`.sym-sprite-${sym}`) ||
+      (sym === 'W' && !!document.querySelector('.sym-wild-sprite'));
+    _spritePresent[sym] = present;
+    _spriteBoosting[sym] = present && spriteShouldBoost(sym);
+  }
+}
+
+function spritePackTick(now) {
+  if (document.hidden) {
+    _spriteRaf = 0;
+    return;
+  }
+  _spriteRaf = requestAnimationFrame(spritePackTick);
+  if (!useSpritePackAnim()) return;
+  refreshSpritePresence(now);
+
+  for (const sym of Object.keys(SYM_SPRITES)) {
+    if (!_spritePresent[sym]) continue;
+    const cfg = SYM_SPRITES[sym];
+
+    if (!_spriteState[sym]) {
+      const phase = (sym.charCodeAt(0) * 7) % cfg.frames;
+      _spriteState[sym] = { frame: phase, lastTs: now };
+      setSpriteCssFrame(sym, phase);
+      continue;
+    }
+    const st = _spriteState[sym];
+    const fps = (performance.now() < _spriteBoostUntil || _spriteBoosting[sym])
+      ? cfg.winFps
+      : cfg.idleFps;
+    const interval = 1000 / fps;
+    if (now - st.lastTs < interval) continue;
+    st.lastTs += interval;
+    if (now - st.lastTs > interval * 3) st.lastTs = now;
+    st.frame = (st.frame + 1) % cfg.frames;
+    setSpriteCssFrame(sym, st.frame);
+  }
+}
+
+function ensureSpritePackTicker() {
+  if (document.hidden) return;
+  if (_spriteRaf) return;
+  for (const sym of Object.keys(SYM_SPRITES)) setSpriteCssFrame(sym, 0);
+  _spriteRaf = requestAnimationFrame(spritePackTick);
+}
+/** @deprecated */
+function ensureWildSpriteTicker() {
+  ensureSpritePackTicker();
+}
+
+/** Tăng FPS sprite tạm thời (win / feature / expand). */
+function boostSpritePack(ms = 1400) {
+  _spriteBoostUntil = performance.now() + ms;
+  ensureSpritePackTicker();
+}
+/** @deprecated */
+function boostWildSprite(ms = 1400) {
+  boostSpritePack(ms);
+}
+
+function preloadSpritePack() {
+  for (const cfg of Object.values(SYM_SPRITES)) {
+    try {
+      const pre = new Image();
+      pre.src = assetUrl(SPRITE_PACK_BASE + cfg.file);
+    } catch (_) { /* ignore */ }
+  }
+  // Win celebration sequence (mọi win > 0)
+  try {
+    const winSeq = new Image();
+    winSeq.src = assetUrl(SPRITE_PACK_BASE + 'animation-sequence.png');
+  } catch (_) { /* ignore */ }
+}
+
+/** Create a symbol visual (.sym-img img or sprite div) with optional FX preset. */
+function createSymbolEl(sym, { fx, className, splitSide, breathe = true } = {}) {
+  const s = SYMBOLS[sym];
+
+  // Art New + animation-pack sheet available → animated sprite
+  if (useSpritePackAnim() && SYM_SPRITES[sym]) {
+    const el = document.createElement('div');
+    const extra = sym === 'W' ? 'sym-wild-sprite' : '';
+    el.className = ['sym-img', 'sym-sprite', `sym-sprite-${sym}`, extra, splitSide, className]
+      .filter(Boolean).join(' ');
+    el.dataset.sym = sym;
+    el.setAttribute('role', 'img');
+    el.setAttribute('aria-label', s?.name || sym);
+    el.draggable = false;
+    ensureSpritePackTicker();
+    if (fx) setSymbolFx(el, fx);
+    else {
+      const aura = idleAuraFx(sym);
+      if (aura) {
+        setSymbolFx(el, aura);
+        el.dataset.symFx = 'idle';
+      }
+    }
+    // Frame animation thay breathe — glow tĩnh
+    return el;
+  }
+
+  const img = document.createElement('img');
+  img.className = ['sym-img', splitSide, className].filter(Boolean).join(' ');
+  img.decoding = 'async';
+  img.draggable = false;
+  if (s?.img) setImgSrc(img, s.img);
+  img.alt = s?.name || sym;
+  img.dataset.sym = sym;
+  // Mỗi symbol idle tỏa 1 màu aura riêng
+  if (fx) setSymbolFx(img, fx);
+  else {
+    const aura = idleAuraFx(sym);
+    if (aura) {
+      setSymbolFx(img, aura);
+      img.dataset.symFx = 'idle';
+    }
+  }
+  if (breathe && img.dataset.symFx === 'idle') {
+    img.classList.add('fx-aura-breathe');
+    // lệch phase theo symbol để glow không nhịp cùng lúc
+    const phase = ((String(sym).charCodeAt(0) || 0) % 7) * 0.18;
+    img.style.animationDelay = `-${phase}s`;
+  }
+  return img;
+}
+
+/** Map feature id → symbol FX (for feature VFX hooks). */
+function featureSymbolFx(featureId) {
+  const map = {
+    decrypt: 'decrypt',
+    surge: 'surge',
+    overclock: 'overclock',
+    glitch: 'glitch',
+    scan: 'ice',
+    trojan: 'mystery',
+    cloning: 'pulse',
+    root: 'pulse',
+    firewall: 'hot',
+    overload: 'wild',
+    bandwidth: 'hot',
+    bypass: 'ice',
+  };
+  return map[featureId] || null;
+}
+
 const PAYING = ['A','B','C','D','E','F','G','H','I','K'];
 const LOWS = ['F','G','H','I','K'];
 const HIGHS = ['A','B','C','D','E'];
@@ -3165,6 +466,12 @@ const ALL_BETS = [...BET_LEVELS.low, ...BET_LEVELS.med, ...BET_LEVELS.high];
  * nameVi: tên gọi dễ nhớ · what: feature sẽ làm gì · how: cách ảnh hưởng tiền/grid.
  */
 const FEATURE_EXPLAIN_VI = {
+  corehack: {
+    nameVi: 'Lõi lượng tử (Core Hack)',
+    what: 'Jackpot cố định 4 tier: USER 15×, GHOST 50×, ELITE 500×, GOD 19693× Total Bet.',
+    how: 'RNG trước khi spin xong. Trúng thì tắt 12 mini-feature. Pick 15 node, match-3 để nhận giải.',
+    see: 'Quantum Core phát sáng, kết nối Mainframe, rồi mở lưới 15 Encrypted Nodes.',
+  },
   firewall: {
     nameVi: 'Tường lửa (Firewall Block)',
     what: 'Chặn 1–2 loại biểu tượng thấp (low) ra khỏi vòng quay lần này.',
@@ -3237,6 +544,18 @@ const FEATURE_EXPLAIN_VI = {
     how: 'Ngoài ways bình thường (L→R), còn cộng thêm ways ngược (R→L) → tổng win có thể gấp phần hai chiều.',
     see: 'Mũi tên luồng dữ liệu chạy hai chiều Trái↔Phải.',
   },
+};
+
+/** Feature Meter slot #1 (GDD §8.2). Not in FEATURES — never RNG-picked with the 12 minis. */
+const CORE_HACK = {
+  id: 'corehack',
+  name: 'Core Hack',
+  color: '#00ff88',
+  timing: 'pre',
+  img: ASSET + 'quantum-core.png',
+  timingLabel: 'Before reels settle',
+  desc: 'Fixed jackpot: USER 15× / GHOST 50× / ELITE 500× / GOD 19693× Total Bet. Disables the 12 mini-features on the same spin.',
+  vfx: 'Quantum Core glows and connects to the Mainframe, then 15 Encrypted Nodes appear.',
 };
 
 const FEATURES = [
@@ -3322,10 +641,83 @@ const JACKPOT_TIERS = [
 ];
 const JACKPOT_CORE_IMG = ASSET + 'quantum-core-jackpot.png';
 
+let _preloadPromise = null;
+let _preloadDone = 0;
+let _preloadTotal = 0;
+
+function listPreloadUrls() {
+  const urls = new Set();
+  const add = (p) => { if (p) urls.add(assetUrl(p)); };
+  for (const k of LETTER_SYMS) {
+    add(ASSET + k + '.png');
+    add(ASSET + 'art-new/' + k + '.png');
+  }
+  add(ASSET + MYSTERY_FILE);
+  add(ASSET + 'art-new/' + MYSTERY_FILE);
+  for (const cfg of Object.values(SYM_SPRITES)) add(SPRITE_PACK_BASE + cfg.file);
+  add(SPRITE_PACK_BASE + 'animation-sequence.png');
+  add(CORE_HACK.img);
+  for (const f of FEATURES) add(f.img);
+  add(JACKPOT_CORE_IMG);
+  add(ASSET + 'spin.png');
+  add(ASSET + 'auto-spin.png');
+  add(ASSET + 'buy-free-spin.png');
+  return [...urls];
+}
+
+function preloadOne(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const done = () => resolve();
+    img.onload = done;
+    img.onerror = done;
+    img.src = url;
+  });
+}
+
+function updateLoginLoadUi() {
+  const label = document.getElementById('loginLoadStatus');
+  const fill = document.getElementById('loginLoadFill');
+  const splashFill = document.getElementById('splashFill');
+  const pct = _preloadTotal ? Math.round((_preloadDone / _preloadTotal) * 100) : 0;
+  if (label) {
+    label.textContent = (_preloadTotal && _preloadDone >= _preloadTotal)
+      ? `Assets ready (${_preloadTotal})`
+      : `Loading assets ${_preloadDone}/${_preloadTotal || '…'} (${pct}%)`;
+    label.style.color = (_preloadTotal && _preloadDone >= _preloadTotal) ? 'var(--green)' : 'var(--dim)';
+  }
+  if (fill) fill.style.width = pct + '%';
+  if (splashFill) splashFill.style.width = pct + '%';
+}
+
+function startAssetPreload() {
+  if (_preloadPromise) return _preloadPromise;
+  const urls = listPreloadUrls();
+  _preloadTotal = urls.length;
+  _preloadDone = 0;
+  updateLoginLoadUi();
+  const conc = 8;
+  let i = 0;
+  const worker = async () => {
+    while (i < urls.length) {
+      const url = urls[i++];
+      await preloadOne(url);
+      _preloadDone++;
+      updateLoginLoadUi();
+    }
+  };
+  _preloadPromise = Promise.all(Array.from({ length: conc }, worker));
+  return _preloadPromise;
+}
+
+function assetsReady() {
+  return _preloadTotal > 0 && _preloadDone >= _preloadTotal;
+}
+
 function symImgHtml(sym, alt = '') {
   const s = SYMBOLS[sym];
   if (!s?.img) return alt || '?';
-  return `<img class="sym-img" src="${s.img}" alt="${s.name}" draggable="false">`;
+  return imgTag(s.img, `class="sym-img" alt="${s.name}" draggable="false"`);
 }
 
 // Reel strips (weighted)
@@ -3340,6 +732,8 @@ const REEL_STRIPS = [
 // ─── State ───────────────────────────────────────────────────
 const state = {
   balance: 10000,
+  /** Số dư chụp lúc bắt đầu spin (trước debit/win) — giữ đến spin kế */
+  balanceBefore: 10000,
   bet: 1.00,
   betIdx: 4,
   spinning: false,
@@ -3355,6 +749,14 @@ const state = {
   grid: [],
   cellMeta: [],
   lastWin: 0,
+  /** Breakdown win spin vừa rồi (panel giải thích) */
+  lastSpinExplain: null,
+  /**
+   * Frame WS IN gần nhất cho SPIN/BUY (cmd 1500/1501).
+   * Panel giải thích win **bắt buộc** parse từ đây — không suy từ UI local.
+   * Shape: { t, cmd, frame, payload, balanceBefore }
+   */
+  lastInSpin: null,
   sessionWin: 0,
   // Free spins
   inFreeSpins: false,
@@ -3373,6 +775,7 @@ const state = {
   txnId: null,
   // Active features this spin
   triggeredFeatures: [],
+  lastJackpotActive: false,
   blockedSymbols: [],
   globalMultiplier: 1,
   bypassProtocol: false,
@@ -3390,20 +793,35 @@ function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
 function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function fmt(n) { return '$' + Number(n || 0).toFixed(2); }
 function fmtBalance(n) {
-  // Giữ style pad 7 chữ số (0010000.50), nhưng KHÔNG làm tròn phần thập phân về .00
+  // Định dạng VND: dấu phẩy hàng nghìn, giữ 2 số thập phân + ký hiệu ₫
   const fixed = Number(n || 0).toFixed(2);
   const [intPart, decPart] = fixed.split('.');
   const sign = intPart.startsWith('-') ? '-' : '';
   const digits = sign ? intPart.slice(1) : intPart;
-  return sign + digits.padStart(7, '0') + '.' + decPart;
+  const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return sign + grouped + '.' + decPart + ' ₫';
+}
+/**
+ * Pay mult theo of-a-kind (3/4/5).
+ * Client SYMBOLS[k].pays = [0, 0, p3, p4, p5]  → index = length - 1
+ * (tooltip cũng slice(2) map thành "3:","4:","5:").
+ * Không dùng pays[length] — với length=5 sẽ ra undefined.
+ */
+function getSymbolPayMult(sym, length) {
+  const pays = SYMBOLS[sym]?.pays;
+  if (!pays || length < 3) return 0;
+  const v = pays[length - 1];
+  return Number(v) || 0;
 }
 function sleep(ms) { return new Promise(r => setTimeout(r, state.fastSpin ? ms * 0.3 : ms)); }
 function sleepRaw(ms) { return new Promise(r => setTimeout(r, ms)); }
 function genTxnId() { return 'TXN' + Date.now().toString(36).toUpperCase() + randInt(100,999); }
 
-// ─── SFX nhẹ — WebAudio (whoosh / hit / charge / …) ──────────
-// Không file MP3; tổng hợp oscillator + envelope. Tôn trọng state.sound.
+// ─── SFX — WebAudio synth (không cần file MP3) ────────────────
+// Tôn trọng state.sound. Spin ticks luôn phát; VFX skip chỉ chặn feature SFX.
+const SFX_VOL = 1.45; // master loudness (1 = baseline)
 let _audioCtx = null;
+let _lastSpinTickAt = 0;
 
 function getAudioCtx() {
   if (!state.sound) return null;
@@ -3434,16 +852,17 @@ function unlockAudio() {
 }
 
 /**
- * @param {'whoosh'|'hit'|'charge'|'blip'|'win'|'jackpot'|'tick'} type
- * @param {{gain?: number, pitch?: number}} [opts]
+ * @param {string} type
+ * @param {{gain?: number, pitch?: number, force?: boolean}} [opts]
+ * force=true: vẫn phát khi đang skip VFX (dùng cho spin tick/land)
  */
 function sfx(type, opts = {}) {
   if (!state.sound) return;
-  if (typeof isVfxSkip === 'function' && isVfxSkip()) return;
+  if (!opts.force && typeof isVfxSkip === 'function' && isVfxSkip()) return;
   const ctx = getAudioCtx();
   if (!ctx) return;
   const now = ctx.currentTime;
-  const gMul = opts.gain != null ? opts.gain : 1;
+  const gMul = (opts.gain != null ? opts.gain : 1) * SFX_VOL;
   const pitch = opts.pitch != null ? opts.pitch : 1;
 
   const master = ctx.createGain();
@@ -3456,7 +875,7 @@ function sfx(type, opts = {}) {
     o.type = typeOsc;
     o.frequency.setValueAtTime(freq * pitch, t0);
     g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(Math.max(0.0001, peak * gMul), t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0001, peak * gMul), t0 + 0.008);
     g.gain.exponentialRampToValueAtTime(end, t0 + dur);
     o.connect(g);
     g.connect(master);
@@ -3464,30 +883,38 @@ function sfx(type, opts = {}) {
     o.stop(t0 + dur + 0.02);
   };
 
-  const noiseBurst = (t0, dur, peak, hpFreq = 800) => {
+  const noiseBurst = (t0, dur, peak, hpFreq = 800, lpFreq = 0) => {
     const len = Math.max(1, Math.floor(ctx.sampleRate * dur));
     const buf = ctx.createBuffer(1, len, ctx.sampleRate);
     const data = buf.getChannelData(0);
     for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len);
     const src = ctx.createBufferSource();
     src.buffer = buf;
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'highpass';
-    filter.frequency.value = hpFreq;
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = hpFreq;
+    let node = hp;
+    src.connect(hp);
+    if (lpFreq > 0) {
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = lpFreq;
+      hp.connect(lp);
+      node = lp;
+    }
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(Math.max(0.0001, peak * gMul), t0 + 0.008);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0001, peak * gMul), t0 + 0.005);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    src.connect(filter);
-    filter.connect(g);
+    node.connect(g);
     g.connect(master);
     src.start(t0);
     src.stop(t0 + dur + 0.02);
   };
 
+  let hold = 0.9;
   switch (type) {
     case 'whoosh':
-      // Lướt: noise + pitch down
       noiseBurst(now, 0.22, 0.18, 400);
       tone(420, 'triangle', now, 0.2, 0.06);
       try {
@@ -3504,15 +931,15 @@ function sfx(type, opts = {}) {
         o.start(now);
         o.stop(now + 0.25);
       } catch (_) {}
+      hold = 0.35;
       break;
     case 'hit':
-      // Đập ngắn
       noiseBurst(now, 0.08, 0.22, 600);
       tone(180, 'square', now, 0.09, 0.1);
       tone(90, 'sine', now, 0.12, 0.12);
+      hold = 0.25;
       break;
     case 'charge':
-      // Sạc tăng dần
       try {
         const o = ctx.createOscillator();
         const g = ctx.createGain();
@@ -3535,54 +962,254 @@ function sfx(type, opts = {}) {
       } catch (_) {
         tone(200, 'sawtooth', now, 0.35, 0.06);
       }
+      hold = 0.5;
       break;
     case 'blip':
       tone(880, 'sine', now, 0.06, 0.07);
       tone(1320, 'sine', now + 0.04, 0.05, 0.04);
+      hold = 0.15;
       break;
     case 'tick':
-      tone(1200, 'square', now, 0.03, 0.035);
+      // Tạch ngắn — mechanical reel click
+      noiseBurst(now, 0.018, 0.14, 1200, 6000);
+      tone(1800 + Math.random() * 400, 'square', now, 0.018, 0.045);
+      tone(900, 'triangle', now, 0.022, 0.025);
+      hold = 0.06;
+      break;
+    case 'land':
+      // Thud khi reel dừng
+      noiseBurst(now, 0.05, 0.16, 200, 1800);
+      tone(140 * pitch, 'sine', now, 0.07, 0.1);
+      tone(70 * pitch, 'triangle', now, 0.09, 0.08);
+      tone(220 * pitch, 'square', now, 0.035, 0.04);
+      hold = 0.15;
+      break;
+    case 'spinStart':
+      noiseBurst(now, 0.12, 0.12, 500);
+      tone(300, 'sawtooth', now, 0.1, 0.04);
+      try {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(200 * pitch, now);
+        o.frequency.exponentialRampToValueAtTime(480 * pitch, now + 0.14);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.06 * gMul, now + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+        o.connect(g);
+        g.connect(master);
+        o.start(now);
+        o.stop(now + 0.18);
+      } catch (_) {}
+      hold = 0.25;
+      break;
+    case 'coin':
+      // Tiền / way win nhỏ
+      tone(1200 * pitch, 'sine', now, 0.05, 0.06);
+      tone(1600 * pitch, 'sine', now + 0.04, 0.07, 0.05);
+      tone(2000 * pitch, 'triangle', now + 0.08, 0.08, 0.035);
+      hold = 0.2;
       break;
     case 'win':
-      tone(523.25, 'sine', now, 0.12, 0.09);       // C5
-      tone(659.25, 'sine', now + 0.08, 0.12, 0.08); // E5
-      tone(783.99, 'sine', now + 0.16, 0.18, 0.1);  // G5
-      tone(1046.5, 'sine', now + 0.28, 0.22, 0.08); // C6
+      tone(523.25, 'sine', now, 0.12, 0.1);
+      tone(659.25, 'sine', now + 0.08, 0.12, 0.09);
+      tone(783.99, 'sine', now + 0.16, 0.18, 0.11);
+      tone(1046.5, 'sine', now + 0.28, 0.28, 0.09);
+      noiseBurst(now + 0.05, 0.08, 0.06, 400);
+      hold = 0.7;
+      break;
+    case 'bigwin':
+      tone(392, 'triangle', now, 0.12, 0.1);
+      tone(523, 'triangle', now + 0.1, 0.14, 0.1);
+      tone(659, 'sine', now + 0.22, 0.16, 0.11);
+      tone(784, 'sine', now + 0.36, 0.2, 0.1);
+      tone(1046, 'sine', now + 0.5, 0.28, 0.09);
+      noiseBurst(now + 0.12, 0.12, 0.1, 300);
+      hold = 1.0;
       break;
     case 'jackpot':
-      tone(392, 'triangle', now, 0.15, 0.1);
-      tone(523, 'triangle', now + 0.1, 0.15, 0.1);
-      tone(659, 'triangle', now + 0.2, 0.2, 0.12);
-      tone(784, 'sine', now + 0.35, 0.35, 0.1);
-      noiseBurst(now + 0.1, 0.15, 0.12, 300);
+      tone(392, 'triangle', now, 0.15, 0.12);
+      tone(523, 'triangle', now + 0.1, 0.15, 0.11);
+      tone(659, 'triangle', now + 0.2, 0.2, 0.13);
+      tone(784, 'sine', now + 0.35, 0.35, 0.11);
+      tone(1175, 'sine', now + 0.5, 0.4, 0.08);
+      noiseBurst(now + 0.1, 0.18, 0.14, 300);
+      hold = 1.1;
+      break;
+    case 'laser':
+      // Decrypt / scan
+      try {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sawtooth';
+        o.frequency.setValueAtTime(1400 * pitch, now);
+        o.frequency.exponentialRampToValueAtTime(280 * pitch, now + 0.22);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.07 * gMul, now + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.24);
+        const f = ctx.createBiquadFilter();
+        f.type = 'bandpass';
+        f.frequency.value = 1200;
+        f.Q.value = 4;
+        o.connect(f);
+        f.connect(g);
+        g.connect(master);
+        o.start(now);
+        o.stop(now + 0.26);
+      } catch (_) {
+        tone(900, 'sawtooth', now, 0.2, 0.06);
+      }
+      noiseBurst(now, 0.1, 0.08, 900);
+      hold = 0.3;
+      break;
+    case 'zap':
+      // Surge / power
+      noiseBurst(now, 0.06, 0.2, 800);
+      tone(80, 'sawtooth', now, 0.08, 0.1);
+      tone(400, 'square', now, 0.05, 0.07);
+      tone(1200, 'square', now + 0.03, 0.04, 0.05);
+      hold = 0.2;
+      break;
+    case 'fire':
+      // Firewall
+      noiseBurst(now, 0.18, 0.16, 200, 2400);
+      tone(90, 'sawtooth', now, 0.15, 0.07);
+      tone(160, 'triangle', now + 0.04, 0.12, 0.05);
+      hold = 0.3;
+      break;
+    case 'glitch':
+      noiseBurst(now, 0.05, 0.14, 1000);
+      tone(300 + Math.random() * 800, 'square', now, 0.04, 0.07);
+      tone(200 + Math.random() * 600, 'sawtooth', now + 0.03, 0.05, 0.05);
+      tone(900, 'square', now + 0.06, 0.03, 0.04);
+      hold = 0.18;
+      break;
+    case 'reveal':
+      // Trojan mystery open
+      tone(300, 'sine', now, 0.08, 0.06);
+      tone(450, 'sine', now + 0.06, 0.08, 0.07);
+      tone(600, 'triangle', now + 0.12, 0.12, 0.08);
+      tone(900, 'sine', now + 0.2, 0.15, 0.06);
+      noiseBurst(now + 0.1, 0.08, 0.08, 500);
+      hold = 0.45;
+      break;
+    case 'matrix':
+      // Root / cloning
+      for (let i = 0; i < 5; i++) {
+        tone(600 + i * 180, 'square', now + i * 0.035, 0.04, 0.035);
+      }
+      noiseBurst(now, 0.12, 0.06, 1500);
+      hold = 0.3;
+      break;
+    case 'radar':
+      // Algorithmic scan
+      tone(440, 'sine', now, 0.06, 0.05);
+      tone(660, 'sine', now + 0.08, 0.06, 0.05);
+      tone(880, 'sine', now + 0.16, 0.08, 0.06);
+      try {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(200 * pitch, now);
+        o.frequency.linearRampToValueAtTime(900 * pitch, now + 0.28);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.linearRampToValueAtTime(0.04 * gMul, now + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+        o.connect(g);
+        g.connect(master);
+        o.start(now);
+        o.stop(now + 0.32);
+      } catch (_) {}
+      hold = 0.4;
+      break;
+    case 'flow':
+      // Bypass both-ways
+      tone(330, 'triangle', now, 0.1, 0.05);
+      tone(440, 'triangle', now + 0.05, 0.1, 0.05);
+      tone(550, 'sine', now + 0.12, 0.14, 0.06);
+      tone(440, 'triangle', now + 0.18, 0.1, 0.04);
+      tone(330, 'triangle', now + 0.24, 0.12, 0.04);
+      hold = 0.45;
+      break;
+    case 'boost':
+      // Bandwidth / overclock
+      try {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sawtooth';
+        o.frequency.setValueAtTime(100 * pitch, now);
+        o.frequency.exponentialRampToValueAtTime(800 * pitch, now + 0.32);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.linearRampToValueAtTime(0.07 * gMul, now + 0.1);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.36);
+        const f = ctx.createBiquadFilter();
+        f.type = 'lowpass';
+        f.frequency.setValueAtTime(300, now);
+        f.frequency.exponentialRampToValueAtTime(3200, now + 0.32);
+        o.connect(f);
+        f.connect(g);
+        g.connect(master);
+        o.start(now);
+        o.stop(now + 0.4);
+      } catch (_) {
+        tone(200, 'sawtooth', now, 0.3, 0.06);
+      }
+      hold = 0.45;
+      break;
+    case 'expand':
+      // Overload wild expand
+      tone(180, 'sine', now, 0.1, 0.07);
+      tone(240, 'triangle', now + 0.06, 0.12, 0.07);
+      tone(360, 'sine', now + 0.14, 0.16, 0.08);
+      noiseBurst(now + 0.08, 0.1, 0.08, 400);
+      hold = 0.4;
       break;
     default:
       tone(440, 'sine', now, 0.08, 0.05);
+      hold = 0.15;
   }
 
-  // Master envelope safety
   master.gain.setValueAtTime(1, now);
-  master.gain.setValueAtTime(1, now + 0.8);
-  master.gain.exponentialRampToValueAtTime(0.0001, now + 1.0);
+  master.gain.setValueAtTime(1, now + Math.max(0.05, hold * 0.7));
+  master.gain.exponentialRampToValueAtTime(0.0001, now + hold + 0.05);
+}
+
+/** Tick tạch-tạch khi reel đang quay (throttle theo ms). */
+function sfxSpinTick(elapsedMs, fast) {
+  if (!state.sound) return;
+  const interval = fast ? 48 : 68;
+  if (elapsedMs - _lastSpinTickAt < interval) return;
+  _lastSpinTickAt = elapsedMs;
+  // pitch hơi lệch mỗi tick → sống động
+  const p = 0.88 + Math.random() * 0.28;
+  sfx('tick', { gain: fast ? 0.42 : 0.5, pitch: p, force: true });
+}
+
+function sfxReelLand(reelIndex = 0) {
+  sfx('land', {
+    gain: 0.78,
+    pitch: 0.92 + reelIndex * 0.06,
+    force: true,
+  });
 }
 
 /** Map feature → SFX khi bắt đầu scene */
 function sfxForFeatureStart(featId) {
   const map = {
-    firewall: 'charge',
-    decrypt: 'whoosh',
-    trojan: 'whoosh',
-    overload: 'charge',
-    overclock: 'charge',
-    cloning: 'blip',
-    root: 'whoosh',
-    surge: 'hit',
-    glitch: 'hit',
-    scan: 'blip',
-    bandwidth: 'charge',
-    bypass: 'whoosh',
+    firewall: 'fire',
+    decrypt: 'laser',
+    trojan: 'reveal',
+    overload: 'expand',
+    overclock: 'boost',
+    cloning: 'matrix',
+    root: 'matrix',
+    surge: 'zap',
+    glitch: 'glitch',
+    scan: 'radar',
+    bandwidth: 'boost',
+    bypass: 'flow',
   };
-  sfx(map[featId] || 'blip', { gain: 0.9 });
+  sfx(map[featId] || 'charge', { gain: 1.15, force: true });
 }
 
 /** Map feature → SFX khi kết scene / hit */
@@ -3592,21 +1219,21 @@ function sfxForFeatureHit(featId) {
     decrypt: 'blip',
     trojan: 'hit',
     overload: 'hit',
-    overclock: 'blip',
+    overclock: 'coin',
     cloning: 'blip',
     root: 'hit',
-    surge: 'hit',
-    glitch: 'hit',
+    surge: 'zap',
+    glitch: 'glitch',
     scan: 'hit',
-    bandwidth: 'blip',
+    bandwidth: 'coin',
     bypass: 'blip',
   };
-  sfx(map[featId] || 'hit', { gain: 0.85 });
+  sfx(map[featId] || 'hit', { gain: 1.1, force: true });
 }
 
 // ─── Presentation gate: auto/FS chỉ spin tiếp khi FX xong ────
-function beginFx() { state.fxPlaying = true; }
-function endFx() { state.fxPlaying = false; }
+function beginFx() { state.fxPlaying = true; syncPerfMode(); }
+function endFx() { state.fxPlaying = false; syncPerfMode(); }
 
 /**
  * Chờ toàn bộ hiệu ứng UI của spin hiện tại kết thúc
@@ -3631,6 +1258,7 @@ async function settleAfterSpinPresentation({
 
     // Dọn class/animation còn sót — tránh spin sau cắt ngang
     document.getElementById('winOverlay')?.classList.remove('show');
+    clearWinFxPosition();
     const wrap = document.getElementById('reelsWrapper');
     wrap?.classList.remove('dim-win', 'tease-dim');
     document.querySelectorAll('.win-float').forEach(el => el.remove());
@@ -3717,7 +1345,7 @@ function calcWays(direction = 'ltr') {
 
     if (length >= 3) {
       const winCount = counts.reduce((a, b) => a * b, 1);
-      const cx = SYMBOLS[sym].pays[length];
+      const cx = getSymbolPayMult(sym, length);
       let win = winCount * cx * state.bet;
 
       // Per-symbol multipliers from overclock
@@ -3981,7 +1609,7 @@ const FEATURE_HANDLERS = {
 
 // ─── Render ──────────────────────────────────────────────────
 /** Build symbol node(s). Split cells show TWO icons side-by-side (GDD Split Symbol). */
-function appendSymbolVisual(cell, sym, isSplit) {
+function appendSymbolVisual(cell, sym, isSplit, fx) {
   const s = SYMBOLS[sym];
   if (!s?.img) {
     cell.textContent = '?';
@@ -3991,11 +1619,8 @@ function appendSymbolVisual(cell, sym, isSplit) {
     const pair = document.createElement('div');
     pair.className = 'split-pair';
     for (const side of ['split-a', 'split-b']) {
-      const img = document.createElement('img');
-      img.className = `sym-img ${side}`;
-      img.src = s.img;
+      const img = createSymbolEl(sym, { fx, splitSide: side });
       img.alt = `${s.name} ×2`;
-      img.draggable = false;
       pair.appendChild(img);
     }
     cell.appendChild(pair);
@@ -4004,55 +1629,100 @@ function appendSymbolVisual(cell, sym, isSplit) {
     badge.textContent = '×2';
     cell.appendChild(badge);
   } else {
-    const img = document.createElement('img');
-    img.className = 'sym-img';
-    img.src = s.img;
-    img.alt = s.name;
-    img.draggable = false;
-    cell.appendChild(img);
+    cell.appendChild(createSymbolEl(sym, { fx }));
   }
+}
+
+function bindGridClicksOnce() {
+  const grid = document.getElementById('reelsGrid');
+  if (!grid || grid.dataset.clickBound === '1') return;
+  grid.dataset.clickBound = '1';
+  grid.addEventListener('click', e => {
+    const cell = e.target.closest('.cell');
+    if (!cell || !grid.contains(cell)) return;
+    const c = Number(cell.dataset.reel);
+    const r = Number(cell.dataset.row);
+    const sym = state.grid?.[c]?.[r];
+    if (sym) showSymTooltip(sym, cell);
+  });
+}
+
+function paintCell(cell, c, r, highlightSet) {
+  const sym = state.grid[c][r];
+  const meta = state.cellMeta[c][r] || { split: false, multiplier: 1, mystery: false };
+  const split = !!meta.split && sym !== 'S';
+  const win = highlightSet.has(`${c},${r}`);
+  const key = `${sym}|${split ? 1 : 0}|${meta.multiplier || 1}|${win ? 1 : 0}|${meta.mystery || sym === 'M' ? 1 : 0}`;
+  if (cell.dataset.rk === key) return;
+  cell.dataset.rk = key;
+  cell.dataset.reel = String(c);
+  cell.dataset.row = String(r);
+  cell.className = 'cell';
+  if (win) cell.classList.add('win');
+  if (sym === 'S') cell.classList.add('scatter-win');
+  if (meta.mystery || sym === 'M') cell.classList.add('mystery');
+  if (meta.split) cell.classList.add('split');
+  cell.replaceChildren();
+  if (meta.multiplier > 1) {
+    const tag = document.createElement('span');
+    tag.className = 'mult-tag';
+    tag.textContent = `×${meta.multiplier}`;
+    cell.appendChild(tag);
+  }
+  appendSymbolVisual(cell, sym, split);
 }
 
 function renderGrid(highlight = []) {
   const grid = document.getElementById('reelsGrid');
-  grid.innerHTML = '';
+  if (!grid || !state.grid?.length) return;
+  bindGridClicksOnce();
   const winSet = new Set(highlight);
+  const canPatch =
+    grid.children.length === REELS &&
+    Array.from(grid.children).every(reel => reel.children.length === ROWS);
+
+  if (!canPatch) {
+    grid.replaceChildren();
+    for (let c = 0; c < REELS; c++) {
+      const reel = document.createElement('div');
+      reel.className = 'reel';
+      reel.id = `reel-${c}`;
+      for (let r = 0; r < ROWS; r++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        paintCell(cell, c, r, winSet);
+        reel.appendChild(cell);
+      }
+      grid.appendChild(reel);
+    }
+    return;
+  }
 
   for (let c = 0; c < REELS; c++) {
-    const reel = document.createElement('div');
-    reel.className = 'reel';
+    const reel = grid.children[c];
     reel.id = `reel-${c}`;
     for (let r = 0; r < ROWS; r++) {
-      const sym = state.grid[c][r];
-      const meta = state.cellMeta[c][r] || { split: false, multiplier: 1, mystery: false };
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      if (winSet.has(`${c},${r}`)) cell.classList.add('win');
-      if (sym === 'S') cell.classList.add('scatter-win');
-      if (meta.mystery || sym === 'M') cell.classList.add('mystery');
-      if (meta.split) cell.classList.add('split');
-      if (meta.multiplier > 1) {
-        const tag = document.createElement('span');
-        tag.className = 'mult-tag';
-        tag.textContent = `×${meta.multiplier}`;
-        cell.appendChild(tag);
-      }
-      appendSymbolVisual(cell, sym, !!meta.split && sym !== 'S');
-      cell.dataset.reel = c;
-      cell.dataset.row = r;
-      cell.addEventListener('click', () => showSymTooltip(sym, cell));
-      reel.appendChild(cell);
+      paintCell(reel.children[r], c, r, winSet);
     }
-    grid.appendChild(reel);
   }
 }
 
+function meterItems() {
+  return [CORE_HACK, ...FEATURES];
+}
+
+function findMeterFeature(featureId) {
+  return meterItems().find(x => x.id === featureId);
+}
+
 function showFeatureDetail(featureId) {
-  const f = FEATURES.find(x => x.id === featureId);
+  const f = findMeterFeature(featureId);
   if (!f) return;
   const vi = FEATURE_EXPLAIN_VI[f.id] || {};
-  const active = !!(state.triggeredFeatures || []).find(x => x.id === f.id)
-    || !!(state.persistentFeatures || []).find(x => x.id === f.id);
+  const active = f.id === CORE_HACK.id
+    ? !!state.lastJackpotActive
+    : !!(state.triggeredFeatures || []).find(x => x.id === f.id)
+      || !!(state.persistentFeatures || []).find(x => x.id === f.id);
 
   const img = document.getElementById('featDetailImg');
   const title = document.getElementById('featDetailTitle');
@@ -4063,13 +1733,13 @@ function showFeatureDetail(featureId) {
   const status = document.getElementById('featDetailStatus');
   if (!img || !title) return;
 
-  const order = FEATURES.findIndex(x => x.id === f.id) + 1;
+  const order = meterItems().findIndex(x => x.id === f.id) + 1;
   const whenVi =
     f.timing === 'spin' ? 'Lúc quay' :
     f.timing === 'win' ? 'Giai đoạn tính tiền thắng' :
     'Sau khi hàng dừng';
 
-  img.src = f.img || '';
+  setImgSrc(img, f.img || '');
   img.alt = vi.nameVi || f.name;
   title.textContent = vi.nameVi || f.name;
   title.style.color = f.color || 'var(--cyan)';
@@ -4105,10 +1775,12 @@ function renderFeatureMeter(activeIds = []) {
   meter.innerHTML = '';
   // has-active → CSS dim các badge không trúng, phóng to badge trúng
   meter.classList.toggle('has-active', ids.length > 0);
-  FEATURES.forEach(f => {
+  meterItems().forEach(f => {
     const badge = document.createElement('span');
     const on = ids.includes(f.id);
-    badge.className = 'feat-badge' + (on ? ' active' : '');
+    badge.className = 'feat-badge'
+      + (f.id === CORE_HACK.id ? ' core-hack' : '')
+      + (on ? ' active' : '');
     const viName = (FEATURE_EXPLAIN_VI[f.id] && FEATURE_EXPLAIN_VI[f.id].nameVi) || f.name;
     badge.title = viName + ' — bấm để xem giải thích' + (on ? ' (đang bật)' : '');
     badge.style.color = f.color;
@@ -4119,7 +1791,7 @@ function renderFeatureMeter(activeIds = []) {
     if (on) badge.setAttribute('aria-current', 'true');
     if (f.img) {
       const img = document.createElement('img');
-      img.src = f.img;
+      setImgSrc(img, f.img);
       img.alt = viName;
       img.draggable = false;
       badge.appendChild(img);
@@ -4137,12 +1809,25 @@ function renderFeatureMeter(activeIds = []) {
   });
 }
 
+function syncPerfMode() {
+  const busy = !!(state.spinning || state.fxPlaying);
+  document.body.classList.toggle('spin-busy', busy);
+}
+
 function updateUI() {
+  const beforeEl = document.getElementById('balanceBeforeDisplay');
+  if (beforeEl) beforeEl.textContent = fmtBalance(state.balanceBefore);
   document.getElementById('balanceDisplay').textContent = fmtBalance(state.balance);
   document.getElementById('betAmount').textContent = fmt(state.bet);
   document.getElementById('headerWin').textContent = state.lastWin.toFixed(2);
   const mult = Math.max(1, state.globalMultiplier || 1);
   document.getElementById('multDisplay').textContent = String(mult).padStart(2, '0');
+  syncPerfMode();
+}
+
+/** Chụp số dư sau trừ bet/phí, trước khi credit win (spin đang chờ kết quả). */
+function captureBalanceBefore() {
+  state.balanceBefore = Number(state.balance) || 0;
 }
 
 function setInfoBar(mode, text) {
@@ -4161,8 +1846,9 @@ function showSymTooltip(sym, el) {
   const s = SYMBOLS[sym];
   if (!s) return;
   const tip = document.getElementById('symTooltip');
-  const pays = s.pays.slice(2).map((p, i) => `${i + 3}: ${fmt(p * state.bet)}`).join(' | ');
-  tip.innerHTML = `<div style="display:flex;align-items:center;gap:8px"><img src="${s.img}" style="width:40px;height:40px;object-fit:contain" alt=""><strong>${s.name}</strong></div><br>${pays || 'Special symbol'}`;
+  // GDD paytable = multipliers of totalBet (not cash). Show raw Cx like 0.75 / 1.00 / 1.50.
+  const pays = s.pays.slice(2).map((p, i) => `${i + 3}: ${Number(p).toFixed(2)}x`).join(' | ');
+  tip.innerHTML = `<div style="display:flex;align-items:center;gap:8px">${imgTag(s.img, 'style="width:40px;height:40px;object-fit:contain" alt=""')}<strong>${s.name}</strong></div><br>${pays || 'Special symbol'}`;
   const rect = el.getBoundingClientRect();
   tip.style.left = Math.min(rect.right + 8, window.innerWidth - 200) + 'px';
   tip.style.top = rect.top + 'px';
@@ -4214,43 +1900,168 @@ async function runMoneyTicker(from, to, {
   return end;
 }
 
+/**
+ * Win celebration overlay — mọi spin win > 0.
+ * animation-sequence.png (6×6) + chữ WIN + số tiền $0.00 → total (đếm nhanh, lấp lánh).
+ * Big/Mega/Legendary: giữ class màu (GDD threshold), label luôn "WIN".
+ * Vị trí: neo đúng giữa khung symbol grid (#reelsWrapper), không căn viewport.
+ */
+const WIN_SEQ = {
+  cols: 6,
+  rows: 6,
+  frames: 36,
+  fps: 14,
+  file: 'animation-sequence.png',
+};
+
+/** Pin .win-fx-stage lên bounding box reels (grid symbol). */
+function positionWinFxToReels() {
+  const stage = document.querySelector('#winOverlay .win-fx-stage');
+  const target =
+    document.getElementById('reelsWrapper') ||
+    document.getElementById('reelsGrid');
+  if (!stage || !target) return;
+  const r = target.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  stage.style.left = `${r.left}px`;
+  stage.style.top = `${r.top}px`;
+  stage.style.width = `${r.width}px`;
+  stage.style.height = `${r.height}px`;
+  stage.style.transform = 'none';
+  stage.style.maxWidth = 'none';
+  stage.style.maxHeight = 'none';
+}
+
+function clearWinFxPosition() {
+  const stage = document.querySelector('#winOverlay .win-fx-stage');
+  if (!stage) return;
+  stage.style.left = '';
+  stage.style.top = '';
+  stage.style.width = '';
+  stage.style.height = '';
+  stage.style.transform = '';
+  stage.style.maxWidth = '';
+  stage.style.maxHeight = '';
+}
+
+function setWinSeqFrame(el, frame) {
+  if (!el) return;
+  const f = ((frame % WIN_SEQ.frames) + WIN_SEQ.frames) % WIN_SEQ.frames;
+  const c = f % WIN_SEQ.cols;
+  const r = Math.floor(f / WIN_SEQ.cols) % WIN_SEQ.rows;
+  const x = WIN_SEQ.cols <= 1 ? 0 : (c / (WIN_SEQ.cols - 1)) * 100;
+  const y = WIN_SEQ.rows <= 1 ? 0 : (r / (WIN_SEQ.rows - 1)) * 100;
+  el.style.backgroundPosition = `${x}% ${y}%`;
+}
+
+/** Play win sequence once (or until skip). Returns when sheet finishes. */
+function playWinSequenceOnce(el, { fps, onFrame } = {}) {
+  const rate = fps || (state.fastSpin ? 22 : WIN_SEQ.fps);
+  const interval = 1000 / rate;
+  return new Promise(resolve => {
+    let frame = 0;
+    let last = performance.now();
+    setWinSeqFrame(el, 0);
+    onFrame?.(0);
+    const tick = (now) => {
+      if (isVfxSkip && isVfxSkip()) {
+        setWinSeqFrame(el, WIN_SEQ.frames - 1);
+        resolve();
+        return;
+      }
+      if (now - last >= interval) {
+        const steps = Math.max(1, Math.floor((now - last) / interval));
+        last += steps * interval;
+        frame += steps;
+        if (frame >= WIN_SEQ.frames) {
+          setWinSeqFrame(el, WIN_SEQ.frames - 1);
+          onFrame?.(WIN_SEQ.frames - 1);
+          resolve();
+          return;
+        }
+        setWinSeqFrame(el, frame);
+        onFrame?.(frame);
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
 async function playWinEffect(total) {
+  const amount = Number(total) || 0;
+  if (amount <= 0) return false;
+
   const threshold = (base) => base * (state.bet / REF_BET);
-  // Overlay Big/Mega/Legendary — hold ngắn hơn, ticker tiền nhanh
-  const hold = state.fastSpin ? 700 : 1600;
-  const tiers = [
-    { name: 'LEGENDARY WIN', cls: 'win-legendary', min: threshold(100), hold },
-    { name: 'MEGA WIN', cls: 'win-mega', min: threshold(40), hold },
-    { name: 'BIG WIN', cls: 'win-big', min: threshold(20), hold },
-  ];
-  const tier = tiers.find(t => total >= t.min);
-  if (!tier) return false;
+  const tierCls =
+    amount >= threshold(100) ? 'win-legendary'
+      : amount >= threshold(40) ? 'win-mega'
+        : amount >= threshold(20) ? 'win-big'
+          : '';
+
+  if (tierCls === 'win-legendary' || tierCls === 'win-mega') {
+    sfx('jackpot', { gain: 1.15, force: true });
+  } else if (tierCls === 'win-big') {
+    sfx('bigwin', { gain: 1.1, force: true });
+  } else {
+    sfx('win', { gain: 1.05, force: true });
+  }
 
   const overlay = document.getElementById('winOverlay');
   const text = document.getElementById('winText');
-  const amount = document.getElementById('winAmountFx');
-  text.className = 'win-text ' + tier.cls;
-  text.textContent = tier.name;
+  const amountEl = document.getElementById('winAmountFx');
+  const seqEl = document.getElementById('winSeqSprite');
+  if (!overlay || !text || !amountEl) return false;
+
+  text.className = 'win-text' + (tierCls ? ' ' + tierCls : '');
+  text.textContent = 'WIN';
+  amountEl.className = 'win-amount-fx' + (tierCls ? ' ' + tierCls : '');
+  amountEl.textContent = fmt(0);
+  setWinSeqFrame(seqEl, 0);
+
+  // Neo đúng khung symbol grid trước khi show
+  positionWinFxToReels();
   overlay.classList.add('show');
+  // layout pass — re-measure sau show (scroll/reflow)
+  requestAnimationFrame(() => positionWinFxToReels());
+  const onWinFxResize = () => positionWinFxToReels();
+  window.addEventListener('resize', onWinFxResize);
   shakeScreen();
 
-  // Overlay amount đếm nhanh; header WIN giữ total (đã cộng ở animateWinWays/tickerWin)
-  document.getElementById('headerWin').textContent = total.toFixed(2);
-  const tickDur = state.fastSpin ? 140 : 280;
-  await runMoneyTicker(0, total, {
-    durationMs: tickDur,
-    onTick: (val) => {
-      amount.textContent = fmt(val);
-    },
-  });
-  amount.textContent = fmt(total);
-  // Giữ overlay ngắn sau khi đếm xong
-  await sleepRaw(state.fastSpin ? 180 : 400);
+  // Header giữ total (đã ticker ở animateWinWays); overlay đếm lại 0 → total
+  document.getElementById('headerWin').textContent = amount.toFixed(2);
 
-  overlay.classList.remove('show');
-  text.textContent = '';
-  amount.textContent = '';
-  await sleepRaw(state.fastSpin ? 80 : 120);
+  // Đếm tiền 0→total (hơi chậm hơn để dễ đọc; vẫn song song animation sequence)
+  const tickDur = state.fastSpin ? 380 : 820;
+  try {
+    const animP = playWinSequenceOnce(seqEl, {
+      fps: state.fastSpin ? 24 : WIN_SEQ.fps,
+    });
+    const moneyP = runMoneyTicker(0, amount, {
+      durationMs: tickDur,
+      onTick: (val) => {
+        amountEl.textContent = fmt(val);
+      },
+    }).then(() => {
+      amountEl.textContent = fmt(amount);
+      amountEl.classList.add('sparkle-done');
+    });
+
+    await Promise.all([animP, moneyP]);
+
+    // Giữ một nhịp ngắn sau khi đếm/anim xong
+    await sleepRaw(state.fastSpin ? 140 : 320);
+  } finally {
+    window.removeEventListener('resize', onWinFxResize);
+    overlay.classList.remove('show');
+    clearWinFxPosition();
+    text.textContent = 'WIN';
+    text.className = 'win-text';
+    amountEl.textContent = '';
+    amountEl.className = 'win-amount-fx';
+    setWinSeqFrame(seqEl, 0);
+  }
+  await sleepRaw(state.fastSpin ? 60 : 100);
   return true;
 }
 
@@ -4287,6 +2098,557 @@ function cellsForWin(w) {
   return cells;
 }
 
+// ─── Win explain (breakdown spin vừa rồi) ─────────────────────
+let _wxZoom = 1;
+
+function countsPerReelFromPositions(positions, length, direction) {
+  const counts = Array(REELS).fill(0);
+  if (!Array.isArray(positions)) return counts;
+  for (const p of positions) {
+    const c = Array.isArray(p) ? Number(p[0]) : Number(p.c);
+    if (c >= 0 && c < REELS) counts[c] += 1;
+  }
+  // Chuỗi LTR: reel 0..length-1; RTL: (REELS-1) xuống
+  const chain = [];
+  for (let i = 0; i < length; i++) {
+    const c = direction === 'rtl' ? (REELS - 1 - i) : i;
+    chain.push(Math.max(1, counts[c] || 0));
+  }
+  return chain;
+}
+
+function waysProduct(chainCounts) {
+  return (chainCounts || []).reduce((a, b) => a * Math.max(0, b), 1) || 0;
+}
+
+/**
+ * Lưu frame IN SPIN/BUY gần nhất (cmd 1500 / 1501).
+ * @param {any} frame full WS message (thường [5, { cmd, c, data }])
+ * @param {object} [payload] game payload nếu đã bóc
+ */
+function captureLastInSpin(frame, payload) {
+  let pl = payload;
+  let cmd = '';
+  if (!pl && Array.isArray(frame) && (frame[0] === 5 || frame[0] === '5') && frame[1] && typeof frame[1] === 'object') {
+    pl = frame[1];
+  }
+  if (!pl && frame && typeof frame === 'object' && !Array.isArray(frame) && frame.data) {
+    pl = frame;
+  }
+  if (!pl || typeof pl !== 'object') return false;
+  cmd = String(pl.cmd ?? '');
+  if (cmd !== '1500' && cmd !== '1501') return false;
+  // Deep clone để panel không bị mutate sau này
+  let frameCopy = null;
+  let payloadCopy = null;
+  try {
+    frameCopy = JSON.parse(JSON.stringify(frame));
+    payloadCopy = JSON.parse(JSON.stringify(pl));
+  } catch (_) {
+    payloadCopy = pl;
+    frameCopy = frame;
+  }
+  state.lastInSpin = {
+    t: Date.now(),
+    cmd,
+    frame: frameCopy,
+    payload: payloadCopy,
+    // BEFORE đã trừ bet (snapshot lúc bấm spin) — không có trong IN, gắn kèm FE
+    balanceBefore: Number(state.balanceBefore) || 0,
+  };
+  // Build explain ngay từ IN
+  buildWinExplainFromLastInSpin();
+  return true;
+}
+
+/**
+ * Tìm IN SPIN mới nhất trong WS traffic log (cmd 1500/1501).
+ */
+function findLatestInSpinFromTraffic() {
+  const items = typeof wsTrafficState !== 'undefined' ? wsTrafficState.items : null;
+  if (!Array.isArray(items) || !items.length) return null;
+  for (let i = items.length - 1; i >= 0; i--) {
+    const it = items[i];
+    if (it.dir !== 'in') continue;
+    if (it.cmd !== '1500' && it.cmd !== '1501') continue;
+    if (it.data != null) return it.data;
+    // Fallback: parse text JSON
+    if (typeof it.text === 'string') {
+      try { return JSON.parse(it.text); } catch (_) { /* ignore */ }
+    }
+  }
+  return null;
+}
+
+/**
+ * Parse payload IN → breakdown win. Nguồn duy nhất cho online = stages[0].wins + totalWin.
+ */
+function buildWinExplainFromInPayload(payload, meta = {}) {
+  if (!payload || typeof payload !== 'object') return null;
+  const parsed = parseOnlineRound(payload);
+  const round = parsed.round || payload?.data?.round || {};
+  const stage = parsed.stage || {};
+  const bet = parseFloat(round.totalBet ?? payload?.data?.round?.totalBet ?? state.bet) || 0;
+  const totalWin = Number(parsed.totalWin) || 0;
+  const balAfter = parseFloat(
+    parsed.control?.balance ??
+      payload?.data?.control?.balance ??
+      state.balance
+  );
+  const rawWins = Array.isArray(stage.wins) ? stage.wins : [];
+  // Ưu tiên raw server wins (symbol id, occurs, positions, win string)
+  const winsIn = rawWins.length
+    ? rawWins.map(w => ({
+        sym: SYM_MAP[w.symbol] || String(w.symbol),
+        symbolId: w.symbol,
+        length: Number(w.occurs) || 3,
+        win: parseFloat(w.win) || 0,
+        direction: String(w.type || '').includes('rtl') ? 'rtl' : 'ltr',
+        type: w.type || 'way',
+        positions: Array.isArray(w.positions) ? w.positions : null,
+        payline: w.payline,
+      }))
+    : (parsed.wins || []);
+
+  const screen = parsed.screen;
+  let gridSnap = null;
+  if (Array.isArray(screen) && screen.length === REELS) {
+    gridSnap = screen.map(col => (Array.isArray(col) ? col.map(id => SYM_MAP[id] || id) : []));
+  }
+
+  const featuresObj = parsed.result?.features || payload?.data?.round?.result?.features || {};
+  const featureNames = []
+    .concat(featuresObj.spinFeatures || [])
+    .concat((parsed.featObjs || []).map(f => f.name || f.id));
+  // unique
+  const featUnique = [...new Set(featureNames.filter(Boolean))];
+
+  // Bandwidth: nếu có trong featureSteps
+  let bandwidthMult = 1;
+  const steps = parsed.featureSteps || [];
+  for (const st of steps) {
+    const n = String(st?.name || '');
+    if (/bandwidth/i.test(n) && st.multiplier != null) {
+      bandwidthMult = Math.max(bandwidthMult, Number(st.multiplier) || 1);
+    }
+  }
+  if (state.globalMultiplier > 1) {
+    bandwidthMult = Math.max(bandwidthMult, state.globalMultiplier);
+  }
+
+  const lines = winsIn.map((w, idx) => {
+    const sym = w.sym || SYM_MAP[w.symbolId] || 'A';
+    const length = Number(w.length) || 3;
+    const dir = w.direction === 'rtl' ? 'rtl' : 'ltr';
+    const payMult = getSymbolPayMult(sym, length);
+    const chainCounts = countsPerReelFromPositions(w.positions, length, dir);
+    const ways = waysProduct(chainCounts);
+    const rawServerWin = Number(w.win) || 0;
+    const baseLine = ways * payMult * bet;
+    const positions = Array.isArray(w.positions)
+      ? w.positions.map(p => (Array.isArray(p) ? [Number(p[0]), Number(p[1])] : [p.c, p.r]))
+      : [];
+
+    return {
+      idx: idx + 1,
+      sym,
+      symbolId: w.symbolId != null ? w.symbolId : null,
+      name: SYMBOLS[sym]?.name || sym,
+      img: SYMBOLS[sym]?.img || '',
+      length,
+      direction: dir,
+      type: w.type || 'way',
+      chainCounts,
+      ways,
+      payMult,
+      bet,
+      cellMult: 1,
+      baseLine,
+      win: rawServerWin,
+      positions,
+      payline: w.payline,
+      raw: w,
+    };
+  });
+
+  const sumLines = lines.reduce((s, L) => s + (L.win || 0), 0);
+  const jp = parsed.progressiveJackpot || null;
+  const jpWin = jp && (jp.isTriggered === true || jp.isTriggered === 'true' || jp.tier)
+    ? (parseFloat(jp.win) || 0)
+    : 0;
+
+  // Stage totalWin string from IN
+  const stageTotalWin = parseFloat(stage.totalWin) || totalWin;
+
+  return {
+    at: meta.t || Date.now(),
+    source: meta.source || `IN ${meta.cmd || payload.cmd || 'SPIN'}`,
+    cmd: String(meta.cmd || payload.cmd || ''),
+    bet,
+    totalWin,
+    stageTotalWin,
+    balanceBefore: Number(meta.balanceBefore ?? state.balanceBefore) || 0,
+    balanceAfter: Number.isFinite(balAfter) ? balAfter : Number(state.balance) || 0,
+    thisMode: parsed.thisMode || 'base',
+    nextMode: parsed.nextMode || '',
+    globalMult: bandwidthMult,
+    featureNames: featUnique,
+    maxWinReached: !!parsed.maxWinReached,
+    spinId: parsed.spinId || '',
+    roundId: parsed.roundId || '',
+    gridSnap,
+    lines,
+    sumLines,
+    jpWin,
+    jpTier: jp?.tier || jp?.tierName || '',
+    note: meta.note || '',
+    // Giữ raw để panel trích đoạn JSON
+    rawWins,
+    rawTotalWin: round.totalWin ?? stage.totalWin,
+    rawTotalBet: round.totalBet,
+    rawScreen: screen,
+    rawFeatures: {
+      spinFeatures: featuresObj.spinFeatures || null,
+      activeFeatures: featuresObj.activeFeatures || null,
+      maxWinReached: featuresObj.maxWinReached || false,
+      progressiveJackpot: jp,
+    },
+  };
+}
+
+/** Build/update state.lastSpinExplain từ state.lastInSpin (IN SPIN gần nhất). */
+function buildWinExplainFromLastInSpin() {
+  // Fallback: lấy từ traffic nếu capture lúc message miss
+  if (!state.lastInSpin?.payload) {
+    const fromTraffic = findLatestInSpinFromTraffic();
+    if (fromTraffic) {
+      captureLastInSpin(fromTraffic);
+    }
+  }
+  const rec = state.lastInSpin;
+  if (!rec?.payload) {
+    state.lastSpinExplain = null;
+    return null;
+  }
+  const ex = buildWinExplainFromInPayload(rec.payload, {
+    t: rec.t,
+    cmd: rec.cmd,
+    source: `IN SPIN cmd ${rec.cmd}`,
+    balanceBefore: rec.balanceBefore,
+  });
+  state.lastSpinExplain = ex;
+  const btn = document.getElementById('btnWinExplain');
+  if (btn) btn.style.opacity = ex && ex.totalWin > 0 ? '1' : '0.55';
+  return ex;
+}
+
+/**
+ * Fallback local (offline demo) — chỉ khi không có IN SPIN.
+ * @param {object} opts
+ */
+function recordSpinWinExplainLocal(opts = {}) {
+  if (state.lastInSpin?.payload) {
+    // Online đã có IN — không ghi đè bằng local estimate
+    return buildWinExplainFromLastInSpin();
+  }
+  const bet = Number(opts.bet ?? state.bet) || 0;
+  const totalWin = Number(opts.totalWin ?? state.lastWin) || 0;
+  const winsIn = Array.isArray(opts.wins) ? opts.wins : [];
+  const screen = opts.screen || null;
+  let gridSnap = null;
+  if (Array.isArray(screen) && screen.length === REELS) {
+    gridSnap = screen.map(col => (Array.isArray(col) ? col.map(id => SYM_MAP[id] || id) : []));
+  } else if (state.grid?.length) {
+    gridSnap = state.grid.map(col => col.map(s => s));
+  }
+  const lines = winsIn.map((w, idx) => {
+    const sym = w.sym || 'A';
+    const length = Number(w.length) || 3;
+    const dir = w.direction === 'rtl' ? 'rtl' : 'ltr';
+    const payMult = getSymbolPayMult(sym, length);
+    let chainCounts = Array.isArray(w.reelPositions) && w.reelPositions.length
+      ? w.reelPositions.map(Number)
+      : countsPerReelFromPositions(w.positions, length, dir);
+    let ways = Number(w.winCount);
+    if (!Number.isFinite(ways) || ways <= 0) ways = waysProduct(chainCounts);
+    const rawServerWin = Number(w.win) || 0;
+    const baseLine = ways * payMult * bet;
+    const positions = Array.isArray(w.positions)
+      ? w.positions.map(p => (Array.isArray(p) ? [p[0], p[1]] : [p.c, p.r]))
+      : cellsForWin(w).map(k => k.split(',').map(Number));
+    return {
+      idx: idx + 1, sym, name: SYMBOLS[sym]?.name || sym, img: SYMBOLS[sym]?.img || '',
+      length, direction: dir, chainCounts, ways, payMult, bet, cellMult: 1,
+      baseLine, win: rawServerWin, positions,
+    };
+  });
+  state.lastSpinExplain = {
+    at: Date.now(),
+    source: 'local (no IN SPIN)',
+    cmd: '',
+    bet,
+    totalWin,
+    stageTotalWin: totalWin,
+    balanceBefore: Number(opts.balanceBefore ?? state.balanceBefore) || 0,
+    balanceAfter: Number(opts.balanceAfter ?? state.balance) || 0,
+    thisMode: opts.thisMode || 'base',
+    globalMult: Math.max(1, Number(opts.globalMultiplier) || 1),
+    featureNames: opts.featureNames || [],
+    maxWinReached: !!opts.maxWinReached,
+    spinId: '',
+    roundId: '',
+    gridSnap,
+    lines,
+    sumLines: lines.reduce((s, L) => s + L.win, 0),
+    jpWin: 0,
+    jpTier: '',
+    note: 'Offline/demo — không có frame IN',
+    rawWins: [],
+    rawTotalWin: totalWin,
+    rawTotalBet: bet,
+  };
+  return state.lastSpinExplain;
+}
+
+function setWinExplainZoom(z) {
+  _wxZoom = Math.min(1.8, Math.max(0.7, z));
+  const stage = document.getElementById('wxZoomStage');
+  const lab = document.getElementById('wxZoomLabel');
+  if (stage) stage.style.transform = `scale(${_wxZoom})`;
+  if (lab) lab.textContent = `${Math.round(_wxZoom * 100)}%`;
+}
+
+function renderWinExplainBody() {
+  const body = document.getElementById('winExplainBody');
+  if (!body) return;
+  // Luôn rebuild từ IN SPIN gần nhất trước khi vẽ
+  buildWinExplainFromLastInSpin();
+  const ex = state.lastSpinExplain;
+  if (!ex) {
+    body.className = 'wx-empty';
+    body.innerHTML = 'Chưa có <strong>IN SPIN</strong> (cmd 1500/1501).<br>Connect &amp; spin — panel này đọc thắng từ frame nhận về, không tự tính local.';
+    return;
+  }
+  body.className = '';
+
+  const modeLabel = ex.thisMode === 'free' ? 'Free Spin' : 'Base';
+  const srcBadge = String(ex.source || '').startsWith('IN')
+    ? `<span style="color:#00ff88">● ${ex.source}</span>`
+    : `<span style="color:#ff8800">○ ${ex.source}</span>`;
+  const cards = `
+    <div class="wx-summary">
+      <div class="wx-card"><span class="k">NGUỒN</span><span class="v" style="font-size:.75rem">${srcBadge}</span></div>
+      <div class="wx-card"><span class="k">BET (IN totalBet)</span><span class="v">${fmtBalance(ex.bet)}</span></div>
+      <div class="wx-card"><span class="k">TOTAL WIN (IN)</span><span class="v green">${fmtBalance(ex.totalWin)}</span></div>
+      <div class="wx-card"><span class="k">BALANCE BEFORE</span><span class="v">${fmtBalance(ex.balanceBefore)}</span></div>
+      <div class="wx-card"><span class="k">BALANCE AFTER (IN)</span><span class="v">${fmtBalance(ex.balanceAfter)}</span></div>
+      <div class="wx-card"><span class="k">MODE</span><span class="v">${modeLabel}</span></div>
+      <div class="wx-card"><span class="k">stages[0].wins</span><span class="v">${ex.lines.length}</span></div>
+    </div>`;
+
+  let formulaTop = `Nguồn: ${ex.source}\n`;
+  formulaTop += `round.totalBet (IN) = ${ex.rawTotalBet ?? ex.bet}\n`;
+  formulaTop += `round.totalWin (IN) = ${ex.rawTotalWin ?? ex.totalWin}\n`;
+  formulaTop += `Σ stages[0].wins[].win = ${fmtBalance(ex.sumLines)}\n`;
+  formulaTop += `stages[0].totalWin = ${fmtBalance(ex.stageTotalWin ?? ex.totalWin)}`;
+  if (ex.globalMult > 1) {
+    formulaTop += `\nBandwidth / mult (từ featureSteps hoặc UI) ×${ex.globalMult} — win IN thường đã nhân sẵn`;
+  }
+  if (ex.jpWin > 0) {
+    formulaTop += `\n+ progressiveJackpot.win = ${fmtBalance(ex.jpWin)} (tier ${ex.jpTier || '?'})`;
+  }
+  if (ex.maxWinReached) formulaTop += `\n⚠ features.maxWinReached = true`;
+
+  // Mini grid 5×3 (row-major visual: row r, col c)
+  let mini = '';
+  if (ex.gridSnap) {
+    const hit = new Set();
+    const hitRtl = new Set();
+    for (const L of ex.lines) {
+      for (const [c, r] of L.positions || []) {
+        (L.direction === 'rtl' ? hitRtl : hit).add(`${c},${r}`);
+      }
+    }
+    mini = `<div class="wx-section-title">LƯỚI PAYOUT (cột →)</div><div class="wx-mini-grid">`;
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < REELS; c++) {
+        const key = `${c},${r}`;
+        const sym = ex.gridSnap[c]?.[r] || '';
+        const img = SYMBOLS[sym]?.img || '';
+        const cls = hitRtl.has(key) ? 'wx-mini-cell hit-rtl' : (hit.has(key) ? 'wx-mini-cell hit' : 'wx-mini-cell');
+        mini += `<div class="${cls}" title="col ${c}, row ${r}: ${sym}">${
+          img ? imgTag(img, `alt="${sym}"`) : `<span style="font-size:.65rem;color:#666">${sym || '·'}</span>`
+        }</div>`;
+      }
+    }
+    mini += `</div>
+      <div class="wx-note">Viền xanh = ô tham gia way LTR · viền cyan = RTL (Bypass). Mỗi ô đếm 1 lần trên reel → nhân ways.</div>`;
+  }
+
+  let feats = '';
+  if (ex.featureNames?.length) {
+    feats = `<div class="wx-section-title">MINI-FEATURES SPIN NÀY</div>
+      <div style="font-size:.8rem;color:#bcd;margin-bottom:8px">${ex.featureNames.map(n => `• ${n}`).join('<br>')}</div>`;
+  }
+
+  let linesHtml = `<div class="wx-section-title">TỪNG WAY — stages[0].wins (từ IN)</div>`;
+  if (!ex.lines.length) {
+    linesHtml += `<div class="wx-empty" style="padding:12px">IN không có stages[0].wins (totalWin có thể từ jackpot / không trúng ways).</div>`;
+  } else {
+    linesHtml += ex.lines.map(L => {
+      const dirLabel = L.direction === 'rtl' ? 'RTL' : 'LTR';
+      const dirCls = L.direction === 'rtl' ? 'dir-rtl' : 'dir-ltr';
+      const sid = L.symbolId != null ? L.symbolId : '—';
+      const p3 = getSymbolPayMult(L.sym, 3);
+      const p4 = getSymbolPayMult(L.sym, 4);
+      const p5 = getSymbolPayMult(L.sym, 5);
+      const matched = Math.abs(L.baseLine - L.win) <= 0.02 * Math.max(1, L.bet);
+      const chain = L.chainCounts || [];
+      const reelChips = chain.map((n, i) => {
+        const reel = L.direction === 'rtl' ? (REELS - 1 - i) : i;
+        return `<div class="wx-reel-chip"><span class="rk">Reel ${reel}</span><span class="rv">${n}</span></div>`;
+      }).join('<span class="wx-op">×</span>');
+      const posChips = (L.positions || []).map(([c, r]) =>
+        `<span class="wx-pos">[${c},${r}]</span>`
+      ).join('');
+      return `<div class="wx-way">
+        <div class="wx-way-head">
+          ${L.img ? imgTag(L.img, 'alt=""') : ''}
+          <div class="wx-way-title">
+            <strong>#${L.idx} · ${L.name}</strong>
+            <span class="sub">Symbol ${L.sym} · id ${sid} · type ${L.type || 'way'}</span>
+          </div>
+          <span class="wx-pill ${dirCls}">${dirLabel}</span>
+          <span class="wx-pill oak">${L.length}-of-a-kind</span>
+          <span class="wx-way-amount">${fmtBalance(L.win)}</span>
+        </div>
+        <div class="wx-way-body">
+          <div class="wx-steps">
+            <div class="wx-step">
+              <div class="wx-step-num">1</div>
+              <div class="wx-step-body">
+                <div class="wx-step-label">Ô thắng (IN positions)</div>
+                <div class="wx-step-text">Tọa độ <code>[cột, hàng]</code> server gửi:</div>
+                <div class="wx-pos-list">${posChips || '<span class="wx-note">—</span>'}</div>
+              </div>
+            </div>
+            <div class="wx-step">
+              <div class="wx-step-num">2</div>
+              <div class="wx-step-body">
+                <div class="wx-step-label">Đếm ô mỗi reel → số ways</div>
+                <div class="wx-step-text">Mỗi reel nhân số ô khớp symbol / wild:</div>
+                <div class="wx-reel-row">
+                  ${reelChips}
+                  <span class="wx-op">=</span>
+                  <span class="wx-ways-result">${L.ways} ways</span>
+                </div>
+              </div>
+            </div>
+            <div class="wx-step">
+              <div class="wx-step-num">3</div>
+              <div class="wx-step-body">
+                <div class="wx-step-label">Paytable symbol ${L.sym} (${L.name})</div>
+                <div class="wx-pay-row">
+                  <span class="wx-pay-chip${L.length === 3 ? ' active' : ''}">3-oak ×${p3}</span>
+                  <span class="wx-pay-chip${L.length === 4 ? ' active' : ''}">4-oak ×${p4}</span>
+                  <span class="wx-pay-chip${L.length === 5 ? ' active' : ''}">5-oak ×${p5}</span>
+                </div>
+                <div class="wx-step-text" style="margin-top:6px">Đang dùng: <strong style="color:#ffc850">${L.length}-oak = ${L.payMult}× totalBet</strong></div>
+              </div>
+            </div>
+            <div class="wx-step">
+              <div class="wx-step-num">4</div>
+              <div class="wx-step-body">
+                <div class="wx-step-label">Công thức tiền</div>
+                <div class="wx-eq">
+                  <span class="dim">ways × pay × totalBet</span><br>
+                  = <span class="hl">${L.ways}</span> × <span class="hl">${L.payMult}</span> × <span class="hl">${L.bet}</span><br>
+                  = <span class="hl">${fmtBalance(L.baseLine)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="wx-match ${matched ? 'ok' : 'bad'}">
+            ${matched
+              ? `✓ Khớp IN · wins[].win = ${fmtBalance(L.win)}`
+              : `△ Chênh IN · tính ${fmtBalance(L.baseLine)} vs wins[].win ${fmtBalance(L.win)} (Δ ${fmtBalance(L.win - L.baseLine)}) — Bandwidth / mult / cap`}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  let rawJson = '';
+  if (ex.rawWins && ex.rawWins.length) {
+    try {
+      rawJson = `<div class="wx-section-title">RAW stages[0].wins (IN)</div>
+        <pre class="wx-formula" style="max-height:180px;overflow:auto;font-size:.68rem">${
+          escapeHtmlWx(JSON.stringify(ex.rawWins, null, 2))
+        }</pre>`;
+    } catch (_) { /* ignore */ }
+  }
+
+  const meta = `<div class="wx-note">spinId: ${ex.spinId || '—'} · roundId: ${ex.roundId || '—'} · ${ex.source}
+${state.lastInSpin?.t ? `· IN @ ${new Date(state.lastInSpin.t).toLocaleTimeString()}` : ''}</div>`;
+
+  body.innerHTML = cards
+    + `<div class="wx-formula">${formulaTop}</div>`
+    + mini
+    + feats
+    + linesHtml
+    + rawJson
+    + meta
+    + `<div class="wx-note">Giải thích bám <strong>IN SPIN</strong> (WS frame nhận). Công thức ways chỉ để hiểu <em>vì sao</em> server trả wins[].win — số tiền authoritative là field trong IN.</div>`;
+}
+
+function escapeHtmlWx(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function openWinExplain() {
+  // Ưu tiên IN SPIN; nếu miss capture thì quét traffic
+  if (!state.lastInSpin?.payload) {
+    const frame = findLatestInSpinFromTraffic();
+    if (frame) captureLastInSpin(frame);
+  }
+  buildWinExplainFromLastInSpin();
+  renderWinExplainBody();
+  setWinExplainZoom(_wxZoom || 1);
+  openModal('modalWinExplain');
+}
+
+function highlightExplainOnMainGrid() {
+  const ex = state.lastSpinExplain;
+  if (!ex?.lines?.length) {
+    showToast('Không có ô win để highlight', '#ff8800');
+    return;
+  }
+  const all = [];
+  for (const L of ex.lines) {
+    for (const [c, r] of L.positions || []) {
+      const k = `${c},${r}`;
+      if (!all.includes(k)) all.push(k);
+    }
+  }
+  closeModal('modalWinExplain');
+  renderGrid(all);
+  document.querySelectorAll('#reelsGrid .cell').forEach(el => {
+    const k = `${el.dataset.reel},${el.dataset.row}`;
+    el.classList.toggle('win', all.includes(k));
+    el.classList.toggle('win-ltr', all.includes(k));
+  });
+  showToast(`Highlight ${all.length} ô thắng`, '#00ff88');
+  setTimeout(() => {
+    document.querySelectorAll('#reelsGrid .cell').forEach(el => {
+      el.classList.remove('win', 'win-ltr', 'win-rtl');
+    });
+    renderGrid();
+  }, 4500);
+}
+
 async function animateWinWays(wins, total) {
   const wrap = document.getElementById('reelsWrapper');
   wrap?.classList.add('dim-win');
@@ -4316,6 +2678,15 @@ async function animateWinWays(wins, total) {
   }
   renderGrid(allCells);
   markWinDir(allCells, 'ltr');
+  // Âm thanh win mở đầu (scale theo mức thắng)
+  {
+    const ref = state.bet / REF_BET || 1;
+    if (total >= 40 * ref) sfx('jackpot', { gain: 1.15, force: true });
+    else if (total >= 20 * ref) sfx('bigwin', { gain: 1.1, force: true });
+    else sfx('win', { gain: 1.0, force: true });
+  }
+  // Symbol có sprite trên lưới thắng → chạy nhanh
+  if (useSpritePackAnim()) boostSpritePack(1600);
   if (state.bypassProtocol || wins.some(w => w.direction === 'rtl')) {
     showVfxBanner('Ways win — LTR + RTL', 'bypass');
   } else {
@@ -4336,6 +2707,7 @@ async function animateWinWays(wins, total) {
     const cells = cellsForWin(w);
     renderGrid(cells);
     markWinDir(cells, w.direction === 'rtl' ? 'rtl' : 'ltr');
+    sfx('coin', { gain: 0.75, pitch: 0.95 + Math.min(0.25, running / Math.max(total, 1)), force: true });
     if (w.direction === 'rtl') {
       showVfxBanner(`RTL way · ${SYMBOLS[w.sym]?.name || w.sym} · ${fmt(w.win)}`, 'bypass');
     } else {
@@ -4416,14 +2788,8 @@ function createStripReel(reelIndex, symbols, cellH) {
     const cell = document.createElement('div');
     cell.className = 'strip-cell';
     cell.style.height = `${cellH}px`;
-    const s = SYMBOLS[sym];
-    if (s?.img) {
-      const img = document.createElement('img');
-      img.className = 'sym-img';
-      img.src = s.img;
-      img.alt = s.name;
-      img.draggable = false;
-      cell.appendChild(img);
+    if (SYMBOLS[sym]?.img) {
+      cell.appendChild(createSymbolEl(sym));
     } else {
       cell.textContent = sym;
     }
@@ -4443,7 +2809,10 @@ async function animateReelSpin(strips, forcedResults = null) {
   const gridRect = grid.getBoundingClientRect();
   let cellH = Math.max(48, (gridRect.height || wrap?.clientHeight || 270) / ROWS);
 
-  sfx('whoosh', { gain: 0.4, pitch: 0.85 });
+  unlockAudio();
+  _lastSpinTickAt = 0;
+  sfx('spinStart', { gain: 0.75, pitch: 0.95, force: true });
+  sfx('whoosh', { gain: 0.5, pitch: 0.85, force: true });
   const speed = state.fastSpin ? 3000 : 2400;
   const baseSpin = state.fastSpin ? 0.32 : 0.62;
   const stagger = state.fastSpin ? 0.14 : 0.32;
@@ -4507,6 +2876,7 @@ async function animateReelSpin(strips, forcedResults = null) {
       const elapsed = (now - t0) / 1000;
       const dt = Math.min(0.048, (now - last) / 1000);
       last = now;
+      let anySpinning = false;
 
       if (!teaseActive && reelData[1]?.done) {
         let s01 = 0;
@@ -4515,6 +2885,7 @@ async function animateReelSpin(strips, forcedResults = null) {
         if (s01 >= 2) {
           teaseActive = true;
           wrap?.classList.add('tease-dim');
+          sfx('charge', { gain: 0.45, pitch: 1.15, force: true });
           for (let c = 2; c < REELS; c++) {
             if (!reelData[c].done && !reelData[c].captured) {
               reelData[c].stopAt += teaseExtra;
@@ -4531,6 +2902,7 @@ async function animateReelSpin(strips, forcedResults = null) {
         if (r.done) continue;
 
         if (elapsed < r.stopAt) {
+          anySpinning = true;
           const spd = speed * (r.teased ? 0.5 : 1);
           // Scroll DOWN: strip moves down (y increases toward 0)
           r.y += spd * dt;
@@ -4557,6 +2929,7 @@ async function animateReelSpin(strips, forcedResults = null) {
           const t = Math.min(1, (elapsed - r.stopAt) / dur);
           const e = easeOutQuint(t);
           r.y = r.yAtDecel + (r.decelTarget - r.yAtDecel) * e;
+          if (t < 1) anySpinning = true;
 
           if (t >= 1) {
             r.y = r.finalY;
@@ -4565,6 +2938,7 @@ async function animateReelSpin(strips, forcedResults = null) {
             r.reel.style.setProperty('--land-y', `${r.finalY}px`);
             r.stripEl.style.transform = `translate3d(0, ${r.finalY}px, 0)`;
             r.reel.classList.add('landing');
+            sfxReelLand(c);
             setTimeout(() => r.reel.classList.remove('landing'), 340);
             continue;
           }
@@ -4572,6 +2946,8 @@ async function animateReelSpin(strips, forcedResults = null) {
 
         r.stripEl.style.transform = `translate3d(0, ${r.y}px, 0)`;
       }
+
+      if (anySpinning) sfxSpinTick(now - t0, !!state.fastSpin);
 
       if (reelData.every(x => x.done)) {
         wrap?.classList.remove('tease-dim');
@@ -4598,6 +2974,77 @@ function jackpotEmoji(tierName) {
   return JACKPOT_TIERS.find(t => t.name === tierName)?.emoji || '◆';
 }
 
+function jackpotTierSvg(tierName) {
+  const t = String(tierName || 'USER').toUpperCase();
+  if (t === 'GHOST') {
+    return '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 8c-11 0-20 8-20 20v26c0 2 2.4 2.2 3.2.4L20 46l5 7c.8 1.1 2.6.4 2.6-1V48l4.4 8c.7 1.2 2.5 1.2 3.2 0L40 48v4c0 1.4 1.8 2.1 2.6 1l5-7 4.8 8.4c.8 1.8 3.2 1.6 3.2-.4V28C52 16 43 8 32 8zm-8 22a3.5 3.5 0 110-7 3.5 3.5 0 010 7zm16 0a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/></svg>';
+  }
+  if (t === 'ELITE') {
+    return '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 8l6.4 13.6L54 24.2 43 34.6l2.8 16.2L32 43.2 18.2 50.8 21 34.6 10 24.2l15.6-2.6z"/></svg>';
+  }
+  if (t === 'GOD') {
+    return '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6l4 12 12-5-3 13 13 3-13 4 5 12-12-6-4 14-4-14-12 6 5-12-13-4 13-3-3-13 12 5z"/></svg>';
+  }
+  return '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="20" r="11"/><path d="M12 56c2-14 10-20 20-20s18 6 20 20z"/></svg>';
+}
+
+/**
+ * 15 nodes: winning tier ≥3; every other tier ≤2 so match-3 chỉ đúng prize BE.
+ * Giữ index server nếu đủ 15; slot trống / decoy thừa → winning tier.
+ */
+function constrainJackpotNodes(rawTiers, winTier) {
+  const win = String(winTier || 'USER').toUpperCase();
+  const names = JACKPOT_TIERS.map(t => t.name);
+  const src = Array.isArray(rawTiers) ? rawTiers.map(t => String(t || '').toUpperCase()) : [];
+  const decoyUsed = {};
+  names.forEach(t => { if (t !== win) decoyUsed[t] = 0; });
+  const out = new Array(15);
+
+  for (let i = 0; i < 15; i++) {
+    const t = src[i];
+    if (t === win) {
+      out[i] = win;
+    } else if (t && names.includes(t) && decoyUsed[t] < 2) {
+      decoyUsed[t] += 1;
+      out[i] = t;
+    }
+  }
+
+  let winCount = out.filter(t => t === win).length;
+  for (let i = 0; i < 15 && winCount < 3; i++) {
+    if (out[i] !== win) {
+      if (out[i] && decoyUsed[out[i]] != null) decoyUsed[out[i]] -= 1;
+      out[i] = win;
+      winCount += 1;
+    }
+  }
+
+  for (let i = 0; i < 15; i++) {
+    if (out[i]) continue;
+    const avail = names.filter(t => t !== win && decoyUsed[t] < 2);
+    if (avail.length && Math.random() < 0.5) {
+      const t = avail[Math.floor(Math.random() * avail.length)];
+      decoyUsed[t] += 1;
+      out[i] = t;
+    } else {
+      out[i] = win;
+    }
+  }
+  return out;
+}
+
+function revealJackpotNode(node, tierName, idx) {
+  const name = String(tierName || 'USER').toUpperCase();
+  const num = String((idx | 0) + 1).padStart(2, '0');
+  node.classList.add('opened', 'jp-' + name);
+  node.innerHTML =
+    '<div class="jp-hex-wrap"><div class="jp-hex-inner">' +
+    '<span class="jp-num">' + num + '</span>' +
+    '<span class="jp-ico">' + jackpotTierSvg(name) + '</span>' +
+    '<span class="jp-name">' + name + '</span>' +
+    '</div></div>';
+}
+
 /**
  * Pick-and-click Core Hack.
  * @param {object|null} serverJp - online: { tier, win, isTriggered, nodes?[{index,tier}] }
@@ -4606,6 +3053,12 @@ function jackpotEmoji(tierName) {
  */
 async function playJackpot(serverJp = null) {
   sfx('charge', { gain: 0.8 });
+  state.lastJackpotActive = true;
+  renderFeatureMeter([
+    CORE_HACK.id,
+    ...((state.persistentFeatures || []).map(f => f.id)),
+    ...((state.triggeredFeatures || []).map(f => f.id)),
+  ].filter((id, i, a) => a.indexOf(id) === i));
   return new Promise(resolve => {
     let nodeTiers = []; // string tier names length 15
     let winAmount = 0;
@@ -4621,24 +3074,13 @@ async function playJackpot(serverJp = null) {
         nodeTiers = nodes.slice(0, 15).map(n => String(n.tier || '').toUpperCase());
       } else if (nodes.length > 0) {
         nodeTiers = nodes.map(n => String(n.tier || '').toUpperCase());
-        while (nodeTiers.length < 15) {
-          const filler = JACKPOT_TIERS[nodeTiers.length % JACKPOT_TIERS.length].name;
-          nodeTiers.push(filler === targetTier ? 'USER' : filler);
-        }
-      } else {
-        // Server omit nodes — still show 15 cells with 3× winning tier
-        nodeTiers = [];
-        for (let i = 0; i < 3; i++) nodeTiers.push(targetTier || 'USER');
-        for (let i = 3; i < 15; i++) {
-          const t = JACKPOT_TIERS[i % JACKPOT_TIERS.length].name;
-          nodeTiers.push(t === targetTier ? 'GHOST' : t);
-        }
-        nodeTiers = shuffle(nodeTiers);
       }
+      nodeTiers = constrainJackpotNodes(nodeTiers, targetTier);
     } else {
-      const fragments = [];
-      JACKPOT_TIERS.forEach(t => { for (let i = 0; i < 3; i++) fragments.push(t.name); });
-      nodeTiers = shuffle(fragments).slice(0, 15);
+      const pick = JACKPOT_TIERS[Math.floor(Math.random() * JACKPOT_TIERS.length)];
+      targetTier = pick.name;
+      winAmount = pick.mult * state.bet;
+      nodeTiers = constrainJackpotNodes([], targetTier);
     }
 
     const picks = {};
@@ -4671,19 +3113,17 @@ async function playJackpot(serverJp = null) {
       })();
     };
 
-    nodeTiers.forEach((tierName) => {
+    nodeTiers.forEach((tierName, idx) => {
       const node = document.createElement('div');
       node.className = 'jackpot-node';
       const coreImg = document.createElement('img');
-      coreImg.src = JACKPOT_CORE_IMG;
+      setImgSrc(coreImg, JACKPOT_CORE_IMG);
       coreImg.alt = 'Encrypted Node';
       node.appendChild(coreImg);
       node.addEventListener('click', () => {
         if (finished || node.classList.contains('opened')) return;
         sfx('tick', { gain: 0.5 });
-        node.classList.add('opened');
-        node.innerHTML = '';
-        node.textContent = jackpotEmoji(tierName);
+        revealJackpotNode(node, tierName, idx);
         picks[tierName] = (picks[tierName] || 0) + 1;
         document.getElementById('jackpotPicks').textContent =
           Object.entries(picks).map(([k, v]) => `${k}: ${v}`).join(' | ');
@@ -4754,6 +3194,10 @@ async function continueAfterSpin() {
 
   // Free spins: remain = số lượt còn lại cần quay
   if (state.inFreeSpins && state.fsRemaining > 0) {
+    if (isEditFsGridOn()) {
+      openFsGridEditor();
+      return;
+    }
     // Nhịp ngắn giữa 2 FS — FX đã settle xong
     await sleepRaw(state.fastSpin ? 180 : 400);
     if (state.inFreeSpins && state.fsRemaining > 0 && !state.spinning && !state.fxPlaying) {
@@ -4811,6 +3255,7 @@ async function triggerFreeSpins(scatterCount, opts = {}) {
 function updateFSBanner() {
   const el = document.getElementById('fsCount');
   if (el) el.textContent = Math.max(0, state.fsRemaining || 0);
+  syncEditFsGridChip();
 }
 
 async function endFreeSpins() {
@@ -4818,6 +3263,7 @@ async function endFreeSpins() {
   state.fsRemaining = 0;
   state.persistentFeatures = [];
   state.fsActiveFeatures = [];
+  closeFsGridEditor();
   document.getElementById('fsBanner').classList.remove('visible');
   renderFeatureMeter([]);
   document.getElementById('fsTotalWin').textContent = fmt(state.fsSessionWin || 0);
@@ -4844,8 +3290,11 @@ async function doSpin(forcedScatters = 0) {
     state.balance -= cost;
     state.txnId = genTxnId();
   }
+  // Snapshot sau trừ bet — BEFORE = số dư khi spin đang chờ kết quả win/lose
+  captureBalanceBefore();
 
   state.spinning = true;
+  syncPerfMode();
   state.lastWin = 0;
   state.blockedSymbols = [];
   state.globalMultiplier = 1;
@@ -4870,6 +3319,7 @@ async function doSpin(forcedScatters = 0) {
       state.fsTotal++;
       showToast(`+1 Free Spin! New feature: ${newFeat[0].name}`, '#aa44ff');
     }
+    mergePendingLocalForceFeatures(features);
   }
 
   state.triggeredFeatures = features;
@@ -4885,6 +3335,7 @@ async function doSpin(forcedScatters = 0) {
     strips[1] = [...strips[1], ...Array(5).fill('S')];
   }
   await animateReelSpin(strips);
+  applyPendingLocalForceGrid();
 
   // Force scatters for buy free spin (before feature transforms)
   if (forcedScatters > 0) {
@@ -4916,6 +3367,8 @@ async function doSpin(forcedScatters = 0) {
   if (!state.inFreeSpins && Math.random() < 0.005) {
     renderGrid();
     jackpotWin = await playJackpot();
+  } else {
+    state.lastJackpotActive = false;
   }
 
   // Calculate wins
@@ -4923,6 +3376,19 @@ async function doSpin(forcedScatters = 0) {
   const finalWin = total + jackpotWin;
   state.lastWin = finalWin;
   state.balance += finalWin;
+
+  // Offline only — online dùng captureLastInSpin từ frame IN
+  recordSpinWinExplainLocal({
+    bet: state.bet,
+    totalWin: finalWin,
+    wins,
+    balanceBefore: state.balanceBefore,
+    balanceAfter: state.balance,
+    thisMode: state.inFreeSpins ? 'free' : 'base',
+    globalMultiplier: state.globalMultiplier,
+    maxWinReached: capped,
+    featureNames: (features || []).map(f => f.name || f.id),
+  });
 
   if (state.inFreeSpins) {
     state.fsSessionWin += finalWin;
@@ -4986,9 +3452,11 @@ async function doSpin(forcedScatters = 0) {
   });
 
   state.spinning = false;
+  state.lastJackpotActive = false;
   document.getElementById('btnSpin').disabled = false;
   updateUI();
   updateAutoUI();
+  renderFeatureMeter((state.inFreeSpins ? (state.persistentFeatures || []) : []).map(f => f.id));
 
   // FS continue / Autospin — chỉ sau settle
   await continueAfterSpin();
@@ -5143,6 +3611,10 @@ function initUI() {
       return;
     }
     if (state.spinning) return;
+    if (isFsGridEditorOpen()) {
+      applyFsGridAndSpin();
+      return;
+    }
     sfx('tick', { gain: 0.45 });
     doSpin();
   });
@@ -5151,6 +3623,19 @@ function initUI() {
     openModal('modalBet');
   });
   document.getElementById('closeBet').addEventListener('click', () => closeModal('modalBet'));
+  document.getElementById('btnWinExplain')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openWinExplain();
+  });
+  document.querySelector('.bottom-bar .win-block')?.addEventListener('click', () => openWinExplain());
+  document.getElementById('closeWinExplain')?.addEventListener('click', () => closeModal('modalWinExplain'));
+  document.getElementById('modalWinExplain')?.addEventListener('click', (e) => {
+    if (e.target.id === 'modalWinExplain') closeModal('modalWinExplain');
+  });
+  document.getElementById('wxZoomIn')?.addEventListener('click', () => setWinExplainZoom(_wxZoom + 0.1));
+  document.getElementById('wxZoomOut')?.addEventListener('click', () => setWinExplainZoom(_wxZoom - 0.1));
+  document.getElementById('wxZoomReset')?.addEventListener('click', () => setWinExplainZoom(1));
+  document.getElementById('wxHighlightGrid')?.addEventListener('click', () => highlightExplainOnMainGrid());
   document.getElementById('btnMenu').addEventListener('click', () => openModal('modalMenu'));
   document.getElementById('closeMenu').addEventListener('click', () => closeModal('modalMenu'));
   document.getElementById('menuPaytable').addEventListener('click', () => { closeModal('modalMenu'); openModal('modalPaytable'); });
@@ -5171,6 +3656,10 @@ function initUI() {
     else renderHistory();
   });
   document.getElementById('closeHistory').addEventListener('click', () => closeModal('modalHistory'));
+  ['modalHistory', 'modalSpinDetail', 'modalJackpotHistory'].forEach(id => {
+    const el = document.getElementById(id);
+    el?.addEventListener('click', e => { if (e.target === el) closeModal(id); });
+  });
   document.getElementById('closeSpinDetail')?.addEventListener('click', () => closeModal('modalSpinDetail'));
   document.getElementById('menuJackpotHistory')?.addEventListener('click', async () => {
     closeModal('modalMenu');
@@ -5442,29 +3931,128 @@ async function openSpinDetailOnline(spinId, roundId) {
     return;
   }
   const d = payload.detail || payload;
-  const screen = d.screen;
-  let screenHtml = '';
-  if (Array.isArray(screen) && screen.length === REELS) {
-    screenHtml = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:10px 0">';
-    for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < REELS; c++) {
-        const key = SYM_MAP[screen[c]?.[r]] || '?';
-        screenHtml += `<div style="text-align:center;font-size:.7rem;padding:4px;background:rgba(0,0,0,.35);border-radius:4px">${key}</div>`;
-      }
-    }
-    screenHtml += '</div>';
+  const wins = Array.isArray(d.wins) ? d.wins : [];
+  const bet = Number(d.betAmount ?? d.totalBet ?? 0);
+  const win = Number(d.totalWin ?? d.win ?? 0);
+  const profit = Number(d.profit != null ? d.profit : win - bet);
+  const ts = d.timestamp ? String(d.timestamp).replace('T', ' ').slice(0, 19) : '—';
+  const mode = String(d.thisMode || 'base').toLowerCase();
+  const spinType = (d.jackpotWonTier || d.jackpotWonAmount > 0) ? 'JACKPOT'
+    : mode.includes('free') || mode === 'fs' ? 'FREE SPIN' : 'NORMAL SPIN';
+
+  // Grid — support row-major (3×5) hoặc column-major (5×3)
+  let matrix = null;
+  if (Array.isArray(d.screen) && Array.isArray(d.screen[0])) {
+    matrix = d.screen.length === ROWS ? d.screen
+      : d.screen[0].length === ROWS ? d.screen[0].map((_, r) => d.screen.map(col => col[r]))
+      : d.screen;
   }
+  const symTag = key => {
+    const s = SYMBOLS[key];
+    return s?.img ? imgTag(s.img, 'style="width:100%;height:100%;object-fit:contain;display:block" draggable="false"') : (key || '?');
+  };
+  let gridHtml = '';
+  if (matrix) {
+    const rows = matrix.length, cols = matrix[0].length;
+    gridHtml = `<div id="sdGrid" style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:5px;margin:12px 0">`
+      + matrix.map((row, r) => row.map((id, c) => {
+        const highlight = wins.some(w => (w.positions || []).some(p => p[0] === c && p[1] === r));
+        const dim = !wins.length || highlight ? '' : 'opacity:.4;filter:brightness(.65) grayscale(.35) saturate(.7);';
+        return `<div data-r="${r}" data-c="${c}" style="aspect-ratio:1/1;background:rgba(0,0,0,.35);border:1px solid ${highlight ? 'var(--cyan)' : '#1e3a5f'};${highlight ? 'box-shadow:0 0 10px rgba(0,240,255,.5);' : ''}border-radius:6px;display:flex;align-items:center;justify-content:center;padding:3px"><div data-dimmed="1" style="${dim}display:flex;width:100%;height:100%;align-items:center;justify-content:center;transition:opacity .2s,filter .2s;pointer-events:none">${symTag(SYM_MAP[id])}</div></div>`;
+      }).join('')).join('') + '</div>';
+  }
+
+  // Way wins — pager 6/page (GDD 9.3)
+  const PAGE = 6;
+  const totalPages = Math.max(1, Math.ceil(wins.length / PAGE));
+  let winPage = 0;
+  const winRowHtml = (w, idx) => {
+    const key = SYM_MAP[w.symbolId] || '?';
+    const posTxt = (w.positions || []).map(p => `R${p[0] + 1}·h${p[1] + 1}`).join(', ');
+    return `<div data-win="${idx}" class="history-item" style="display:flex;align-items:center;gap:10px;cursor:pointer">
+      <div style="width:44px;height:44px;flex:0 0 44px;background:rgba(0,0,0,.35);border-radius:6px;padding:3px;display:flex;align-items:center;justify-content:center">${symTag(key)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="color:var(--text);font-size:.8rem">#${idx + 1} · ${SYMBOLS[key]?.name || key} ×${w.count}${w.type ? ` · ${w.type}` : ''}${w.lineId != null ? ` · line ${w.lineId}` : ''}</div>
+        <div style="color:var(--dim);font-size:.7rem;margin-top:2px">${posTxt || '—'}</div>
+      </div>
+      <div class="history-profit-pos" style="flex:0 0 auto">${fmt(w.amount)}</div>
+    </div>`;
+  };
+  const winsPageHtml = () => `<div id="sdWins">${wins.slice(winPage * PAGE, winPage * PAGE + PAGE).map((w, i) => winRowHtml(w, winPage * PAGE + i)).join('')}</div>`;
+  const pagerHtml = () => (totalPages > 1 ? `
+    <div id="sdPager" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px">
+      <button class="btn" id="sdPrev" style="padding:6px 14px;font-size:.75rem" ${winPage === 0 ? 'disabled' : ''}>‹ Prev</button>
+      <span style="color:var(--dim);font-size:.75rem">${winPage + 1} / ${totalPages}</span>
+      <button class="btn" id="sdNext" style="padding:6px 14px;font-size:.75rem" ${winPage >= totalPages - 1 ? 'disabled' : ''}>Next ›</button>
+    </div>` : '');
+
+  const modeBadge = `
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+      <span style="padding:3px 10px;border-radius:20px;border:1px solid var(--frame-hi);font-size:.65rem;letter-spacing:1px;color:var(--cyan)">${spinType}</span>
+      ${d.buyFeatureTrigger ? '<span style="padding:3px 10px;border-radius:20px;border:1px solid var(--orange);font-size:.65rem;color:var(--orange)">BUY FEATURE</span>' : ''}
+      ${d.maxWinReached ? '<span style="padding:3px 10px;border-radius:20px;border:1px solid var(--red);font-size:.65rem;color:var(--red)">WIN CAP</span>' : ''}
+    </div>
+    ${d.maxWinReached ? '<p style="color:var(--red);font-size:.75rem;margin:-4px 0 8px">Maximum Win Cap reached. Only ' + fmt(Math.min(win, 19693 * bet)) + ' has been awarded for this spin.</p>' : ''}`;
+
   body.innerHTML = `
-    <div><strong style="color:var(--text)">spinId</strong>: ${d.spinId || payload.spinId || spinId}</div>
-    <div><strong style="color:var(--text)">roundId</strong>: ${d.roundId || payload.roundId || roundId || '—'}</div>
-    <div><strong style="color:var(--text)">mode</strong>: ${d.thisMode || '—'} → ${d.nextMode || '—'}</div>
-    <div><strong style="color:var(--text)">bet / win</strong>: ${fmt(d.betAmount ?? d.totalBet)} / ${fmt(d.totalWin ?? d.win)}</div>
-    <div><strong style="color:var(--text)">FS</strong>: remain ${d.freeSpinsRemain ?? '—'} / total ${d.freeSpinsTotal ?? '—'}</div>
-    <div><strong style="color:var(--text)">jackpot</strong>: ${d.jackpotWonTier || '—'} ${d.jackpotWonAmount != null ? fmt(d.jackpotWonAmount) : ''}</div>
-    <div><strong style="color:var(--text)">maxWin</strong>: ${d.maxWinReached ? 'YES' : 'no'}</div>
-    ${screenHtml}
-    <div style="margin-top:8px"><strong style="color:var(--text)">wins</strong>: ${(d.wins || []).length}</div>
+    ${modeBadge}
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+      <div style="background:rgba(0,0,0,.35);border:1px solid #1e3a5f;border-radius:8px;padding:8px;text-align:center"><div style="font-size:.65rem;color:var(--dim)">BET</div><div style="color:var(--text)">${fmt(bet)}</div></div>
+      <div style="background:rgba(0,0,0,.35);border:1px solid #1e3a5f;border-radius:8px;padding:8px;text-align:center"><div style="font-size:.65rem;color:var(--dim)">WIN</div><div style="color:var(--green)">${fmt(win)}</div></div>
+      <div style="background:rgba(0,0,0,.35);border:1px solid #1e3a5f;border-radius:8px;padding:8px;text-align:center"><div style="font-size:.65rem;color:var(--dim)">PROFIT</div><div class="${profit >= 0 ? 'history-profit-pos' : 'history-profit-neg'}">${profit >= 0 ? '+' : ''}${fmt(profit)}</div></div>
+    </div>
+    ${gridHtml}
+    <div style="display:flex;justify-content:space-between;align-items:baseline">
+      <strong style="color:var(--text);font-size:.85rem;letter-spacing:1px">WAY WINS (${wins.length})</strong>
+      <span style="font-size:.7rem;color:var(--dim)">${ts}</span>
+    </div>
+    ${wins.length ? winsPageHtml() + pagerHtml() : '<p style="color:var(--dim);padding:10px;text-align:center">No wins this spin</p>'}
+    <div style="border-top:1px solid #1e3a5f;margin-top:12px;padding-top:10px;font-size:.7rem;color:var(--dim);display:grid;gap:3px">
+      <div>mode: ${d.thisMode || '—'} → ${d.nextMode || '—'} · jackpot: ${d.jackpotWonTier ? d.jackpotWonTier + ' ' : ''}${fmt(d.jackpotWonAmount ?? 0)} · contribution: ${fmt(d.jackpotContribution ?? 0)}</div>
+      <div style="word-break:break-all">spinId: ${d.spinId || payload.spinId || spinId}</div>
+      <div style="word-break:break-all">roundId: ${d.roundId || payload.roundId || roundId || '—'} · session: ${d.sessionId || payload.sessionId || '—'} · game: ${d.gameId || '—'}</div>
+    </div>
   `;
+
+  // Highlight winning positions khi click vào way win
+  const hlCells = w => {
+    const posSet = new Set((w?.positions || []).map(p => p[0] + ',' + p[1]));
+    const hasSel = posSet.size > 0;
+    body.querySelectorAll('#sdGrid > div[data-r]').forEach(el => {
+      const on = posSet.has(el.dataset.c + ',' + el.dataset.r);
+      el.style.border = on ? '1px solid var(--cyan)' : '1px solid #1e3a5f';
+      el.style.boxShadow = on ? '0 0 10px rgba(0,240,255,.5)' : 'none';
+      const inner = el.firstElementChild;
+      const symEl = inner?.dataset?.dimmed === '1' ? inner : null;
+      if (symEl) {
+        if (hasSel && !on) { symEl.style.opacity = '.4'; symEl.style.filter = 'brightness(.65) grayscale(.35) saturate(.7)'; }
+        else { symEl.style.opacity = '1'; symEl.style.filter = 'none'; }
+      }
+    });
+  };
+  const bindWins = () => {
+    body.querySelectorAll('#sdWins .history-item[data-win]').forEach(el =>
+      el.addEventListener('click', () => hlCells(wins[Number(el.dataset.win)])));
+    if (wins.length) hlCells(wins[0]);
+  };
+  const bindPager = () => {
+    body.querySelector('#sdPrev')?.addEventListener('click', () => { winPage--; reWins(); });
+    body.querySelector('#sdNext')?.addEventListener('click', () => { winPage++; reWins(); });
+  };
+  const reWins = () => {
+    const winsEl = body.querySelector('#sdWins');
+    if (winsEl) winsEl.outerHTML = winsPageHtml();
+    const pager = body.querySelector('#sdPager');
+    const parsed = new DOMParser().parseFromString(pagerHtml(), 'text/html').body.firstElementChild;
+    if (pager) {
+      if (parsed) pager.replaceWith(parsed);
+      else pager.remove();
+      body.querySelector('#sdPrev')?.addEventListener('click', () => { winPage--; reWins(); });
+      body.querySelector('#sdNext')?.addEventListener('click', () => { winPage++; reWins(); });
+    }
+    bindWins();
+  };
+  bindWins(); bindPager();
   if (btnRounds) {
     btnRounds.style.display = 'inline-block';
     btnRounds.onclick = () => openSessionRoundsOnline(lastDetailRoundId || lastDetailSpinId);
@@ -5522,11 +4110,16 @@ async function renderJackpotHistoryOnline() {
 // ─── Splash ──────────────────────────────────────────────────
 async function splash() {
   const fill = document.getElementById('splashFill');
-  for (let i = 0; i <= 100; i += 5) {
-    fill.style.width = i + '%';
-    await sleep(60);
+  const pending = startAssetPreload();
+  if (!assetsReady()) {
+    updateLoginLoadUi();
+    while (!assetsReady()) {
+      await Promise.race([pending, sleep(80)]);
+    }
   }
-  await sleep(300);
+  if (fill) fill.style.width = '100%';
+  await pending;
+  await sleep(assetsReady() ? 180 : 80);
   document.getElementById('splash').classList.add('hidden');
   document.getElementById('game').classList.add('visible');
 }
@@ -5748,7 +4341,7 @@ function applyServerScreen(screen, splitCounts) {
   return true;
 }
 
-function applyOnlineBalance(payload) {
+function applyOnlineBalance(payload, { syncBefore = false } = {}) {
   const raw =
     payload?.data?.control?.balance ??
     payload?.control?.balance ??
@@ -5758,6 +4351,8 @@ function applyOnlineBalance(payload) {
   if (Number.isNaN(bal)) return false;
   onlineBalance = bal;
   state.balance = bal;
+  // JOIN / last-session: BEFORE = balance hiện tại (chưa có spin pending)
+  if (syncBefore) state.balanceBefore = bal;
   updateUI();
   return true;
 }
@@ -5937,7 +4532,7 @@ function parseOnlineRound(payload) {
  */
 function restoreOnlineSessionFromPayload(payload, { autoContinueFs = false } = {}) {
   if (!payload) return;
-  applyOnlineBalance(payload);
+  applyOnlineBalance(payload, { syncBefore: true });
   const parsed = parseOnlineRound(payload);
   if (parsed.screen) {
     applyServerScreen(parsed.screen, parsed.splitCounts);
@@ -5992,7 +4587,7 @@ function restoreOnlineSessionFromPayload(payload, { autoContinueFs = false } = {
     );
     if (autoContinueFs && state.fsRemaining > 0 && !state.spinning) {
       setTimeout(() => {
-        if (online && state.inFreeSpins && state.fsRemaining > 0 && !state.spinning) {
+        if (state.inFreeSpins && state.fsRemaining > 0 && !state.spinning) {
           continueAfterSpin();
         }
       }, 600);
@@ -6229,23 +4824,60 @@ function cellEl(c, r) {
   return document.querySelector(`#reelsGrid .cell[data-reel="${c}"][data-row="${r}"]`);
 }
 
+/** Map cell VFX class → symbol color/scale FX preset */
+const VFX_CLS_SYM_FX = {
+  'vfx-decrypt': 'decrypt',
+  'vfx-surge': 'surge',
+  'vfx-mult': 'overclock',
+  'vfx-firewall': 'hot',
+  'vfx-wild-glow': 'wild',
+  'vfx-morph': 'pulse',
+  'vfx-hit': 'win',
+  'vfx-glitch': 'glitch',
+  'vfx-split': 'pulse',
+  scrub: 'hot',
+};
+
+function restoreIdleSymbolFx(img) {
+  if (!img) return;
+  const sym = img.dataset.sym;
+  const aura = idleAuraFx(sym);
+  if (aura) {
+    setSymbolFx(img, aura);
+    img.dataset.symFx = 'idle';
+    img.classList.add('fx-aura-breathe');
+  } else {
+    setSymbolFx(img, null);
+    img.classList.remove('fx-aura-breathe');
+  }
+}
+
 function clearCellClasses(clsList) {
   const sels = (clsList || []).map(c => `.cell.${c}`).join(',');
   if (!sels) return;
   document.querySelectorAll(`#reelsGrid ${sels}`).forEach(el => {
     clsList.forEach(c => el.classList.remove(c));
+    // Reset temporary VFX tint; keep idle accents for W / M
+    el.querySelectorAll('.sym-img').forEach(restoreIdleSymbolFx);
   });
 }
 
 function highlightCells(keys, cls, ms) {
   if (!keys?.length) return Promise.resolve();
   const set = new Set(keys);
+  const symFx = VFX_CLS_SYM_FX[cls] || null;
   document.querySelectorAll('#reelsGrid .cell').forEach(el => {
     const k = `${el.dataset.reel},${el.dataset.row}`;
-    if (set.has(k)) el.classList.add(cls);
+    if (set.has(k)) {
+      el.classList.add(cls);
+      if (symFx) setCellSymbolFx(el, symFx);
+    }
   });
   return sleepRaw(ms).then(() => {
-    document.querySelectorAll(`#reelsGrid .cell.${cls}`).forEach(el => el.classList.remove(cls));
+    document.querySelectorAll(`#reelsGrid .cell.${cls}`).forEach(el => {
+      el.classList.remove(cls);
+      if (symFx) el.querySelectorAll('.sym-img').forEach(restoreIdleSymbolFx);
+    });
   });
 }
 
@@ -6255,9 +4887,13 @@ async function highlightCellsKeep(keys, cls, ms) {
     return;
   }
   const set = new Set(keys);
+  const symFx = VFX_CLS_SYM_FX[cls] || null;
   document.querySelectorAll('#reelsGrid .cell').forEach(el => {
     const k = `${el.dataset.reel},${el.dataset.row}`;
-    if (set.has(k)) el.classList.add(cls);
+    if (set.has(k)) {
+      el.classList.add(cls);
+      if (symFx) setCellSymbolFx(el, symFx);
+    }
   });
   await sleepRaw(ms);
 }
@@ -6472,7 +5108,7 @@ async function flyFeatureIconFromMeter(featId) {
   const endX = wr.left + wr.width / 2 - 24;
   const endY = wr.top + wr.height / 2 - 36;
 
-  fly.src = feat.img;
+  setImgSrc(fly, feat.img);
   fly.classList.remove('fly');
   fly.style.display = 'block';
   fly.style.opacity = '1';
@@ -6499,7 +5135,7 @@ async function celebrateWinPro(totalWin) {
   const mega = totalWin >= 40 * ref;
   const big = totalWin >= 20 * ref;
   const scale = mega ? 2.1 : big ? 1.65 : 1.25;
-  sfx(mega || big ? 'jackpot' : 'win', { gain: mega ? 1 : big ? 0.95 : 0.85 });
+  sfx(mega ? 'jackpot' : big ? 'bigwin' : 'win', { gain: mega ? 1.15 : big ? 1.1 : 1.0, force: true });
   const bal = document.getElementById('balanceDisplay');
   const hw = document.getElementById('headerWin');
   bal?.classList.remove('win-pulse');
@@ -6690,7 +5326,7 @@ async function playFeatureIntro(featId) {
   const img = document.getElementById('vfxIntroImg');
   const name = document.getElementById('vfxIntroName');
   if (intro && img && name && feat) {
-    img.src = feat.img || '';
+    setImgSrc(img, feat.img || '');
     img.alt = feat.name;
     name.textContent = feat.name;
     name.style.borderColor = feat.color || 'var(--cyan)';
@@ -6792,7 +5428,7 @@ async function playFeatureExplainBeat(featId, step = null) {
   hideFeatureIntro(true);
 
   if (img) {
-    img.src = feat.img || '';
+    setImgSrc(img, feat.img || '');
     img.alt = vi.nameVi || feat.name;
   }
   if (nameEl) {
@@ -7220,6 +5856,8 @@ async function morphChangesSequential(changes, cellCls, opts = {}) {
     if (el) {
       el.classList.add(cellCls || 'vfx-morph', 'vfx-hit');
       if (cellCls === 'vfx-decrypt') el.classList.add('vfx-decrypt');
+      const fxName = VFX_CLS_SYM_FX[cellCls] || VFX_CLS_SYM_FX['vfx-morph'] || 'pulse';
+      setCellSymbolFx(el, fxName);
     }
     const rc = cellRectInWrap(p.c, p.r);
     if (canvas && rc) {
@@ -7611,6 +6249,7 @@ async function presentVfxOverload(step, featId) {
           const rc = cellRectInWrap(c, r);
           if (rc) {
             cellEl(c, r)?.classList.add('vfx-wild-glow');
+            boostWildSprite(1200);
             parts = parts.concat(burstParticles(canvas.ctx, rc.x, rc.y, '#ffcc44', vfxParticleN(14), 'spark'));
           }
         }
@@ -7638,6 +6277,7 @@ async function presentVfxOverload(step, featId) {
   for (const col of cols) {
     document.getElementById(`reel-${col}`)?.classList.add('vfx-wild-col');
   }
+  boostWildSprite(1800);
 
   if (Array.isArray(step.changes) && step.changes.length) {
     const byCol = new Map();
@@ -8054,7 +6694,12 @@ async function presentVfxSurge(step, featId) {
     if (ch) setCellSymbol(p.c, p.r, ch.to);
     else setCellSymbol(p.c, p.r, 11);
     renderGrid();
-    cellEl(p.c, p.r)?.classList.add('vfx-surge', 'vfx-wild-glow');
+    {
+      const el = cellEl(p.c, p.r);
+      el?.classList.add('vfx-surge', 'vfx-wild-glow');
+      if (el) setCellSymbolFx(el, 'surge');
+      boostWildSprite(1400);
+    }
 
     if (rc && st) {
       const ring = document.createElement('div');
@@ -8769,10 +7414,17 @@ function setConnState(state, msg) {
 function sendWS(data) {
   if (!ws || ws.readyState !== WebSocket.OPEN) {
     showToast('Not connected', '#ff3355');
+    try { logWsTraffic('err', data, 'send-failed: not connected'); } catch (_) {}
     return false;
   }
-  ws.send(JSON.stringify(data));
-  return true;
+  try {
+    ws.send(JSON.stringify(data));
+    try { logWsTraffic('out', data); } catch (_) {}
+    return true;
+  } catch (err) {
+    try { logWsTraffic('err', data, String(err?.message || err)); } catch (_) {}
+    return false;
+  }
 }
 
 function wsInit() {
@@ -8928,9 +7580,20 @@ function connectWS() {
   ws.onmessage = (e) => {
     try {
       const msg = JSON.parse(e.data);
+      try { logWsTraffic('in', msg); } catch (_) {}
+      // Bắt IN SPIN sớm (frame [5,{cmd:1500|1501,...}]) cho win explain
+      try {
+        if (Array.isArray(msg) && (msg[0] === 5 || msg[0] === '5') && msg[1] && typeof msg[1] === 'object') {
+          const c = String(msg[1].cmd ?? '');
+          if (c === '1500' || c === '1501') captureLastInSpin(msg, msg[1]);
+        } else if (msg && typeof msg === 'object' && (String(msg.cmd) === '1500' || String(msg.cmd) === '1501')) {
+          captureLastInSpin(msg, msg);
+        }
+      } catch (_) { /* ignore */ }
       handleWSMessage(msg);
     } catch (_) {
       // binary / non-JSON
+      try { logWsTraffic('in', e.data, 'non-json'); } catch (__) {}
     }
   };
 
@@ -9031,7 +7694,7 @@ function handleWSMessage(msg) {
         break;
 
       case '1503': // GET_BALANCE
-        applyOnlineBalance(payload);
+        applyOnlineBalance(payload, { syncBefore: !state.spinning });
         break;
 
       case '1501': // BUY_FEATURE — FS / scatter / 3 / 12 → full spin result
@@ -9064,7 +7727,7 @@ function handleWSMessage(msg) {
         break;
 
       case '1531': // BALANCE_UPDATED push
-        applyOnlineBalance(payload);
+        applyOnlineBalance(payload, { syncBefore: !state.spinning });
         break;
     }
   }
@@ -9077,7 +7740,11 @@ function handleSpinResponse(payload) {
     return;
   }
 
-  applyOnlineBalance(payload);
+  // Lưu IN SPIN làm nguồn authoritative cho panel giải thích win
+  captureLastInSpin(payload, payload);
+
+  // Không sync BEFORE — giữ snapshot lúc bấm spin (trước kết quả)
+  applyOnlineBalance(payload, { syncBefore: false });
   pendingSpinData = { payload, ...parsed };
 
   if (pendingSpinResolve) {
@@ -9110,6 +7777,7 @@ async function doOnlineSpin(opts = {}) {
   }
 
   state.spinning = true;
+  syncPerfMode();
   state.lastWin = 0;
   state.globalMultiplier = 1;
   state.bypassProtocol = false;
@@ -9135,7 +7803,6 @@ async function doOnlineSpin(opts = {}) {
     }
     if (hint > 0) {
       state.balance -= hint;
-      updateUI();
     }
     showToast(`BUY_FEATURE ${buyFeature} — ${hint ? fmt(hint) : 'server cost'}`, '#aa44ff');
   } else if (!state.inFreeSpins) {
@@ -9148,8 +7815,11 @@ async function doOnlineSpin(opts = {}) {
       return;
     }
     state.balance -= cost;
-    updateUI();
   }
+
+  // Snapshot sau trừ bet/phí — BEFORE = số dư khi đang chờ kết quả win/lose
+  captureBalanceBefore();
+  updateUI();
 
   pendingSpinData = null;
   if (isBuy) {
@@ -9189,12 +7859,16 @@ async function doOnlineSpin(opts = {}) {
   const {
     screen, baseScreen, featureSteps, splitCounts, featObjs, wins, totalWin,
     maxWinReached, control, payload, cellMultipliers, activeIds,
-    progressiveJackpot, roundId, spinId,
+    progressiveJackpot, roundId, spinId, thisMode,
   } = parsed;
 
-  // Feature meter: active (FS persistent) + spin features
+  // Feature meter: Core Hack #1 (if JP) + FS persistent + spin features
   state.triggeredFeatures = featObjs;
+  const jp = progressiveJackpot;
+  const jpOn = !!(jp && (jp.isTriggered === true || jp.isTriggered === 'true' || jp.tier));
+  state.lastJackpotActive = jpOn;
   const meterIds = [
+    ...(jpOn ? [CORE_HACK.id] : []),
     ...((state.persistentFeatures || []).map(f => f.id)),
     ...featObjs.map(f => f.id),
     ...(activeIds || []),
@@ -9277,8 +7951,7 @@ async function doOnlineSpin(opts = {}) {
     renderGrid();
 
     // 5b) Core Hack jackpot — pick-and-click VFX (win đã nằm trong totalWin)
-    const jp = progressiveJackpot;
-    if (jp && (jp.isTriggered === true || jp.isTriggered === 'true' || jp.tier)) {
+    if (jpOn) {
       await playJackpot(jp);
     }
 
@@ -9291,6 +7964,11 @@ async function doOnlineSpin(opts = {}) {
     }
 
     state.lastWin = totalWin;
+
+    // Breakdown win: chỉ từ IN payload (đã capture ở handleWSMessage / handleSpinResponse)
+    if (payload) captureLastInSpin(payload, payload);
+    else buildWinExplainFromLastInSpin();
+
     // Không set headerWin = total trước ticker — để cộng tiền nhìn thấy
     document.getElementById('headerWin').textContent = totalWin > 0 ? '0.00' : '0.00';
 
@@ -9348,6 +8026,7 @@ async function doOnlineSpin(opts = {}) {
   clearVfxStage();
 
   state.spinning = false;
+  state.lastJackpotActive = false;
   document.getElementById('btnSpin').disabled = false;
   updateUI();
   updateAutoUI();
@@ -9464,6 +8143,51 @@ document.getElementById('btnDisconnect').addEventListener('click', () => {
   returnToLogin({ message: 'Disconnected. Log in again to play online.', color: 'var(--dim)' });
 });
 
+function isLoginVisible() {
+  const el = document.getElementById('loginOverlay');
+  return !!(el && el.style.display !== 'none');
+}
+
+function isTypingTarget(el) {
+  if (!el || el === document.body || el === document.documentElement) return false;
+  const tag = (el.tagName || '').toUpperCase();
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+  if (el.isContentEditable) return true;
+  return false;
+}
+
+window.addEventListener('keydown', (e) => {
+  if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+
+  if (e.key === 'Enter') {
+    if (!isLoginVisible()) return;
+    if (e.target && e.target.id === 'btnPlayOffline') return;
+    if (e.target && e.target.id === 'btnPlayOnline') return;
+    const btn = document.getElementById('btnPlayOnline');
+    if (!btn || btn.disabled) return;
+    e.preventDefault();
+    btn.click();
+    return;
+  }
+
+  if (e.key === ' ' || e.code === 'Space') {
+    if (isLoginVisible()) return;
+    if (isTypingTarget(e.target)) return;
+    const splash = document.getElementById('splash');
+    if (splash && !splash.classList.contains('hidden')) return;
+    if (isFsGridEditorOpen()) {
+      e.preventDefault();
+      applyFsGridAndSpin();
+      return;
+    }
+    if (document.querySelector('.modal-overlay.open')) return;
+    const btn = document.getElementById('btnSpin');
+    if (!btn || btn.disabled) return;
+    e.preventDefault();
+    btn.click();
+  }
+});
+
 // ═══════════════════════════════════════════════════════════════
 // CHEAT / DEBUG PANEL — WS cmd 1999 + REST /debug/cheat
 // ═══════════════════════════════════════════════════════════════
@@ -9487,6 +8211,18 @@ const CHEAT_CODES = [
   'FORCE_FEATURES',
   'FORCE_3_FEATURES',
   'FORCE_12_FEATURES',
+  'FORCE_FIREWALL_BLOCK',
+  'FORCE_DATA_DECRYPT',
+  'FORCE_TROJAN_HORSE',
+  'FORCE_DATA_OVERLOAD',
+  'FORCE_SYSTEM_OVERCLOCK',
+  'FORCE_DATA_CLONING',
+  'FORCE_ROOT_ACCESS',
+  'FORCE_POWER_SURGE',
+  'FORCE_SYSTEM_GLITCH',
+  'FORCE_ALGORITHMIC_SCAN',
+  'FORCE_BANDWIDTH_MULTIPLIER',
+  'FORCE_BYPASS_PROTOCOL',
   'SET_JACKPOT_POOL',
   'SET_AGENT_JACKPOT_POOL',
   'RESET_JACKPOT_POOL',
@@ -9526,42 +8262,112 @@ const CHEAT_SYM_OPTS = [
   { id: 12, label: '12 S' },
 ];
 
-/** Quick presets shown as big buttons */
+const CHEAT_FEATURE_NAMES = [
+  'FirewallBlock',
+  'DataDecrypt',
+  'TrojanHorse',
+  'DataOverload',
+  'SystemOverclock',
+  'DataCloning',
+  'RootAccess',
+  'PowerSurge',
+  'SystemGlitch',
+  'AlgorithmicScan',
+  'BypassProtocol',
+  'BandwidthMultiplier',
+];
+
+/** Quick presets. `group` drives sidebar sections (2-col for Features). */
 const CHEAT_PRESETS = [
-  { code: 'FORCE_FREE_SPIN', label: 'FS 3 scatters', value: {} },
-  { code: 'FORCE_FREE_SPIN_4', label: 'FS 4 scatters', value: {} },
-  { code: 'FORCE_FREE_SPIN_5', label: 'FS 5 scatters', value: {} },
-  { code: 'FORCE_LOSS', label: 'Force loss', value: {} },
-  { code: 'FORCE_WIN_CAP', label: 'Max win grid', value: {} },
-  { code: 'FORCE_WIN_MULTIPLIER', label: 'Win ×500', value: { multiplier: 500 } },
-  { code: 'FORCE_JACKPOT', label: 'Jackpot (rand tier)', value: {} },
-  { code: 'FORCE_GOD_JACKPOT', label: 'Jackpot GOD', value: {} },
-  { code: 'FORCE_ELITE_JACKPOT', label: 'Jackpot ELITE', value: {} },
-  { code: 'FORCE_USER_JACKPOT', label: 'Jackpot USER', value: {} },
-  { code: 'FORCE_3_FEATURES', label: '3 features', value: {} },
-  { code: 'FORCE_12_FEATURES', label: '12 features', value: {} },
+  { group: 'Spin', code: 'FORCE_FREE_SPIN', label: 'FS · 3 scatters', value: {} },
+  { group: 'Spin', code: 'FORCE_FREE_SPIN_4', label: 'FS · 4 scatters', value: {} },
+  { group: 'Spin', code: 'FORCE_FREE_SPIN_5', label: 'FS · 5 scatters', value: {} },
+  { group: 'Spin', code: 'FORCE_LOSS', label: 'Force loss', value: {} },
+  { group: 'Spin', code: 'FORCE_WIN_CAP', label: 'Max win grid', value: {} },
+  { group: 'Spin', code: 'FORCE_WIN_MULTIPLIER', label: 'Win ×500', value: { multiplier: 500 } },
   {
+    group: 'Spin',
+    code: 'FORCE_GRID',
+    label: 'Custom grid',
+    value: { grid: [[1, 2, 3, 4, 5], [8, 8, 8, 8, 8], [6, 7, 9, 10, 1]] },
+  },
+  { group: 'Spin', code: 'FORCE_FS_MAX_LINE_WIN', label: 'FS max line', value: {} },
+  { group: 'Jackpot', code: 'FORCE_JACKPOT', label: 'JP random', value: {} },
+  { group: 'Jackpot', code: 'FORCE_GOD_JACKPOT', label: 'JP GOD', value: {} },
+  { group: 'Jackpot', code: 'FORCE_ELITE_JACKPOT', label: 'JP ELITE', value: {} },
+  { group: 'Jackpot', code: 'FORCE_USER_JACKPOT', label: 'JP USER', value: {} },
+  { group: 'Features', code: 'FORCE_3_FEATURES', label: '3 random', value: {} },
+  { group: 'Features', code: 'FORCE_12_FEATURES', label: 'All 12', value: {} },
+  {
+    group: 'Features',
     code: 'FORCE_FEATURES',
-    label: 'Bypass + Bandwidth',
+    label: 'Bypass+BW',
     value: { features: ['BypassProtocol', 'BandwidthMultiplier'] },
   },
+  { group: 'Features', code: 'FORCE_FIREWALL_BLOCK', label: 'Firewall', value: { bannedLows: [8, 10] } },
+  { group: 'Features', code: 'FORCE_DATA_DECRYPT', label: 'Decrypt', value: { count: 2, toSymbol: 1 } },
   {
-    code: 'FORCE_GRID',
-    label: 'Custom grid (H row)',
-    value: {
-      grid: [
-        [1, 2, 3, 4, 5],
-        [8, 8, 8, 8, 8],
-        [6, 7, 9, 10, 1],
-      ],
-    },
+    group: 'Features',
+    code: 'FORCE_TROJAN_HORSE',
+    label: 'Trojan',
+    value: { revealTo: 8, positions: [[0, 0], [1, 0], [2, 1], [3, 2]] },
   },
-  { code: 'FORCE_FS_MAX_LINE_WIN', label: 'FS max line (sticky)', value: {} },
-  { code: 'FORCE_LAST_FREE_SPIN', label: 'Last FS remain=1', value: { game_id: 'yama_01023' } },
-  { code: 'SET_GAME_MODE', label: 'Enter free mode', value: { mode: 'free', bet: 1, game_id: 'yama_01023' } },
-  { code: 'RESET_SESSION', label: 'Reset session', value: { game_id: 'yama_01023' } },
-  { code: 'CLEAR_AGENT_STATE', label: 'Clear state', value: { game_id: 'yama_01023' } },
+  { group: 'Features', code: 'FORCE_DATA_OVERLOAD', label: 'Overload', value: { columns: [0, 4] } },
+  { group: 'Features', code: 'FORCE_SYSTEM_OVERCLOCK', label: 'Overclock', value: { targetSymbol: 1, multiplier: 8 } },
+  { group: 'Features', code: 'FORCE_DATA_CLONING', label: 'Cloning', value: { targetSymbol: 8 } },
+  { group: 'Features', code: 'FORCE_ROOT_ACCESS', label: 'Root', value: { reels: [2] } },
+  { group: 'Features', code: 'FORCE_POWER_SURGE', label: 'Surge', value: { convertedTypes: [1, 6] } },
+  { group: 'Features', code: 'FORCE_SYSTEM_GLITCH', label: 'Glitch', value: { protectWinning: true } },
+  { group: 'Features', code: 'FORCE_ALGORITHMIC_SCAN', label: 'Scan', value: { convertedTypes: [8] } },
+  { group: 'Features', code: 'FORCE_BANDWIDTH_MULTIPLIER', label: 'Bandwidth', value: { multiplier: 10 } },
+  { group: 'Features', code: 'FORCE_BYPASS_PROTOCOL', label: 'Bypass', value: {} },
+  { group: 'Session', code: 'FORCE_LAST_FREE_SPIN', label: 'Last FS = 1', value: { game_id: 'yama_01023' } },
+  { group: 'Session', code: 'SET_GAME_MODE', label: 'Enter free', value: { mode: 'free', bet: 1, game_id: 'yama_01023' } },
+  { group: 'Session', code: 'RESET_SESSION', label: 'Reset session', value: { game_id: 'yama_01023' } },
+  { group: 'Session', code: 'CLEAR_AGENT_STATE', label: 'Clear state', value: { game_id: 'yama_01023' } },
 ];
+
+const CHEAT_CODE_GROUP = {
+  FORCE_FREE_SPIN: 'Spin',
+  FORCE_FREE_SPIN_4: 'Spin',
+  FORCE_FREE_SPIN_5: 'Spin',
+  FORCE_LOSS: 'Spin',
+  FORCE_NORMAL_WIN: 'Spin',
+  FORCE_WIN_CAP: 'Spin',
+  FORCE_WIN_MULTIPLIER: 'Spin',
+  FORCE_GRID: 'Spin',
+  FORCE_FS_MAX_LINE_WIN: 'Spin',
+  FORCE_JACKPOT: 'Jackpot',
+  FORCE_JACKPOT_TRIGGER: 'Jackpot',
+  FORCE_GOD_JACKPOT: 'Jackpot',
+  FORCE_ELITE_JACKPOT: 'Jackpot',
+  FORCE_GHOST_JACKPOT: 'Jackpot',
+  FORCE_USER_JACKPOT: 'Jackpot',
+  FORCE_FEATURES: 'Features',
+  FORCE_3_FEATURES: 'Features',
+  FORCE_12_FEATURES: 'Features',
+  FORCE_FIREWALL_BLOCK: 'Features',
+  FORCE_DATA_DECRYPT: 'Features',
+  FORCE_TROJAN_HORSE: 'Features',
+  FORCE_DATA_OVERLOAD: 'Features',
+  FORCE_SYSTEM_OVERCLOCK: 'Features',
+  FORCE_DATA_CLONING: 'Features',
+  FORCE_ROOT_ACCESS: 'Features',
+  FORCE_POWER_SURGE: 'Features',
+  FORCE_SYSTEM_GLITCH: 'Features',
+  FORCE_ALGORITHMIC_SCAN: 'Features',
+  FORCE_BANDWIDTH_MULTIPLIER: 'Features',
+  FORCE_BYPASS_PROTOCOL: 'Features',
+  SET_JACKPOT_POOL: 'Session',
+  SET_AGENT_JACKPOT_POOL: 'Session',
+  RESET_JACKPOT_POOL: 'Session',
+  SET_FREE_SPIN_COUNT: 'Session',
+  FORCE_LAST_FREE_SPIN: 'Session',
+  SET_GAME_MODE: 'Session',
+  SET_ACCUMULATED_WIN: 'Session',
+  RESET_SESSION: 'Session',
+  CLEAR_AGENT_STATE: 'Session',
+};
 
 let cheatPanelBuilt = false;
 
@@ -9571,13 +8377,42 @@ function initCheatPanel() {
   if (!sel || !presets) return;
 
   if (!cheatPanelBuilt) {
-    sel.innerHTML = CHEAT_CODES.map(c => `<option value="${c}">${c}</option>`).join('');
+    const groupOrder = ['Spin', 'Jackpot', 'Features', 'Session'];
+    const groupedCodes = {};
+    for (const c of CHEAT_CODES) {
+      const g = CHEAT_CODE_GROUP[c] || 'More';
+      if (!groupedCodes[g]) groupedCodes[g] = [];
+      groupedCodes[g].push(c);
+    }
+    sel.innerHTML = [...groupOrder, 'More']
+      .filter(g => groupedCodes[g]?.length)
+      .map(g => {
+        const opts = groupedCodes[g].map(c => `<option value="${c}">${c}</option>`).join('');
+        return `<optgroup label="${g}">${opts}</optgroup>`;
+      })
+      .join('');
 
-    presets.innerHTML = CHEAT_PRESETS.map(
-      (p, i) =>
-        `<button type="button" data-preset="${i}" title="${p.code}">` +
-        `<strong>${p.code}</strong>${p.label}</button>`
-    ).join('');
+    const groupedPresets = {};
+    CHEAT_PRESETS.forEach((p, i) => {
+      const g = p.group || 'More';
+      if (!groupedPresets[g]) groupedPresets[g] = [];
+      groupedPresets[g].push({ ...p, i });
+    });
+    presets.innerHTML = groupOrder
+      .filter(g => groupedPresets[g]?.length)
+      .map(g => {
+        const cols = g === 'Features' || g === 'Jackpot' || g === 'Session' ? ' cols-2' : '';
+        const btns = groupedPresets[g]
+          .map(
+            p =>
+              `<button type="button" data-preset="${p.i}" title="${p.code}">${p.label}</button>`
+          )
+          .join('');
+        const gClass = { Spin: 'g-spin', Jackpot: 'g-jp', Features: 'g-feat', Session: 'g-sess' }[g] || '';
+        return `<div class="cheat-side-group ${gClass}"><div class="cheat-side-label">${g}</div>` +
+          `<div class="cheat-presets${cols}">${btns}</div></div>`;
+      })
+      .join('');
 
     presets.querySelectorAll('button[data-preset]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -9585,12 +8420,14 @@ function initCheatPanel() {
         if (!p) return;
         sel.value = p.code;
         document.getElementById('cheatValue').value = JSON.stringify(p.value ?? {}, null, 2);
+        setCheatPresetActive(p.code);
         onCheatCodeChanged({ fromPreset: true });
         setCheatLog(`Preset: ${p.code}\n${JSON.stringify(p.value ?? {})}`, '');
       });
     });
 
     buildCheatGridEditor();
+    buildCheatFeaturePicker();
     cheatPanelBuilt = true;
   }
 
@@ -9600,6 +8437,7 @@ function initCheatPanel() {
     if (saved.debugBase) document.getElementById('cheatDebugBase').value = saved.debugBase;
     if (saved.token) document.getElementById('cheatDebugToken').value = saved.token;
     if (saved.transport) document.getElementById('cheatTransport').value = saved.transport;
+    if (saved.editFsGrid) setEditFsGridEnabled(true, { persist: false });
     // Manual overrides only if user previously saved non-empty (don't clobber session pull)
     if (saved.agencyId && document.getElementById('cheatAgencyId')?.dataset.auto === '0') {
       document.getElementById('cheatAgencyId').value = saved.agencyId;
@@ -9650,9 +8488,261 @@ function saveCheatPrefs() {
         agencyId: document.getElementById('cheatAgencyId')?.value || '',
         userId: document.getElementById('cheatUserId')?.value || '',
         transport: document.getElementById('cheatTransport')?.value || 'auto',
+        editFsGrid: isEditFsGridOn(),
       })
     );
   } catch (_) { /* ignore */ }
+}
+
+// ── Per-FS grid editor (FORCE_GRID before each 1500) ──────────
+let editFsGridEnabled = false;
+let fsGridBusy = false;
+let pendingLocalForceGrid = null;
+let pendingLocalForceFeatures = null;
+
+function isEditFsGridOn() {
+  return !!editFsGridEnabled;
+}
+
+function isFsGridEditorOpen() {
+  return !!document.getElementById('modalFsGrid')?.classList.contains('open');
+}
+
+function setEditFsGridEnabled(on, opts = {}) {
+  editFsGridEnabled = !!on;
+  const cb = document.getElementById('cheatEditFsGrid');
+  if (cb) cb.checked = editFsGridEnabled;
+  syncEditFsGridChip();
+  if (opts.persist !== false) saveCheatPrefs();
+  if (!editFsGridEnabled && isFsGridEditorOpen()) {
+    closeFsGridEditor();
+    if (state.inFreeSpins && state.fsRemaining > 0 && !state.spinning && !state.fxPlaying) {
+      continueAfterSpin();
+    }
+  }
+}
+
+function syncEditFsGridChip() {
+  document.getElementById('btnFsEditGrid')?.classList.toggle('is-on', isEditFsGridOn());
+}
+
+function buildFsOverlayEditor() {
+  const body = document.getElementById('fsGridBody');
+  if (body && body.dataset.built !== '1') {
+    const opts = CHEAT_SYM_OPTS.map(o => `<option value="${o.id}">${o.label}</option>`).join('');
+    let html = '';
+    for (let r = 0; r < 3; r++) {
+      html += `<tr><th style="font-size:.6rem;color:var(--dim)">row${r}</th>`;
+      for (let c = 0; c < 5; c++) {
+        html += `<td><select data-r="${r}" data-c="${c}" class="fs-cell">${opts}</select></td>`;
+      }
+      html += '</tr>';
+    }
+    body.innerHTML = html;
+    body.dataset.built = '1';
+  }
+  const featRoot = document.getElementById('fsFeatureList');
+  if (featRoot && featRoot.dataset.built !== '1') {
+    const short = {
+      FirewallBlock: 'Firewall',
+      DataDecrypt: 'Decrypt',
+      TrojanHorse: 'Trojan',
+      DataOverload: 'Overload',
+      SystemOverclock: 'Overclock',
+      DataCloning: 'Cloning',
+      RootAccess: 'Root',
+      PowerSurge: 'Surge',
+      SystemGlitch: 'Glitch',
+      AlgorithmicScan: 'Scan',
+      BandwidthMultiplier: 'Bandwidth',
+      BypassProtocol: 'Bypass',
+    };
+    featRoot.innerHTML = CHEAT_FEATURE_NAMES.map(
+      name =>
+        `<label class="cheat-feature-item" data-feature="${name}" title="${name}">` +
+        `<input type="checkbox" value="${name}" /><span>${short[name] || name}</span></label>`
+    ).join('');
+    featRoot.dataset.built = '1';
+    featRoot.addEventListener('change', e => {
+      const input = e.target;
+      if (!(input instanceof HTMLInputElement) || input.type !== 'checkbox') return;
+      input.closest('.cheat-feature-item')?.classList.toggle('is-on', input.checked);
+    });
+  }
+}
+
+function readFsOverlayGrid() {
+  const grid = [[], [], []];
+  document.querySelectorAll('#fsGridBody select.fs-cell').forEach(sel => {
+    const r = Number(sel.dataset.r);
+    const c = Number(sel.dataset.c);
+    grid[r][c] = Number(sel.value) || 1;
+  });
+  return grid;
+}
+
+function applyGridToFsOverlay(grid) {
+  if (!Array.isArray(grid) || grid.length !== 3) return;
+  document.querySelectorAll('#fsGridBody select.fs-cell').forEach(sel => {
+    const r = Number(sel.dataset.r);
+    const c = Number(sel.dataset.c);
+    const v = grid[r]?.[c];
+    if (v != null) sel.value = String(v);
+  });
+}
+
+function fillFsOverlayGrid(symId) {
+  document.querySelectorAll('#fsGridBody select.fs-cell').forEach(sel => {
+    sel.value = String(symId);
+  });
+}
+
+function readFsOverlayFeatures() {
+  return [...document.querySelectorAll('#fsFeatureList input[type="checkbox"]:checked')]
+    .map(el => el.value)
+    .filter(name => CHEAT_FEATURE_NAMES.includes(name));
+}
+
+function applyFeaturesToFsOverlay(features) {
+  const selected = new Set(Array.isArray(features) ? features : []);
+  document.querySelectorAll('#fsFeatureList .cheat-feature-item').forEach(label => {
+    const on = selected.has(label.dataset.feature);
+    const input = label.querySelector('input');
+    if (input) input.checked = on;
+    label.classList.toggle('is-on', on);
+  });
+}
+
+function currentScreenAsRowMajor() {
+  if (!state.grid || state.grid.length !== 5) return null;
+  const inv = {};
+  Object.entries(SYM_MAP).forEach(([id, key]) => {
+    inv[key] = Number(id);
+  });
+  const grid = [[], [], []];
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 5; c++) {
+      grid[r][c] = inv[state.grid[c][r]] || 1;
+    }
+  }
+  return grid;
+}
+
+function loadFsOverlayFromScreen() {
+  const grid = currentScreenAsRowMajor();
+  if (!grid) {
+    showToast('Chưa có screen trên reels', '#ff8800');
+    return;
+  }
+  applyGridToFsOverlay(grid);
+}
+
+function mergePendingLocalForceFeatures(features) {
+  const names = pendingLocalForceFeatures;
+  pendingLocalForceFeatures = null;
+  if (!Array.isArray(names) || !names.length || !Array.isArray(features)) return;
+  for (const name of names) {
+    const id = SERVER_FEATURE_MAP[name];
+    if (!id) continue;
+    if (features.find(f => f.id === id)) continue;
+    const feat = FEATURES.find(f => f.id === id);
+    if (feat) features.push(feat);
+  }
+}
+
+function applyPendingLocalForceGrid() {
+  const rows = pendingLocalForceGrid;
+  pendingLocalForceGrid = null;
+  if (!Array.isArray(rows) || rows.length !== 3) return;
+  for (let r = 0; r < 3; r++) {
+    if (!Array.isArray(rows[r]) || rows[r].length !== 5) return;
+  }
+  for (let c = 0; c < 5; c++) {
+    for (let r = 0; r < 3; r++) {
+      const id = Number(rows[r][c]);
+      state.grid[c][r] = SYM_MAP[id] || 'A';
+    }
+  }
+  renderGrid();
+}
+
+function closeFsGridEditor() {
+  closeModal('modalFsGrid');
+}
+
+function openFsGridEditor() {
+  if (!state.inFreeSpins || state.fsRemaining <= 0 || state.spinning) return;
+  buildFsOverlayEditor();
+  const hint = document.getElementById('fsGridHint');
+  if (hint) {
+    hint.textContent =
+      `FS còn ${state.fsRemaining}/${state.fsTotal || state.fsRemaining} — sửa 5×3 rồi Apply & Spin. ` +
+      `Online: FORCE_GRID (1999) rồi 1500 (debit 0, bet session). Offline: ghi đè grid local.`;
+  }
+  const fromScreen = currentScreenAsRowMajor();
+  if (fromScreen) applyGridToFsOverlay(fromScreen);
+  setInfoBar('idle', `Sửa grid FS — ${state.fsRemaining} left`);
+  openModal('modalFsGrid');
+}
+
+async function sendCheatCode(code, value) {
+  const transport = document.getElementById('cheatTransport')?.value || 'auto';
+  if (transport === 'ws') return sendCheatViaWs(code, value);
+  if (transport === 'rest') return sendCheatViaRest(code, value);
+  if (online && ws?.readyState === WebSocket.OPEN) {
+    try {
+      return await sendCheatViaWs(code, value);
+    } catch (_) {
+      return sendCheatViaRest(code, value);
+    }
+  }
+  return sendCheatViaRest(code, value);
+}
+
+async function skipFsGridAndSpin() {
+  if (fsGridBusy || state.spinning) return;
+  closeFsGridEditor();
+  pendingLocalForceGrid = null;
+  pendingLocalForceFeatures = null;
+  showToast('FS RNG — không force grid', '#ff8800');
+  await doSpin();
+}
+
+async function applyFsGridAndSpin() {
+  if (fsGridBusy || state.spinning) return;
+  if (!state.inFreeSpins || state.fsRemaining <= 0) {
+    closeFsGridEditor();
+    return;
+  }
+  const grid = readFsOverlayGrid();
+  fsGridBusy = true;
+  const btn = document.getElementById('fsGridApply');
+  if (btn) btn.disabled = true;
+  try {
+    const features = readFsOverlayFeatures();
+    const value = features.length ? { grid, features } : { grid };
+    if (online) {
+      await sendCheatCode('FORCE_GRID', value);
+      showToast(
+        features.length
+          ? `FORCE_GRID + ${features.length} feature — quay FS`
+          : 'FORCE_GRID đã set — quay FS',
+        '#00ff88'
+      );
+      await sleepRaw(80);
+    } else {
+      pendingLocalForceGrid = grid;
+      pendingLocalForceFeatures = features;
+      showToast('Offline: force grid/feature local', '#ff8800');
+    }
+    closeFsGridEditor();
+    await doSpin();
+  } catch (e) {
+    showToast('FORCE_GRID thất bại: ' + e.message, '#ff3355');
+  } finally {
+    fsGridBusy = false;
+    if (btn) btn.disabled = false;
+  }
 }
 
 // ── FORCE_GRID editor ─────────────────────────────────────────
@@ -9680,26 +8770,322 @@ function setCheatGridEditorVisible(on) {
   document.getElementById('cheatGridEditor')?.classList.toggle('visible', !!on);
 }
 
+function syncCheatJsonBox(code) {
+  const box = document.getElementById('cheatJsonBox');
+  if (!box) return;
+  box.open = !(code === 'FORCE_GRID' || isDedicatedFeatureCheat(code));
+}
+
+const CHEAT_FEATURE_TUNES = {
+  FORCE_FIREWALL_BLOCK: {
+    title: 'FirewallBlock',
+    help: 'Cấm 1–2 low (6–10) khỏi strip + scrub grid. Bỏ trống = RNG 1–2 loại.',
+    fields: ['bannedLows'],
+  },
+  FORCE_DATA_DECRYPT: {
+    title: 'DataDecrypt',
+    help: 'Đổi low → high. Chọn ô (FE [col,row]) hoặc count 1–2. toSymbol = high 1–5.',
+    fields: ['count12', 'toHigh', 'positions'],
+  },
+  FORCE_TROJAN_HORSE: {
+    title: 'TrojanHorse',
+    help: 'Bấm 3–6 ô Mystery ([col,row]). revealTo = symbol sau khi mở (1–10). Không chọn ô thì dùng count.',
+    fields: ['count36', 'revealTo', 'positions'],
+  },
+  FORCE_DATA_OVERLOAD: {
+    title: 'DataOverload',
+    help: 'Reel được chọn nở full Wild (kể cả reel chưa có Wild).',
+    fields: ['reels'],
+  },
+  FORCE_SYSTEM_OVERCLOCK: {
+    title: 'SystemOverclock',
+    help: 'targetSymbol phải đang có trên grid. multiplier ∈ 3 / 5 / 8 / 10.',
+    fields: ['targetPay', 'mult'],
+  },
+  FORCE_DATA_CLONING: {
+    title: 'DataCloning',
+    help: 'Split ×2 mọi ô của targetSymbol (phải có trên grid).',
+    fields: ['targetPay'],
+  },
+  FORCE_ROOT_ACCESS: {
+    title: 'RootAccess',
+    help: 'Split ×2 cả reel (trừ Scatter). Chọn reel hoặc reelCount 1–3.',
+    fields: ['reels', 'reelCount'],
+  },
+  FORCE_POWER_SURGE: {
+    title: 'PowerSurge',
+    help: '1–2 loại pay → Wild + neighbor split. Tick loại, tối đa 2.',
+    fields: ['types2'],
+  },
+  FORCE_SYSTEM_GLITCH: {
+    title: 'SystemGlitch',
+    help: 'Shuffle ô không thắng / không scatter. Tắt protectWinning để xáo cả ô thắng.',
+    fields: ['protectWinning'],
+  },
+  FORCE_ALGORITHMIC_SCAN: {
+    title: 'AlgorithmicScan',
+    help: '1–3 loại pay → Wild. Tick loại, tối đa 3.',
+    fields: ['types3'],
+  },
+  FORCE_BANDWIDTH_MULTIPLIER: {
+    title: 'BandwidthMultiplier',
+    help: 'Hệ số nhân win sau payout: 3 / 5 / 8 / 10.',
+    fields: ['mult'],
+  },
+  FORCE_BYPASS_PROTOCOL: {
+    title: 'BypassProtocol',
+    help: 'Bật đánh ways phải → trái. Không có tham số thêm.',
+    fields: [],
+  },
+};
+
+const CHEAT_PAY_OPTS = [
+  { id: 1, label: '1 A' }, { id: 2, label: '2 B' }, { id: 3, label: '3 C' },
+  { id: 4, label: '4 D' }, { id: 5, label: '5 E' }, { id: 6, label: '6 F' },
+  { id: 7, label: '7 G' }, { id: 8, label: '8 H' }, { id: 9, label: '9 I' },
+  { id: 10, label: '10 K' },
+];
+
+function isDedicatedFeatureCheat(code) {
+  return !!CHEAT_FEATURE_TUNES[code];
+}
+
+function setCheatTuneVisible(on) {
+  document.getElementById('cheatFeatureTune')?.classList.toggle('visible', !!on);
+}
+
+function renderCheatTune(code, value) {
+  const spec = CHEAT_FEATURE_TUNES[code];
+  const root = document.getElementById('cheatTuneFields');
+  const title = document.getElementById('cheatTuneTitle');
+  const help = document.getElementById('cheatTuneHelp');
+  if (!spec || !root) return;
+  title.textContent = spec.title;
+  help.textContent = spec.help;
+  const v = value && typeof value === 'object' ? value : {};
+  const posSet = new Set(
+    (Array.isArray(v.positions) ? v.positions : [])
+      .filter(p => Array.isArray(p) && p.length >= 2)
+      .map(p => `${p[0]},${p[1]}`)
+  );
+  const selected = (arr) => new Set((arr || []).map(Number));
+  let html = '';
+  for (const field of spec.fields) {
+    if (field === 'bannedLows') {
+      const on = selected(v.bannedLows);
+      html += `<div class="cheat-tune-row"><label>bannedLows</label><div class="cheat-chip-list" data-tune="bannedLows">`;
+      for (const o of CHEAT_PAY_OPTS.filter(x => x.id >= 6)) {
+        html += `<button type="button" class="cheat-chip${on.has(o.id) ? ' is-on' : ''}" data-id="${o.id}">${o.label}</button>`;
+      }
+      html += `</div></div>`;
+    } else if (field === 'count12' || field === 'count36' || field === 'reelCount') {
+      const min = field === 'count36' ? 3 : 1;
+      const max = field === 'count36' ? 6 : field === 'reelCount' ? 3 : 2;
+      const key = field === 'reelCount' ? 'reelCount' : 'count';
+      const val = v[key] != null ? v[key] : (field === 'count36' ? 4 : min);
+      html += `<div class="cheat-tune-row"><label>${key}</label><input type="number" min="${min}" max="${max}" value="${val}" data-tune="${key}"></div>`;
+    } else if (field === 'toHigh' || field === 'revealTo' || field === 'targetPay') {
+      const key = field === 'targetPay' ? 'targetSymbol' : field === 'toHigh' ? 'toSymbol' : 'revealTo';
+      const min = field === 'toHigh' ? 1 : 1;
+      const max = field === 'toHigh' ? 5 : 10;
+      const val = v[key] != null ? v[key] : (field === 'revealTo' ? 8 : 1);
+      const opts = CHEAT_PAY_OPTS.filter(o => o.id >= min && o.id <= max);
+      html += `<div class="cheat-tune-row"><label>${key}</label><select data-tune="${key}">`;
+      html += opts.map(o => `<option value="${o.id}"${Number(val) === o.id ? ' selected' : ''}>${o.label}</option>`).join('');
+      html += `</select></div>`;
+    } else if (field === 'mult') {
+      const val = v.multiplier != null ? v.multiplier : 10;
+      html += `<div class="cheat-tune-row"><label>multiplier</label><select data-tune="multiplier">`;
+      html += [3, 5, 8, 10].map(m => `<option value="${m}"${Number(val) === m ? ' selected' : ''}>×${m}</option>`).join('');
+      html += `</select></div>`;
+    } else if (field === 'reels') {
+      const on = selected(v.reels || v.columns);
+      html += `<div class="cheat-tune-row"><label>reels</label><div class="cheat-chip-list" data-tune="reels">`;
+      for (let i = 0; i < 5; i++) {
+        html += `<button type="button" class="cheat-chip${on.has(i) ? ' is-on' : ''}" data-id="${i}">R${i + 1}</button>`;
+      }
+      html += `</div></div>`;
+    } else if (field === 'types2' || field === 'types3') {
+      const max = field === 'types2' ? 2 : 3;
+      const on = selected(v.convertedTypes);
+      html += `<div class="cheat-tune-row"><label>types (max ${max})</label><div class="cheat-chip-list" data-tune="convertedTypes" data-max="${max}">`;
+      for (const o of CHEAT_PAY_OPTS) {
+        html += `<button type="button" class="cheat-chip${on.has(o.id) ? ' is-on' : ''}" data-id="${o.id}">${o.label}</button>`;
+      }
+      html += `</div></div>`;
+    } else if (field === 'protectWinning') {
+      const on = v.protectWinning !== false;
+      html += `<div class="cheat-tune-row"><label>protectWinning</label><button type="button" class="cheat-chip${on ? ' is-on' : ''}" data-tune="protectWinning">${on ? 'true' : 'false'}</button></div>`;
+    } else if (field === 'positions') {
+      html += `<div class="cheat-tune-row"><label>positions</label><div class="cheat-pos-wrap">`;
+      html += `<div class="cheat-pos-head"><span></span><span>R1</span><span>R2</span><span>R3</span><span>R4</span><span>R5</span></div>`;
+      html += `<div class="cheat-pos-grid" data-tune="positions">`;
+      for (let r = 0; r < 3; r++) {
+        html += `<span class="cheat-pos-rowlab">r${r}</span>`;
+        for (let c = 0; c < 5; c++) {
+          const key = `${c},${r}`;
+          html += `<button type="button" class="cheat-pos-cell${posSet.has(key) ? ' is-on' : ''}" data-c="${c}" data-r="${r}" title="[${c},${r}]"></button>`;
+        }
+      }
+      html += `</div></div></div>`;
+    }
+  }
+  root.innerHTML = html || '<p style="font-size:.7rem;color:var(--dim);margin:0">Không có field — chỉ force feature.</p>';
+  root.querySelectorAll('.cheat-chip-list .cheat-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const list = btn.parentElement;
+      const max = Number(list.dataset.max || 0);
+      if (list.dataset.tune === 'bannedLows') {
+        btn.classList.toggle('is-on');
+        const ons = [...list.querySelectorAll('.cheat-chip.is-on')];
+        if (ons.length > 2) ons[0].classList.remove('is-on');
+      } else if (max > 0) {
+        if (btn.classList.contains('is-on')) btn.classList.remove('is-on');
+        else {
+          const ons = [...list.querySelectorAll('.cheat-chip.is-on')];
+          if (ons.length >= max) ons[0].classList.remove('is-on');
+          btn.classList.add('is-on');
+        }
+      } else {
+        btn.classList.toggle('is-on');
+      }
+      writeCheatTuneToJson();
+    });
+  });
+  root.querySelectorAll('.cheat-pos-cell').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('is-on');
+      const ons = root.querySelectorAll('.cheat-pos-cell.is-on');
+      if (ons.length > 6) ons[0].classList.remove('is-on');
+      writeCheatTuneToJson();
+    });
+  });
+  root.querySelectorAll('select[data-tune], input[data-tune]').forEach(el => {
+    el.addEventListener('change', () => writeCheatTuneToJson());
+    el.addEventListener('input', () => writeCheatTuneToJson());
+  });
+  const prot = root.querySelector('[data-tune="protectWinning"]');
+  if (prot) {
+    prot.addEventListener('click', () => {
+      const next = prot.textContent !== 'true';
+      prot.textContent = next ? 'true' : 'false';
+      prot.classList.toggle('is-on', next);
+      writeCheatTuneToJson();
+    });
+  }
+}
+
+function writeCheatTuneToJson() {
+  const code = document.getElementById('cheatCode')?.value;
+  if (!isDedicatedFeatureCheat(code)) return;
+  let value = {};
+  try { value = parseCheatValue(); } catch (_) { value = {}; }
+  const root = document.getElementById('cheatTuneFields');
+  if (!root) return;
+  root.querySelectorAll('select[data-tune], input[data-tune]').forEach(el => {
+    const key = el.dataset.tune;
+    const n = Number(el.value);
+    value[key] = Number.isFinite(n) ? n : el.value;
+  });
+  root.querySelectorAll('.cheat-chip-list').forEach(list => {
+    const key = list.dataset.tune;
+    const ids = [...list.querySelectorAll('.cheat-chip.is-on')].map(b => Number(b.dataset.id));
+    if (ids.length) value[key] = ids;
+    else delete value[key];
+  });
+  const prot = root.querySelector('[data-tune="protectWinning"]');
+  if (prot) value.protectWinning = prot.textContent === 'true';
+  const posRoot = root.querySelector('[data-tune="positions"]');
+  if (posRoot) {
+    const pos = [...posRoot.querySelectorAll('.cheat-pos-cell.is-on')].map(b => [Number(b.dataset.c), Number(b.dataset.r)]);
+    if (pos.length) value.positions = pos;
+    else delete value.positions;
+  }
+  document.getElementById('cheatValue').value = JSON.stringify(value, null, 2);
+}
+
+function setCheatPresetActive(code) {
+  document.querySelectorAll('#cheatPresets button[data-preset]').forEach(btn => {
+    const p = CHEAT_PRESETS[Number(btn.dataset.preset)];
+    btn.classList.toggle('is-active', p?.code === code);
+  });
+}
+
+function buildCheatFeaturePicker() {
+  const root = document.getElementById('cheatFeatureList');
+  if (!root || root.dataset.built === '1') return;
+  root.innerHTML = CHEAT_FEATURE_NAMES.map(
+    name =>
+      `<label class="cheat-feature-item" data-feature="${name}">` +
+      `<input type="checkbox" value="${name}" /><span>${name}</span></label>`
+  ).join('');
+  root.dataset.built = '1';
+  root.addEventListener('change', e => {
+    const input = e.target;
+    if (!(input instanceof HTMLInputElement) || input.type !== 'checkbox') return;
+    input.closest('.cheat-feature-item')?.classList.toggle('is-on', input.checked);
+    writeCheatGridToJson();
+  });
+}
+
+function readCheatFeaturesFromEditor() {
+  return [...document.querySelectorAll('#cheatFeatureList input[type="checkbox"]:checked')]
+    .map(el => el.value)
+    .filter(name => CHEAT_FEATURE_NAMES.includes(name));
+}
+
+function applyFeaturesToEditor(features) {
+  const selected = new Set(Array.isArray(features) ? features : []);
+  document.querySelectorAll('#cheatFeatureList .cheat-feature-item').forEach(label => {
+    const on = selected.has(label.dataset.feature);
+    const input = label.querySelector('input');
+    if (input) input.checked = on;
+    label.classList.toggle('is-on', on);
+  });
+}
+
 function onCheatCodeChanged({ fromPreset = false } = {}) {
   const code = document.getElementById('cheatCode')?.value || '';
   const preset = CHEAT_PRESETS.find(p => p.code === code);
+  setCheatPresetActive(code);
   if (code === 'FORCE_GRID') {
+    setCheatTuneVisible(false);
     setCheatGridEditorVisible(true);
     try {
       const v = JSON.parse(document.getElementById('cheatValue')?.value || '{}');
       if (Array.isArray(v.grid) && v.grid.length === 3) {
         applyGridToEditor(v.grid);
+        applyFeaturesToEditor(v.features);
       } else if (preset?.value?.grid) {
         document.getElementById('cheatValue').value = JSON.stringify(preset.value, null, 2);
         applyGridToEditor(preset.value.grid);
+        applyFeaturesToEditor(preset.value.features);
       } else {
         fillCheatGrid(8);
+        applyFeaturesToEditor([]);
       }
     } catch (_) {
       fillCheatGrid(8);
+      applyFeaturesToEditor([]);
     }
+  } else if (isDedicatedFeatureCheat(code)) {
+    setCheatGridEditorVisible(false);
+    setCheatTuneVisible(true);
+    let v = {};
+    if (fromPreset && preset?.value != null) {
+      v = preset.value;
+      document.getElementById('cheatValue').value = JSON.stringify(v, null, 2);
+    } else {
+      try { v = JSON.parse(document.getElementById('cheatValue')?.value || '{}'); } catch (_) { v = {}; }
+      if (!v || typeof v !== 'object' || Array.isArray(v) || !Object.keys(v).length) {
+        v = preset?.value && typeof preset.value === 'object' ? preset.value : {};
+        document.getElementById('cheatValue').value = JSON.stringify(v, null, 2);
+      }
+    }
+    renderCheatTune(code, v);
   } else {
     setCheatGridEditorVisible(false);
+    setCheatTuneVisible(false);
     if (fromPreset && preset?.value != null) {
       document.getElementById('cheatValue').value = JSON.stringify(preset.value, null, 2);
     }
@@ -9710,6 +9096,7 @@ function onCheatCodeChanged({ fromPreset = false } = {}) {
       ? 'Immediate cheat — will send only (no auto-spin)'
       : 'Send next-spin cheat then trigger SPIN';
   }
+  syncCheatJsonBox(code);
 }
 
 function readCheatGridFromEditor() {
@@ -9740,6 +9127,9 @@ function writeCheatGridToJson() {
     value = {};
   }
   value.grid = readCheatGridFromEditor();
+  const features = readCheatFeaturesFromEditor();
+  if (features.length) value.features = features;
+  else delete value.features;
   document.getElementById('cheatValue').value = JSON.stringify(value, null, 2);
 }
 
@@ -10023,6 +9413,40 @@ function bindCheatPanelEvents() {
     writeCheatGridToJson();
     setCheatLog('Grid → JSON synced', 'ok');
   });
+  document.getElementById('cheatFeatAll')?.addEventListener('click', () => {
+    applyFeaturesToEditor(CHEAT_FEATURE_NAMES);
+    writeCheatGridToJson();
+  });
+  document.getElementById('cheatFeatNone')?.addEventListener('click', () => {
+    applyFeaturesToEditor([]);
+    writeCheatGridToJson();
+  });
+  document.getElementById('cheatEditFsGrid')?.addEventListener('change', e => {
+    setEditFsGridEnabled(!!e.target.checked);
+  });
+  document.getElementById('btnFsEditGrid')?.addEventListener('click', e => {
+    e.stopPropagation();
+    if (!state.inFreeSpins || state.spinning) return;
+    openFsGridEditor();
+  });
+  document.getElementById('fsGridSkip')?.addEventListener('click', () => skipFsGridAndSpin());
+  document.getElementById('fsGridApply')?.addEventListener('click', () => applyFsGridAndSpin());
+  document.getElementById('fsGridFillH')?.addEventListener('click', () => fillFsOverlayGrid(8));
+  document.getElementById('fsGridFillA')?.addEventListener('click', () => fillFsOverlayGrid(1));
+  document.getElementById('fsGridFromScreen')?.addEventListener('click', () => loadFsOverlayFromScreen());
+  document.getElementById('fsGridScatter3')?.addEventListener('click', () => {
+    applyGridToFsOverlay([
+      [6, 7, 8, 9, 10],
+      [6, 12, 12, 12, 10],
+      [7, 8, 9, 6, 7],
+    ]);
+  });
+  document.getElementById('fsFeatAll')?.addEventListener('click', () => {
+    applyFeaturesToFsOverlay(CHEAT_FEATURE_NAMES);
+  });
+  document.getElementById('fsFeatNone')?.addEventListener('click', () => {
+    applyFeaturesToFsOverlay([]);
+  });
   window.addEventListener('keydown', e => {
     if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
       e.preventDefault();
@@ -10035,8 +9459,446 @@ function bindCheatPanelEvents() {
 bindCheatPanelEvents();
 initCheatPanel();
 
-// ─── Boot — wait for user choice ─────────────────────────────
-// initUI and splash are now triggered by button clicks above
-</script>
-</body>
-</html>
+// ─── WS TRAFFIC DOCK ─────────────────────────────────────────
+const WS_CMD_LABELS = {
+  '1002': 'PING',
+  '1005': 'JOIN',
+  '1006': 'FORCE_LOGOUT',
+  '1500': 'SPIN',
+  '1501': 'BUY_FEATURE',
+  '1502': 'LAST_SESSION',
+  '1503': 'GET_BALANCE',
+  '1504': 'GET_SPIN_LIST',
+  '1505': 'GET_SESSION_ROUNDS',
+  '1506': 'GET_SPIN_DETAIL',
+  '1507': 'JACKPOT_HISTORY',
+  '1508': 'PREV_LAST_SESSION',
+  '1531': 'BALANCE_UPDATED',
+  '1999': 'CHEAT',
+  '9000': 'JACKPOT_WIN',
+  '9001': 'JACKPOT_POOL',
+};
+
+const wsTrafficState = {
+  items: [],
+  maxItems: 200,
+  paused: false,
+  seq: 0,
+};
+
+function wsTrafficStorageKey(k) {
+  return 'zd.wsTraffic.' + k;
+}
+
+function extractWsCmdMeta(data) {
+  // Outgoing game: [6, 'MiniGame', gameId, { cmd, ... }]
+  // Incoming game: [5, { cmd, c, data, ... }]
+  // Auth: [1, ...]
+  // Ping: ["7", ...] or [7, ...]
+  let cmd = '';
+  let label = '';
+  let err = false;
+  try {
+    if (Array.isArray(data)) {
+      const t = data[0];
+      if (t === 6 || t === '6') {
+        const p = data[3];
+        if (p && typeof p === 'object' && p.cmd != null) {
+          cmd = String(p.cmd);
+          label = WS_CMD_LABELS[cmd] || ('cmd ' + cmd);
+        } else if (data[1] === 1 || data[1] === '1') {
+          label = 'PING_ACK';
+          cmd = 'ping-ack';
+        } else {
+          label = 'FRAME_6';
+        }
+      } else if (t === 5 || t === '5') {
+        const p = data[1];
+        if (p && typeof p === 'object') {
+          cmd = String(p.cmd ?? '');
+          label = WS_CMD_LABELS[cmd] || (cmd ? 'cmd ' + cmd : 'GAME');
+          if (p.c != null && p.c !== 0 && p.c !== '0') err = true;
+        } else label = 'GAME';
+      } else if (t === 1 || t === '1') {
+        label = 'AUTH';
+        cmd = 'auth';
+      } else if (t === 0 || t === '0') {
+        label = 'ERROR';
+        err = true;
+      } else if (t === 7 || t === '7') {
+        label = 'PING';
+        cmd = 'ping';
+      } else {
+        label = 'T' + String(t);
+      }
+    } else if (data && typeof data === 'object' && data.cmd != null) {
+      cmd = String(data.cmd);
+      label = WS_CMD_LABELS[cmd] || ('cmd ' + cmd);
+    } else {
+      label = typeof data === 'string' ? 'RAW' : 'MSG';
+    }
+  } catch (_) {
+    label = 'MSG';
+  }
+  return { cmd, label, err };
+}
+
+function isWsPingLike(meta, data) {
+  if (!meta) return false;
+  if (meta.cmd === 'ping' || meta.cmd === 'ping-ack' || meta.label === 'PING' || meta.label === 'PING_ACK') {
+    return true;
+  }
+  if (Array.isArray(data) && (data[0] === 7 || data[0] === '7')) return true;
+  if (Array.isArray(data) && (data[0] === 6 || data[0] === '6') && (data[1] === 1 || data[1] === '1')) {
+    return true;
+  }
+  return false;
+}
+
+function formatWsTrafficPayload(data) {
+  if (typeof data === 'string') return data;
+  try {
+    return JSON.stringify(data, null, 2);
+  } catch (_) {
+    return String(data);
+  }
+}
+
+function logWsTraffic(dir, data, note) {
+  if (wsTrafficState.paused) return;
+  const meta = extractWsCmdMeta(data);
+  const hidePing = document.getElementById('wsTrafficHidePing')?.checked !== false;
+  if (hidePing && isWsPingLike(meta, data)) return;
+
+  const item = {
+    id: ++wsTrafficState.seq,
+    t: Date.now(),
+    dir, // out | in | err
+    cmd: meta.cmd,
+    label: meta.label + (note ? ' · ' + note : ''),
+    err: dir === 'err' || meta.err,
+    data, // raw frame — dùng cho win explain (IN SPIN)
+    text: formatWsTrafficPayload(data),
+  };
+  wsTrafficState.items.push(item);
+  while (wsTrafficState.items.length > wsTrafficState.maxItems) {
+    wsTrafficState.items.shift();
+  }
+  renderWsTrafficItem(item);
+  updateWsTrafficCount();
+
+  const dock = document.getElementById('wsTrafficDock');
+  if (dock && dock.style.display === 'none') {
+    document.getElementById('wsTrafficFab')?.classList.add('has-new');
+  }
+}
+
+function updateWsTrafficCount() {
+  const el = document.getElementById('wsTrafficCount');
+  if (el) el.textContent = String(wsTrafficState.items.length);
+}
+
+function renderWsTrafficItem(item) {
+  const body = document.getElementById('wsTrafficBody');
+  const empty = document.getElementById('wsTrafficEmpty');
+  if (!body) return;
+  if (empty) empty.remove();
+
+  const row = document.createElement('div');
+  row.className =
+    'ws-traffic-item ' +
+    (item.err ? 'err' : item.dir === 'out' ? 'out' : 'in');
+  row.dataset.id = String(item.id);
+
+  const time = new Date(item.t).toLocaleTimeString('en-GB', { hour12: false }) +
+    '.' + String(item.t % 1000).padStart(3, '0');
+  const dirLabel = item.dir === 'out' ? 'OUT' : item.dir === 'err' ? 'ERR' : 'IN';
+  const preview = (item.text || '').replace(/\s+/g, ' ').slice(0, 80);
+
+  row.innerHTML =
+    '<div class="ws-traffic-item-head">' +
+    '<span class="ws-traffic-dir">' + dirLabel + '</span>' +
+    '<span class="ws-traffic-cmd">' + escapeHtmlLite(item.label) + '</span>' +
+    '<span class="ws-traffic-preview">' + escapeHtmlLite(preview) + '</span>' +
+    '<span class="ws-traffic-time">' + time + '</span>' +
+    '</div>' +
+    '<pre class="ws-traffic-item-body"></pre>';
+
+  const pre = row.querySelector('.ws-traffic-item-body');
+  pre.textContent = item.text;
+
+  row.querySelector('.ws-traffic-item-head').addEventListener('click', () => {
+    const willOpen = !row.classList.contains('open');
+    // Accordion: only one fully expanded at a time (easier to read full body)
+    if (willOpen) {
+      body.querySelectorAll('.ws-traffic-item.open').forEach(el => {
+        if (el !== row) el.classList.remove('open');
+      });
+    }
+    row.classList.toggle('open', willOpen);
+    if (willOpen) {
+      requestAnimationFrame(() => {
+        row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        // Reset inner scroll to top so long responses start from the beginning
+        const pre = row.querySelector('.ws-traffic-item-body');
+        if (pre) pre.scrollTop = 0;
+      });
+    }
+  });
+
+  body.appendChild(row);
+  if (document.getElementById('wsTrafficAutoScroll')?.checked !== false) {
+    body.scrollTop = body.scrollHeight;
+  }
+}
+
+function escapeHtmlLite(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function clearWsTraffic() {
+  wsTrafficState.items = [];
+  const body = document.getElementById('wsTrafficBody');
+  if (body) {
+    body.innerHTML =
+      '<div class="ws-traffic-empty" id="wsTrafficEmpty">' +
+      'Đã xóa log.<br>Traffic mới sẽ hiện tại đây.' +
+      '</div>';
+  }
+  updateWsTrafficCount();
+}
+
+function copyWsTraffic() {
+  const payload = wsTrafficState.items.map(i => ({
+    t: new Date(i.t).toISOString(),
+    dir: i.dir,
+    label: i.label,
+    cmd: i.cmd,
+    body: (() => { try { return JSON.parse(i.text); } catch (_) { return i.text; } })(),
+  }));
+  const text = JSON.stringify(payload, null, 2);
+  const done = () => showToast('WS traffic copied (' + payload.length + ')', '#00ff88');
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => {
+      fallbackCopyText(text);
+      done();
+    });
+  } else {
+    fallbackCopyText(text);
+    done();
+  }
+}
+
+function fallbackCopyText(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch (_) {}
+  ta.remove();
+}
+
+function setWsTrafficCollapsed(collapsed) {
+  const dock = document.getElementById('wsTrafficDock');
+  const btn = document.getElementById('wsTrafficCollapse');
+  if (!dock) return;
+  dock.classList.toggle('collapsed', !!collapsed);
+  if (btn) btn.textContent = collapsed ? '+' : '−';
+  try {
+    localStorage.setItem(wsTrafficStorageKey('collapsed'), collapsed ? '1' : '0');
+  } catch (_) {}
+}
+
+function setWsTrafficVisible(visible) {
+  const dock = document.getElementById('wsTrafficDock');
+  const fab = document.getElementById('wsTrafficFab');
+  if (!dock || !fab) return;
+  dock.style.display = visible ? 'flex' : 'none';
+  fab.style.display = visible ? 'none' : 'flex';
+  if (visible) fab.classList.remove('has-new');
+  try {
+    localStorage.setItem(wsTrafficStorageKey('visible'), visible ? '1' : '0');
+  } catch (_) {}
+}
+
+function saveWsTrafficGeom() {
+  const dock = document.getElementById('wsTrafficDock');
+  if (!dock || dock.classList.contains('collapsed')) return;
+  try {
+    localStorage.setItem(
+      wsTrafficStorageKey('geom'),
+      JSON.stringify({
+        left: dock.style.left || '',
+        top: dock.style.top || '',
+        right: dock.style.right || '',
+        bottom: dock.style.bottom || '',
+        width: dock.style.width || dock.offsetWidth + 'px',
+        height: dock.style.height || dock.offsetHeight + 'px',
+      })
+    );
+  } catch (_) {}
+}
+
+function restoreWsTrafficGeom() {
+  const dock = document.getElementById('wsTrafficDock');
+  if (!dock) return;
+  try {
+    const raw = localStorage.getItem(wsTrafficStorageKey('geom'));
+    if (!raw) return;
+    const g = JSON.parse(raw);
+    if (g.width) dock.style.width = g.width;
+    if (g.height) dock.style.height = g.height;
+    if (g.left) {
+      dock.style.left = g.left;
+      dock.style.right = 'auto';
+    } else if (g.right) {
+      dock.style.right = g.right;
+      dock.style.left = 'auto';
+    }
+    if (g.top) {
+      dock.style.top = g.top;
+      dock.style.bottom = 'auto';
+    } else if (g.bottom) {
+      dock.style.bottom = g.bottom;
+      dock.style.top = 'auto';
+    }
+  } catch (_) {}
+}
+
+function bindWsTrafficDrag() {
+  const dock = document.getElementById('wsTrafficDock');
+  const head = document.getElementById('wsTrafficHead');
+  if (!dock || !head) return;
+
+  let dragging = false;
+  let ox = 0;
+  let oy = 0;
+
+  const onMove = (e) => {
+    if (!dragging) return;
+    const pt = e.touches ? e.touches[0] : e;
+    let nx = pt.clientX - ox;
+    let ny = pt.clientY - oy;
+    const maxX = window.innerWidth - Math.min(dock.offsetWidth, 80);
+    const maxY = window.innerHeight - 40;
+    nx = Math.max(0, Math.min(nx, maxX));
+    ny = Math.max(0, Math.min(ny, maxY));
+    dock.style.left = nx + 'px';
+    dock.style.top = ny + 'px';
+    dock.style.right = 'auto';
+    dock.style.bottom = 'auto';
+  };
+
+  const onUp = () => {
+    if (!dragging) return;
+    dragging = false;
+    saveWsTrafficGeom();
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onUp);
+  };
+
+  const onDown = (e) => {
+    if (e.target.closest('button')) return;
+    if (dock.classList.contains('collapsed')) {
+      // collapsed: click head expands
+      if (e.type === 'mousedown' || e.type === 'touchstart') {
+        setWsTrafficCollapsed(false);
+      }
+      return;
+    }
+    const pt = e.touches ? e.touches[0] : e;
+    const rect = dock.getBoundingClientRect();
+    dragging = true;
+    ox = pt.clientX - rect.left;
+    oy = pt.clientY - rect.top;
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onUp);
+    e.preventDefault();
+  };
+
+  head.addEventListener('mousedown', onDown);
+  head.addEventListener('touchstart', onDown, { passive: false });
+
+  // Persist size after resize
+  if (typeof ResizeObserver !== 'undefined') {
+    let t = null;
+    new ResizeObserver(() => {
+      clearTimeout(t);
+      t = setTimeout(saveWsTrafficGeom, 200);
+    }).observe(dock);
+  }
+}
+
+function initWsTrafficDock() {
+  const dock = document.getElementById('wsTrafficDock');
+  if (!dock) return;
+
+  restoreWsTrafficGeom();
+
+  try {
+    const collapsed = localStorage.getItem(wsTrafficStorageKey('collapsed')) === '1';
+    setWsTrafficCollapsed(collapsed);
+    const visible = localStorage.getItem(wsTrafficStorageKey('visible'));
+    setWsTrafficVisible(visible !== '0');
+  } catch (_) {
+    setWsTrafficVisible(true);
+  }
+
+  document.getElementById('wsTrafficCollapse')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setWsTrafficCollapsed(!dock.classList.contains('collapsed'));
+  });
+  document.getElementById('wsTrafficHide')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setWsTrafficVisible(false);
+  });
+  document.getElementById('wsTrafficFab')?.addEventListener('click', () => {
+    setWsTrafficVisible(true);
+  });
+  document.getElementById('wsTrafficClear')?.addEventListener('click', clearWsTraffic);
+  document.getElementById('wsTrafficCopy')?.addEventListener('click', copyWsTraffic);
+  document.getElementById('wsTrafficPause')?.addEventListener('click', (e) => {
+    wsTrafficState.paused = !wsTrafficState.paused;
+    e.currentTarget.classList.toggle('active', wsTrafficState.paused);
+    e.currentTarget.textContent = wsTrafficState.paused ? '▶' : '❚❚';
+    e.currentTarget.title = wsTrafficState.paused ? 'Tiếp tục ghi log' : 'Tạm dừng ghi log';
+  });
+
+  bindWsTrafficDrag();
+
+  window.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey && (e.key === 'L' || e.key === 'l')) {
+      e.preventDefault();
+      const visible = dock.style.display !== 'none';
+      setWsTrafficVisible(!visible);
+    }
+  });
+}
+
+initWsTrafficDock();
+
+document.addEventListener('visibilitychange', () => {
+  document.body.classList.toggle('tab-hidden', document.hidden);
+  if (document.hidden) {
+    if (_spriteRaf) {
+      cancelAnimationFrame(_spriteRaf);
+      _spriteRaf = 0;
+    }
+  } else if (typeof ensureSpritePackTicker === 'function') {
+    ensureSpritePackTicker();
+  }
+});
+if (document.hidden) document.body.classList.add('tab-hidden');
+
+// ─── Boot — preload while login is visible ───────────────────
+startAssetPreload();
