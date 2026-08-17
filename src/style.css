@@ -2928,12 +2928,22 @@
     }
     .ws-traffic-body {
       flex: 1;
-      overflow: auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
       padding: 6px;
       display: flex;
       flex-direction: column;
       gap: 6px;
+      scrollbar-width: thin;
+      scrollbar-color: #1e3a5f transparent;
     }
+    .ws-traffic-body::-webkit-scrollbar { width: 8px; }
+    .ws-traffic-body::-webkit-scrollbar-thumb {
+      background: #1e3a5f;
+      border-radius: 4px;
+    }
+    .ws-traffic-body::-webkit-scrollbar-thumb:hover { background: #2a4a8a; }
     .ws-traffic-empty {
       color: var(--dim);
       text-align: center;
@@ -2943,6 +2953,7 @@
       line-height: 1.45;
     }
     .ws-traffic-item {
+      flex: 0 0 auto;
       border: 1px solid #1a2d48;
       border-radius: 8px;
       background: #070b14;
