@@ -1546,8 +1546,41 @@ async function applyPowerSurge() {
     await sleep(400);
     return;
   }
-  const n = randInt(1, Math.min(2, present.length));
-  const targets = shuffle(present).slice(0, n);
+  const counts = {};
+  for (let c = 0; c < REELS; c++) {
+    for (let r = 0; r < ROWS; r++) {
+      const sym = state.grid[c][r];
+      if (present.includes(sym)) counts[sym] = (counts[sym] || 0) + 1;
+    }
+  }
+  const n = present.length >= 2 && Math.random() < 0.1 ? 2 : 1;
+  let min = Infinity;
+  let second = Infinity;
+  for (const s of present) {
+    const cells = counts[s] || 1;
+    if (cells < min) { second = min; min = cells; }
+    else if (cells > min && cells < second) second = cells;
+  }
+  const pool = present.filter(s => {
+    const cells = counts[s] || 1;
+    return cells === min || cells === second;
+  });
+  const targets = [];
+  for (let i = 0; i < n && pool.length; i++) {
+    let total = 0;
+    const weights = pool.map(s => {
+      const w = Math.max(1, Math.floor(16 / Math.max(1, counts[s] || 1)));
+      total += w;
+      return w;
+    });
+    let roll = Math.floor(Math.random() * total);
+    let idx = 0;
+    for (let j = 0; j < weights.length; j++) {
+      roll -= weights[j];
+      if (roll < 0) { idx = j; break; }
+    }
+    targets.push(pool.splice(idx, 1)[0]);
+  }
   const wildPositions = [];
   for (let c = 0; c < REELS; c++) {
     for (let r = 0; r < ROWS; r++) {
