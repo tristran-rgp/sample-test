@@ -592,8 +592,8 @@ const FEATURES = [
   {
     id: 'surge', name: 'Power Surge', color: '#ffff00', timing: 'post', img: ASSET + 'power-surge.webp',
     timingLabel: 'After reels stop',
-    desc: 'Converts 1–2 paying symbol types into Wilds. Adjacent cells (except Scatters) become Split Symbols.',
-    vfx: 'Lightning strikes symbols into Wilds; shockwave splits neighbors.',
+    desc: 'Picks 1–2 paying types present on the grid and converts every matching cell into Wild. All 8 adjacent cells (including diagonals, except Scatters) become Split Symbols.',
+    vfx: 'Lightning strikes symbols into Wilds; shockwave splits the 8 neighboring cells.',
   },
   {
     id: 'glitch', name: 'System Glitch', color: '#aa44ff', timing: 'post', img: ASSET + 'system-glitch.webp',
@@ -1534,8 +1534,20 @@ async function applyRootAccess() {
 }
 
 async function applyPowerSurge() {
-  const n = randInt(1, 2);
-  const targets = shuffle(PAYING).slice(0, n);
+  const present = [];
+  for (let c = 0; c < REELS; c++) {
+    for (let r = 0; r < ROWS; r++) {
+      const sym = state.grid[c][r];
+      if (PAYING.includes(sym) && !present.includes(sym)) present.push(sym);
+    }
+  }
+  if (!present.length) {
+    showToast('⚡ Power Surge: no pay types on grid', '#ffff00');
+    await sleep(400);
+    return;
+  }
+  const n = randInt(1, Math.min(2, present.length));
+  const targets = shuffle(present).slice(0, n);
   const wildPositions = [];
   for (let c = 0; c < REELS; c++) {
     for (let r = 0; r < ROWS; r++) {
@@ -1545,7 +1557,7 @@ async function applyPowerSurge() {
       }
     }
   }
-  const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  const dirs = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
   for (const { c, r } of wildPositions) {
     for (const [dc, dr] of dirs) {
       const nc = c + dc, nr = r + dr;
@@ -8835,7 +8847,7 @@ const CHEAT_FEATURE_TUNES = {
   },
   FORCE_POWER_SURGE: {
     title: 'PowerSurge',
-    help: '1–2 loại pay → Wild + neighbor split. Tick loại, tối đa 2.',
+    help: '1–2 loại pay đang có trên lưới → Wild + split 8 ô kề (cả chéo), trừ Scatter. Tick loại, tối đa 2.',
     fields: ['types2'],
   },
   FORCE_SYSTEM_GLITCH: {
