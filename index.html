@@ -1035,10 +1035,11 @@
     .cheat-toggle input { accent-color: #e8c56b; }
     .cheat-toggle span { color: var(--cheat-gold, #e8c56b); font-weight: 700; }
     .cheat-toggle small { color: var(--dim); font-weight: 400; }
-    #modalFsGrid .fs-grid-modal { max-width: 540px; }
-    #modalFsGrid .fs-grid-hint { font-size: .75rem; color: var(--dim); margin: 0 0 12px; line-height: 1.4; }
+    #modalFsGrid .fs-grid-modal { max-width: 480px; padding: 16px 16px 14px; }
+    #modalFsGrid .fs-grid-modal h2 { margin-bottom: 8px; font-size: .95rem; }
+    #modalFsGrid .fs-grid-hint { font-size: .68rem; color: var(--dim); margin: 0 0 8px; line-height: 1.35; }
     #modalFsGrid table { width: 100%; border-collapse: collapse; }
-    #modalFsGrid th, #modalFsGrid td { padding: 4px; text-align: center; }
+    #modalFsGrid th, #modalFsGrid td { padding: 3px; text-align: center; }
     #modalFsGrid select {
       width: 100%;
       background: #0d0d1a;
@@ -1048,7 +1049,7 @@
       padding: 4px 2px;
       font-size: .7rem;
     }
-    #modalFsGrid .grid-tools { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 10px; }
+    #modalFsGrid .grid-tools { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 8px; }
     #modalFsGrid .grid-tools button {
       font-size: .65rem;
       padding: 4px 8px;
@@ -1059,8 +1060,28 @@
       cursor: pointer;
     }
     #modalFsGrid .grid-tools button:hover { border-color: var(--cyan); color: var(--cyan); }
-    #modalFsGrid .cheat-feature-list { margin-top: 4px; }
-    #modalFsGrid .fs-feat-note { font-size: .62rem; color: var(--dim); margin: 8px 0 0; line-height: 1.35; }
+    #modalFsGrid .cheat-feature-head { margin: 8px 0 4px; }
+    #modalFsGrid .cheat-feature-head .grid-tools { margin: 0; }
+    #modalFsGrid .cheat-feature-list {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 3px;
+      margin: 0;
+    }
+    #modalFsGrid .cheat-feature-item {
+      padding: 2px 4px;
+      gap: 3px;
+      font-size: .56rem;
+      border-radius: 5px;
+      min-width: 0;
+    }
+    #modalFsGrid .cheat-feature-item span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #modalFsGrid .cheat-feature-item input { width: 11px; height: 11px; flex-shrink: 0; }
+    #modalFsGrid .fs-feat-note { display: none; }
+    #modalFsGrid .modal-actions { margin-top: 10px; }
 
     .reels-wrapper {
       position: relative;
@@ -12877,10 +12898,24 @@ function buildFsOverlayEditor() {
   }
   const featRoot = document.getElementById('fsFeatureList');
   if (featRoot && featRoot.dataset.built !== '1') {
+    const short = {
+      FirewallBlock: 'Firewall',
+      DataDecrypt: 'Decrypt',
+      TrojanHorse: 'Trojan',
+      DataOverload: 'Overload',
+      SystemOverclock: 'Overclock',
+      DataCloning: 'Cloning',
+      RootAccess: 'Root',
+      PowerSurge: 'Surge',
+      SystemGlitch: 'Glitch',
+      AlgorithmicScan: 'Scan',
+      BandwidthMultiplier: 'Bandwidth',
+      BypassProtocol: 'Bypass',
+    };
     featRoot.innerHTML = CHEAT_FEATURE_NAMES.map(
       name =>
-        `<label class="cheat-feature-item" data-feature="${name}">` +
-        `<input type="checkbox" value="${name}" /><span>${name}</span></label>`
+        `<label class="cheat-feature-item" data-feature="${name}" title="${name}">` +
+        `<input type="checkbox" value="${name}" /><span>${short[name] || name}</span></label>`
     ).join('');
     featRoot.dataset.built = '1';
     featRoot.addEventListener('change', e => {
