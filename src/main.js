@@ -9,7 +9,10 @@ function toPngPath(path) {
   return String(path || '').replace(/\.png(\?|#|$)/i, '.webp$1');
 }
 function assetUrl(path) {
-  return toPngPath(path);
+  const p = toPngPath(path);
+  if (!p) return p;
+  const v = typeof __ZD_ASSET_VERSION__ !== 'undefined' ? __ZD_ASSET_VERSION__ : '';
+  return v && !/[?#]/.test(p) ? p + '?v=' + v : p;
 }
 function setImgSrc(el, path) {
   if (!el) return;
@@ -640,13 +643,20 @@ function listPreloadUrls() {
   add(ASSET + MYSTERY_FILE);
   add(ASSET + 'art-new/' + MYSTERY_FILE);
   for (const cfg of Object.values(SYM_SPRITES)) add(SPRITE_PACK_BASE + cfg.file);
+  add(ASSET + 'spin.webp');
+  add(ASSET + 'auto-spin.webp');
+  add(ASSET + 'buy-free-spin.webp');
+  return [...urls];
+}
+
+/** Heavy/rarely-shown assets — load in background after critical set. */
+function listDeferredUrls() {
+  const urls = new Set();
+  const add = (p) => { if (p) urls.add(assetUrl(p)); };
   add(SPRITE_PACK_BASE + 'animation-sequence.webp');
   add(CORE_HACK.img);
   for (const f of FEATURES) add(f.img);
   add(JACKPOT_CORE_IMG);
-  add(ASSET + 'spin.webp');
-  add(ASSET + 'auto-spin.webp');
-  add(ASSET + 'buy-free-spin.webp');
   return [...urls];
 }
 
@@ -692,6 +702,18 @@ function startAssetPreload() {
     }
   };
   _preloadPromise = Promise.all(Array.from({ length: conc }, worker));
+  // Non-critical assets: load quietly in background, 2 at a time
+  _preloadPromise.then(() => {
+    const deferred = listDeferredUrls();
+    let j = 0;
+    const bg = async () => {
+      while (j < deferred.length) {
+        const url = deferred[j++];
+        await preloadOne(url);
+      }
+    };
+    return Promise.all(Array.from({ length: 2 }, bg));
+  });
   return _preloadPromise;
 }
 
@@ -9887,3 +9909,10 @@ if (document.hidden) document.body.classList.add('tab-hidden');
 
 // ─── Boot — preload while login is visible ───────────────────
 startAssetPreload();
+
+// Service worker: cache assets → lần mở sau gần như instant
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
