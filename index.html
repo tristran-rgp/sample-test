@@ -5,15 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>ZERO DAY — Cyberpunk Slot</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-  <script>
-    window.__ZD_WEBP = false;
-    try {
-      var _c = document.createElement('canvas');
-      _c.width = _c.height = 1;
-      window.__ZD_WEBP = _c.toDataURL('image/webp').indexOf('data:image/webp') === 0;
-    } catch (e) { /* keep false → PNG */ }
-    if (window.__ZD_WEBP) document.documentElement.classList.add('webp');
-  </script>
   <script type="module" src="/src/main.js"></script>
   <link rel="stylesheet" href="/src/style.css" />
 </head>
@@ -210,12 +201,9 @@
           <button class="circle-btn turbo" id="btnFast" title="Fast Spin">⚡</button>
           <button class="circle-btn" id="btnExplainFeat" title="Feature Explain Mode — pause & show what each feature does">📖</button>
           <button class="spin-btn" id="btnSpin" title="SPIN (Space)">
-            <picture>
-              <source type="image/webp" srcset="assert/spin.webp">
-              <img src="assert/spin.png" alt="SPIN">
-            </picture>
+            <img src="assert/spin.webp" alt="SPIN">
           </button>
-          <button class="circle-btn" id="btnAuto" title="Autospin"><picture><source type="image/webp" srcset="assert/auto-spin.webp"><img src="assert/auto-spin.png" alt="Auto"></picture></button>
+          <button class="circle-btn" id="btnAuto" title="Autospin"><img src="assert/auto-spin.webp" alt="Auto"></button>
         </div>
       </div>
     </div>
@@ -223,7 +211,7 @@
     <div class="side-left">
       <div class="side-stack">
         <button class="circle-btn buy" id="btnBuyFeature" title="Execute Script / Buy Feature">★</button>
-        <button class="circle-btn" id="btnBuyFS" title="Buy Free Spin"><picture><source type="image/webp" srcset="assert/buy-free-spin.webp"><img src="assert/buy-free-spin.png" alt="Buy FS"></picture></button>
+        <button class="circle-btn" id="btnBuyFS" title="Buy Free Spin"><img src="assert/buy-free-spin.webp" alt="Buy FS"></button>
         <button class="circle-btn" id="btnMenu" title="Menu">☰</button>
       </div>
       <div class="side-row">

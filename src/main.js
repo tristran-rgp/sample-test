@@ -4,39 +4,24 @@
 
 const ASSET = 'assert/';
 
-/** Canonical path stays .png; swap to .webp when canvas probe said yes. */
+/** All assets are WebP-only (PNG files removed). Canonical paths may still say .png. */
 function toPngPath(path) {
-  return String(path || '').replace(/\.webp(\?|#|$)/i, '.png$1');
+  return String(path || '').replace(/\.png(\?|#|$)/i, '.webp$1');
 }
 function assetUrl(path) {
-  const png = toPngPath(path);
-  if (!png || window.__ZD_WEBP === false) return png;
-  return png.replace(/\.png(\?|#|$)/i, '.webp$1');
+  return toPngPath(path);
 }
 function setImgSrc(el, path) {
   if (!el) return;
-  const png = toPngPath(path);
-  const href = assetUrl(png);
-  el.src = href;
-  if (href && href !== png) {
-    el.onerror = () => {
-      el.onerror = null;
-      window.__ZD_WEBP = false;
-      document.documentElement.classList.remove('webp');
-      el.src = png;
-    };
-  }
+  el.src = assetUrl(path);
 }
 function imgTag(path, extra = '') {
-  const png = toPngPath(path);
-  const href = assetUrl(png);
-  const fb = href && href !== png ? ` onerror="this.onerror=null;this.src='${png}'"` : '';
-  return `<img src="${href}"${fb}${extra ? ' ' + extra : ''}>`;
+  return `<img src="${assetUrl(path)}"${extra ? ' ' + extra : ''}>`;
 }
 
 /** Letter symbols shared by both art packs (A–K, W, S). Mystery uses pack file name. */
 const LETTER_SYMS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'W', 'S'];
-const MYSTERY_FILE = 'trojan-horse-mystery.png';
+const MYSTERY_FILE = 'trojan-horse-mystery.webp';
 const SYMBOL_PACKS = {
   classic: { id: 'classic', label: 'Classic', base: ASSET },
   artNew:  { id: 'artNew',  label: 'Art New', base: ASSET + 'art-new/' },
@@ -44,18 +29,18 @@ const SYMBOL_PACKS = {
 const DEFAULT_SYMBOL_PACK = 'artNew';
 
 const SYMBOLS = {
-  A: { img: ASSET + 'A.png', name: 'Master Hacker', type: 'high', pays: [0,0,0.75,1.00,1.50] },
-  B: { img: ASSET + 'B.png', name: 'AI Core', type: 'high', pays: [0,0,0.50,0.75,1.00] },
-  C: { img: ASSET + 'C.png', name: 'VR Headset', type: 'high', pays: [0,0,0.50,0.75,1.00] },
-  D: { img: ASSET + 'D.png', name: 'Recon Drone', type: 'high', pays: [0,0,0.25,0.50,0.75] },
-  E: { img: ASSET + 'E.png', name: 'EMP Gun', type: 'high', pays: [0,0,0.25,0.50,0.75] },
-  F: { img: ASSET + 'F.png', name: 'Bitcoin', type: 'low', pays: [0,0,0.20,0.40,0.60] },
-  G: { img: ASSET + 'G.png', name: 'Terminal', type: 'low', pays: [0,0,0.20,0.40,0.60] },
-  H: { img: ASSET + 'H.png', name: 'Code', type: 'low', pays: [0,0,0.15,0.30,0.50] },
-  I: { img: ASSET + 'I.png', name: 'Ethereum', type: 'low', pays: [0,0,0.10,0.20,0.50] },
-  K: { img: ASSET + 'K.png', name: 'Microchip', type: 'low', pays: [0,0,0.10,0.20,0.50] },
-  W: { img: ASSET + 'W.png', name: 'Wild', type: 'wild', pays: [0,0,0,0,0] },
-  S: { img: ASSET + 'S.png', name: 'Scatter', type: 'scatter', pays: [0,0,0,0,0] },
+  A: { img: ASSET + 'A.webp', name: 'Master Hacker', type: 'high', pays: [0,0,0.75,1.00,1.50] },
+  B: { img: ASSET + 'B.webp', name: 'AI Core', type: 'high', pays: [0,0,0.50,0.75,1.00] },
+  C: { img: ASSET + 'C.webp', name: 'VR Headset', type: 'high', pays: [0,0,0.50,0.75,1.00] },
+  D: { img: ASSET + 'D.webp', name: 'Recon Drone', type: 'high', pays: [0,0,0.25,0.50,0.75] },
+  E: { img: ASSET + 'E.webp', name: 'EMP Gun', type: 'high', pays: [0,0,0.25,0.50,0.75] },
+  F: { img: ASSET + 'F.webp', name: 'Bitcoin', type: 'low', pays: [0,0,0.20,0.40,0.60] },
+  G: { img: ASSET + 'G.webp', name: 'Terminal', type: 'low', pays: [0,0,0.20,0.40,0.60] },
+  H: { img: ASSET + 'H.webp', name: 'Code', type: 'low', pays: [0,0,0.15,0.30,0.50] },
+  I: { img: ASSET + 'I.webp', name: 'Ethereum', type: 'low', pays: [0,0,0.10,0.20,0.50] },
+  K: { img: ASSET + 'K.webp', name: 'Microchip', type: 'low', pays: [0,0,0.10,0.20,0.50] },
+  W: { img: ASSET + 'W.webp', name: 'Wild', type: 'wild', pays: [0,0,0,0,0] },
+  S: { img: ASSET + 'S.webp', name: 'Scatter', type: 'scatter', pays: [0,0,0,0,0] },
   M: { img: ASSET + MYSTERY_FILE, name: 'Mystery', type: 'mystery', pays: [0,0,0,0,0] },
 };
 
@@ -74,7 +59,7 @@ function applySymbolPack(packId, { persist = true, toast = false, rerender = tru
   const pack = SYMBOL_PACKS[packId] || SYMBOL_PACKS.classic;
   if (state) state.symbolPack = pack.id;
   for (const k of LETTER_SYMS) {
-    if (SYMBOLS[k]) SYMBOLS[k].img = assetUrl(pack.base + k + '.png');
+    if (SYMBOLS[k]) SYMBOLS[k].img = assetUrl(pack.base + k + '.webp');
   }
   if (SYMBOLS.M) SYMBOLS.M.img = assetUrl(pack.base + MYSTERY_FILE);
   if (persist) {
@@ -229,12 +214,12 @@ function setCellSymbolFx(cellOrSel, fx) {
  */
 const SPRITE_PACK_BASE = ASSET + 'art-new/animation-pack/';
 const SYM_SPRITES = {
-  W: { file: 'wild-sprite.png', cols: 6, rows: 6, frames: 36, idleFps: 10, winFps: 18 },
-  A: { file: 'A-sprite.png',    cols: 6, rows: 6, frames: 36, idleFps: 8,  winFps: 14 },
-  D: { file: 'D-sprite.png',    cols: 6, rows: 6, frames: 36, idleFps: 10, winFps: 16 },
-  E: { file: 'E-sprite.png',    cols: 6, rows: 6, frames: 36, idleFps: 10, winFps: 16 },
-  S: { file: 'S-sprite.png',    cols: 6, rows: 6, frames: 36, idleFps: 9,  winFps: 16 },
-  M: { file: 'M-sprite.png',    cols: 6, rows: 6, frames: 36, idleFps: 8,  winFps: 14 },
+  W: { file: 'wild-sprite.webp', cols: 6, rows: 6, frames: 36, idleFps: 10, winFps: 18 },
+  A: { file: 'A-sprite.webp',    cols: 6, rows: 6, frames: 36, idleFps: 8,  winFps: 14 },
+  D: { file: 'D-sprite.webp',    cols: 6, rows: 6, frames: 36, idleFps: 10, winFps: 16 },
+  E: { file: 'E-sprite.webp',    cols: 6, rows: 6, frames: 36, idleFps: 10, winFps: 16 },
+  S: { file: 'S-sprite.webp',    cols: 6, rows: 6, frames: 36, idleFps: 9,  winFps: 16 },
+  M: { file: 'M-sprite.webp',    cols: 6, rows: 6, frames: 36, idleFps: 8,  winFps: 14 },
 };
 // Compat alias
 const WILD_SPRITE = SYM_SPRITES.W;
@@ -372,7 +357,7 @@ function preloadSpritePack() {
   // Win celebration sequence (mọi win > 0)
   try {
     const winSeq = new Image();
-    winSeq.src = assetUrl(SPRITE_PACK_BASE + 'animation-sequence.png');
+    winSeq.src = assetUrl(SPRITE_PACK_BASE + 'animation-sequence.webp');
   } catch (_) { /* ignore */ }
 }
 
@@ -552,7 +537,7 @@ const CORE_HACK = {
   name: 'Core Hack',
   color: '#00ff88',
   timing: 'pre',
-  img: ASSET + 'quantum-core.png',
+  img: ASSET + 'quantum-core.webp',
   timingLabel: 'Before reels settle',
   desc: 'Fixed jackpot: USER 15× / GHOST 50× / ELITE 500× / GOD 19693× Total Bet. Disables the 12 mini-features on the same spin.',
   vfx: 'Quantum Core glows and connects to the Mainframe, then 15 Encrypted Nodes appear.',
@@ -560,73 +545,73 @@ const CORE_HACK = {
 
 const FEATURES = [
   {
-    id: 'firewall', name: 'Firewall Block', color: '#ff3355', timing: 'spin', img: ASSET + 'firewall-block.png',
+    id: 'firewall', name: 'Firewall Block', color: '#ff3355', timing: 'spin', img: ASSET + 'firewall-block.webp',
     timingLabel: 'During spin',
     desc: 'Blocks 1–2 random low-paying symbols so they cannot land on the reels this spin.',
     vfx: 'Red firewall rises from below the grid and burns low symbols off the screen.',
   },
   {
-    id: 'decrypt', name: 'Data Decrypt', color: '#00f0ff', timing: 'post', img: ASSET + 'data-decrypt.png',
+    id: 'decrypt', name: 'Data Decrypt', color: '#00f0ff', timing: 'post', img: ASSET + 'data-decrypt.webp',
     timingLabel: 'After reels stop',
     desc: 'Picks 1–2 low-paying symbols on the grid and transforms them into high-paying symbols.',
     vfx: 'Cyan laser scan decrypts low symbols into high symbols.',
   },
   {
-    id: 'trojan', name: 'Trojan Horse', color: '#aa44ff', timing: 'post', img: ASSET + 'trojan-horse.png',
+    id: 'trojan', name: 'Trojan Horse', color: '#aa44ff', timing: 'post', img: ASSET + 'trojan-horse.webp',
     timingLabel: 'After reels stop',
     desc: 'Places 3–6 Mystery symbols. After the spin they all reveal as the same paying symbol.',
     vfx: 'Encrypted packages drop onto cells, then explode into matching symbols.',
   },
   {
-    id: 'overload', name: 'Data Overload', color: '#ff8800', timing: 'post', img: ASSET + 'data-everload.png',
+    id: 'overload', name: 'Data Overload', color: '#ff8800', timing: 'post', img: ASSET + 'data-everload.webp',
     timingLabel: 'After reels stop',
     desc: 'Any reel that contains a Wild expands so the entire reel becomes Wild. No effect if no Wild is present.',
     vfx: 'Electric surge spreads from Wild and lights the full column.',
   },
   {
-    id: 'overclock', name: 'System Overclock', color: '#ff8800', timing: 'post', img: ASSET + 'system-overclock.png',
+    id: 'overclock', name: 'System Overclock', color: '#ff8800', timing: 'post', img: ASSET + 'system-overclock.webp',
     timingLabel: 'After reels stop',
     desc: 'Chooses one paying symbol type and applies the same random multiplier (×3 / ×5 / ×8 / ×10) to all of them on the grid.',
     vfx: 'Orange overclock labels stamp ×N onto the chosen symbols.',
   },
   {
-    id: 'cloning', name: 'Data Cloning', color: '#00ff88', timing: 'post', img: ASSET + 'data-cloning.png',
+    id: 'cloning', name: 'Data Cloning', color: '#00ff88', timing: 'post', img: ASSET + 'data-cloning.webp',
     timingLabel: 'After reels stop',
     desc: 'Chooses one paying symbol type and splits every matching cell into a Split Symbol (counts as 2 in ways).',
     vfx: 'Symbols glitch and divide like digital mitosis.',
   },
   {
-    id: 'root', name: 'Root Access', color: '#00ff88', timing: 'post', img: ASSET + 'root-access.png',
+    id: 'root', name: 'Root Access', color: '#00ff88', timing: 'post', img: ASSET + 'root-access.webp',
     timingLabel: 'After reels stop',
     desc: 'Selects 1–3 reels and splits every symbol on those reels (except Scatters).',
     vfx: 'Green matrix rain floods the chosen reels and splits symbols.',
   },
   {
-    id: 'surge', name: 'Power Surge', color: '#ffff00', timing: 'post', img: ASSET + 'power-surge.png',
+    id: 'surge', name: 'Power Surge', color: '#ffff00', timing: 'post', img: ASSET + 'power-surge.webp',
     timingLabel: 'After reels stop',
     desc: 'Converts 1–2 paying symbol types into Wilds. Adjacent cells (except Scatters) become Split Symbols.',
     vfx: 'Lightning strikes symbols into Wilds; shockwave splits neighbors.',
   },
   {
-    id: 'glitch', name: 'System Glitch', color: '#aa44ff', timing: 'post', img: ASSET + 'system-glitch.png',
+    id: 'glitch', name: 'System Glitch', color: '#aa44ff', timing: 'post', img: ASSET + 'system-glitch.webp',
     timingLabel: 'After reels stop',
     desc: 'Shuffles all non-winning symbols on the grid (Scatters stay). Multipliers and symbol size are kept.',
     vfx: 'Grid glitch/noise, then non-win symbols swap places.',
   },
   {
-    id: 'scan', name: 'Algorithmic Scan', color: '#00f0ff', timing: 'post', img: ASSET + 'algorithmic-scan.png',
+    id: 'scan', name: 'Algorithmic Scan', color: '#00f0ff', timing: 'post', img: ASSET + 'algorithmic-scan.webp',
     timingLabel: 'After reels stop',
     desc: 'Locks onto 1–3 paying symbol types and turns all of them into Wilds.',
     vfx: 'Radar target lock paints symbols, then they become Wild.',
   },
   {
-    id: 'bypass', name: 'Bypass Protocol', color: '#00f0ff', timing: 'win', img: ASSET + 'bypass-protocal.png',
+    id: 'bypass', name: 'Bypass Protocol', color: '#00f0ff', timing: 'win', img: ASSET + 'bypass-protocal.webp',
     timingLabel: 'Win phase',
     desc: 'Unlocks Right-to-Left pays in addition to Left-to-Right. Total win is the sum of both directions.',
     vfx: 'Data-flow arrows show both L→R and R→L evaluation.',
   },
   {
-    id: 'bandwidth', name: 'Bandwidth Multiplier', color: '#ff8800', timing: 'win', img: ASSET + 'bandwidth-multiplier%20.png',
+    id: 'bandwidth', name: 'Bandwidth Multiplier', color: '#ff8800', timing: 'win', img: ASSET + 'bandwidth-multiplier%20.webp',
     timingLabel: 'Win phase',
     desc: 'Applies a random global win multiplier (×3 / ×5 / ×8 / ×10) to all wins of this spin.',
     vfx: 'Bandwidth loading bar ramps to the chosen multiplier.',
@@ -639,7 +624,7 @@ const JACKPOT_TIERS = [
   { name: 'ELITE', mult: 500, emoji: '⭐' },
   { name: 'GOD', mult: 19693, emoji: '🔱' },
 ];
-const JACKPOT_CORE_IMG = ASSET + 'quantum-core-jackpot.png';
+const JACKPOT_CORE_IMG = ASSET + 'quantum-core-jackpot.webp';
 
 let _preloadPromise = null;
 let _preloadDone = 0;
@@ -649,19 +634,19 @@ function listPreloadUrls() {
   const urls = new Set();
   const add = (p) => { if (p) urls.add(assetUrl(p)); };
   for (const k of LETTER_SYMS) {
-    add(ASSET + k + '.png');
-    add(ASSET + 'art-new/' + k + '.png');
+    add(ASSET + k + '.webp');
+    add(ASSET + 'art-new/' + k + '.webp');
   }
   add(ASSET + MYSTERY_FILE);
   add(ASSET + 'art-new/' + MYSTERY_FILE);
   for (const cfg of Object.values(SYM_SPRITES)) add(SPRITE_PACK_BASE + cfg.file);
-  add(SPRITE_PACK_BASE + 'animation-sequence.png');
+  add(SPRITE_PACK_BASE + 'animation-sequence.webp');
   add(CORE_HACK.img);
   for (const f of FEATURES) add(f.img);
   add(JACKPOT_CORE_IMG);
-  add(ASSET + 'spin.png');
-  add(ASSET + 'auto-spin.png');
-  add(ASSET + 'buy-free-spin.png');
+  add(ASSET + 'spin.webp');
+  add(ASSET + 'auto-spin.webp');
+  add(ASSET + 'buy-free-spin.webp');
   return [...urls];
 }
 
@@ -1911,7 +1896,7 @@ const WIN_SEQ = {
   rows: 6,
   frames: 36,
   fps: 14,
-  file: 'animation-sequence.png',
+  file: 'animation-sequence.webp',
 };
 
 /** Pin .win-fx-stage lên bounding box reels (grid symbol). */
