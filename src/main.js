@@ -9568,7 +9568,7 @@ function bindCheatPanelEvents() {
       return;
     }
     if (
-      e.key === 'C' &&
+      e.key === 'c' &&
       !e.ctrlKey &&
       !e.metaKey &&
       !e.altKey &&
