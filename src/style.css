@@ -2306,6 +2306,17 @@
     body.pack-art-new .spin-btn {
       filter: drop-shadow(0 0 12px rgba(0,255,140,.35));
     }
+    body.pack-art-new .side-paytable {
+      background: linear-gradient(180deg, rgba(6,20,15,.94) 0%, rgba(4,14,11,.9) 100%);
+      border-color: #14503a;
+      box-shadow:
+        inset 0 1px 0 rgba(0,255,160,.1),
+        0 0 0 1px rgba(0,255,140,.08),
+        0 8px 24px rgba(0,0,0,.4);
+    }
+    body.pack-art-new .side-pt-cols {
+      border-bottom-color: rgba(20,80,58,.7);
+    }
 
     #vfxSkipBar {
       position: absolute; right: 8px; bottom: 8px; z-index: 30;
@@ -2419,6 +2430,116 @@
       overflow: hidden;
     }
     .side-left { grid-column: 1; grid-row: 2; justify-content: space-between; }
+
+    .side-paytable {
+      display: none;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      align-self: stretch;
+      background: linear-gradient(180deg, rgba(12,20,36,.94) 0%, rgba(8,14,24,.9) 100%);
+      border: 2px solid #1a3568;
+      border-radius: 10px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.08),
+        0 0 0 1px rgba(0,200,255,.08),
+        0 8px 24px rgba(0,0,0,.35);
+      padding: 8px 7px 6px;
+    }
+    .side-pt-head {
+      flex-shrink: 0;
+      font-size: .62rem;
+      letter-spacing: 1.6px;
+      font-weight: 800;
+      color: var(--cyan);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .side-pt-cols,
+    .side-pt-row {
+      display: grid;
+      grid-template-columns: 30px 42px 1fr 1fr 1fr;
+      align-items: center;
+      gap: 4px;
+    }
+    .side-pt-cols {
+      flex-shrink: 0;
+      font-size: .72rem;
+      color: var(--dim);
+      letter-spacing: .3px;
+      padding: 0 2px 5px;
+      border-bottom: 1px solid rgba(30,58,95,.7);
+      margin-bottom: 2px;
+      text-align: center;
+    }
+    .side-pt-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #1e3a5f transparent;
+    }
+    .side-pt-row {
+      padding: 3px 2px;
+      border-radius: 4px;
+    }
+    .side-pt-row:nth-child(odd) { background: rgba(255,255,255,.025); }
+    .side-pt-icon {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .side-paytable .sym-img {
+      width: 28px;
+      height: 28px;
+      max-width: 28px;
+      max-height: 28px;
+    }
+    .side-pt-row span {
+      font-size: .88rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--green);
+      text-align: center;
+    }
+    .side-pt-id {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      line-height: 1.1;
+      color: var(--text) !important;
+      text-align: left !important;
+    }
+    .side-pt-id .sid {
+      font-size: .62rem;
+      font-weight: 600;
+      color: var(--dim);
+      letter-spacing: .3px;
+    }
+    .side-pt-id .sname {
+      font-size: .78rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .side-pt-row[data-type="high"] span:not(.side-pt-icon):not(.side-pt-id):not(.sid):not(.sname) { color: var(--yellow); }
+    .side-pt-row.special .side-pt-note {
+      grid-column: 3 / -1;
+      font-size: .68rem;
+      font-weight: 600;
+      color: var(--dim);
+      text-align: left;
+    }
+    .side-pt-foot {
+      flex-shrink: 0;
+      font-size: .52rem;
+      color: var(--dim);
+      text-align: center;
+      margin-top: 6px;
+      letter-spacing: .25px;
+    }
 
     .side-stack { display: flex; flex-direction: column; align-items: center; gap: clamp(8px, 1.2vh, 14px); }
     .side-row { display: flex; gap: clamp(6px, 0.8vw, 10px); align-items: center; flex-wrap: wrap; justify-content: center; }
@@ -3800,6 +3921,21 @@
       .stage { max-width: min(1400px, 100%); }
       .mult-box { width: clamp(72px, 6vw, 96px); font-size: clamp(1.35rem, 1.6vw, 1.7rem); }
       .info-bar { height: clamp(28px, 3.5vh, 36px); font-size: clamp(.78rem, 1vw, .9rem); }
+    }
+
+    /* Desktop: paytable rail bên phải reels để đối chiếu 3/4/5× */
+    @media (min-width: 1180px) {
+      .stage {
+        grid-template-columns: clamp(64px, 8vw, 100px) minmax(0, 1fr) clamp(236px, 17vw, 292px);
+        max-width: min(1660px, 100%);
+      }
+      .side-paytable {
+        display: flex;
+        grid-column: 3;
+        grid-row: 1 / span 2;
+        align-self: end;
+        max-height: 100%;
+      }
     }
 
     @media (min-width: 1200px) and (min-height: 720px) {

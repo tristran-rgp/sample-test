@@ -3595,15 +3595,62 @@ function initBuyModals() {
   });
 }
 
+function fmtCx(n) {
+  return Number(n || 0).toFixed(2);
+}
+
+/** id + name từ be-zero-day .../games/zero_day.json `symbols`. */
+const PAYTABLE_ROWS = [
+  { id: 1,  name: 'A',       key: 'A' },
+  { id: 2,  name: 'B',       key: 'B' },
+  { id: 3,  name: 'C',       key: 'C' },
+  { id: 4,  name: 'D',       key: 'D' },
+  { id: 5,  name: 'E',       key: 'E' },
+  { id: 6,  name: 'F',       key: 'F' },
+  { id: 7,  name: 'G',       key: 'G' },
+  { id: 8,  name: 'H',       key: 'H' },
+  { id: 9,  name: 'I',       key: 'I' },
+  { id: 10, name: 'K',       key: 'K' },
+  { id: 11, name: 'WILD',    key: 'W' },
+  { id: 12, name: 'SCATTER', key: 'S' },
+];
+
+const PAYTABLE_SPECIAL = {
+  W: 'Wild · substitutes',
+  S: 'Scatter · 3+ FS',
+};
+
 function renderPaytable() {
   const ptGrid = document.getElementById('paytableGrid');
-  if (!ptGrid) return;
-  ptGrid.innerHTML = '';
-  [...PAYING, 'W', 'S'].forEach(s => {
-    const sym = SYMBOLS[s];
-    const pays = sym.pays.slice(2).map((p, i) => `${i + 3}×: ${p}`).join(' | ') || 'Special';
-    ptGrid.innerHTML += `<div class="pay-sym">${symImgHtml(s)}<div class="name">${sym.name}</div><div class="pays">${pays}</div></div>`;
-  });
+  if (ptGrid) {
+    ptGrid.innerHTML = PAYTABLE_ROWS.map(row => {
+      const sym = SYMBOLS[row.key];
+      const note = PAYTABLE_SPECIAL[row.key];
+      const pays = note || (sym?.pays || []).slice(2).map((p, i) => `${i + 3}×: ${fmtCx(p)}`).join(' | ');
+      return `<div class="pay-sym">${symImgHtml(row.key)}<div class="name">#${row.id} ${row.name}</div><div class="pays">${pays}</div></div>`;
+    }).join('');
+  }
+
+  const side = document.getElementById('sidePaytableBody');
+  if (!side) return;
+  side.innerHTML = PAYTABLE_ROWS.map(row => {
+    const sym = SYMBOLS[row.key];
+    const note = PAYTABLE_SPECIAL[row.key];
+    const idCell = `<span class="side-pt-id"><span class="sid">${row.id}</span><span class="sname">${row.name}</span></span>`;
+    if (note) {
+      return `<div class="side-pt-row special" data-sym="${row.key}" data-id="${row.id}">
+        <span class="side-pt-icon">${symImgHtml(row.key)}</span>
+        ${idCell}
+        <span class="side-pt-note">${note}</span>
+      </div>`;
+    }
+    const [p3, p4, p5] = (sym?.pays || []).slice(2);
+    return `<div class="side-pt-row" data-sym="${row.key}" data-id="${row.id}" data-type="${sym?.type || ''}">
+      <span class="side-pt-icon">${symImgHtml(row.key)}</span>
+      ${idCell}
+      <span>${fmtCx(p3)}</span><span>${fmtCx(p4)}</span><span>${fmtCx(p5)}</span>
+    </div>`;
+  }).join('');
 }
 
 // ─── Init UI ─────────────────────────────────────────────────
