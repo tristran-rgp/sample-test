@@ -9565,6 +9565,18 @@ function bindCheatPanelEvents() {
     if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
       e.preventDefault();
       openCheatPanel();
+      return;
+    }
+    if (
+      e.key === 'C' &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.altKey &&
+      !e.shiftKey &&
+      !/^(input|textarea|select)$/i.test(e.target?.tagName || '') &&
+      !e.target?.isContentEditable
+    ) {
+      openCheatPanel();
     }
   });
 }
