@@ -4961,6 +4961,28 @@ function setCellMultiplier(c, r, mult) {
   state.cellMeta[c][r].multiplier = Number(mult) || 1;
 }
 
+/** Mọi mystery ô phải reveal — server bỏ change khi from === revealTo. */
+function revealTrojanStep(step) {
+  if (!step) return;
+  const mysteryPos = Array.isArray(step.mysteryPositions) ? step.mysteryPositions : [];
+  const changePos = Array.isArray(step.changes) ? step.changes.map(ch => ch.pos) : [];
+  const positions = mysteryPos.length ? mysteryPos : changePos;
+  if (Array.isArray(step.changes) && step.changes.length) applyStepChanges(step.changes);
+  if (step.revealTo != null) {
+    for (const pos of positions) {
+      const p = stepPos(pos);
+      if (!p) continue;
+      setCellSymbol(p.c, p.r, step.revealTo);
+      setCellMystery(p.c, p.r, false);
+    }
+    return;
+  }
+  for (const pos of positions) {
+    const p = stepPos(pos);
+    if (p) setCellMystery(p.c, p.r, false);
+  }
+}
+
 function applyStepChanges(changes) {
   if (!Array.isArray(changes)) return [];
   const hit = [];
@@ -6362,20 +6384,7 @@ async function presentVfxTrojan(step, featId) {
     }
   }
 
-  if (Array.isArray(step.changes) && step.changes.length) applyStepChanges(step.changes);
-  else if (step.revealTo != null) {
-    for (const pos of positions) {
-      const p = stepPos(pos);
-      if (p) {
-        setCellSymbol(p.c, p.r, step.revealTo);
-        setCellMystery(p.c, p.r, false);
-      }
-    }
-  }
-  for (const pos of positions) {
-    const p = stepPos(pos);
-    if (p) setCellMystery(p.c, p.r, false);
-  }
+  revealTrojanStep(step);
   renderGrid();
 
   if (canvas) {
@@ -7416,15 +7425,7 @@ function applyFeatureStepDataOnly(step) {
     state.globalMultiplier = Number(step.multiplier) || state.globalMultiplier || 1;
   }
   if (featId === 'bypass') state.bypassProtocol = true;
-  if (featId === 'trojan' && step.revealTo != null && !step.changes?.length) {
-    for (const pos of step.mysteryPositions || []) {
-      const p = stepPos(pos);
-      if (p) {
-        setCellSymbol(p.c, p.r, step.revealTo);
-        setCellMystery(p.c, p.r, false);
-      }
-    }
-  }
+  if (featId === 'trojan') revealTrojanStep(step);
 }
 
 /**
