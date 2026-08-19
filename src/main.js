@@ -782,6 +782,8 @@ const state = {
   txnId: null,
   // Active features this spin
   triggeredFeatures: [],
+  /** Spin vừa rồi — bấm badge để replay VFX từng feature */
+  lastFeatureReplay: null,
   lastJackpotActive: false,
   blockedSymbols: [],
   globalMultiplier: 1,
@@ -1785,10 +1787,12 @@ function showFeatureDetail(featureId) {
   const f = findMeterFeature(featureId);
   if (!f) return;
   const vi = FEATURE_EXPLAIN_VI[f.id] || {};
+  const replayable = findReplayStepIndex(f.id) >= 0;
   const active = f.id === CORE_HACK.id
     ? !!state.lastJackpotActive
     : !!(state.triggeredFeatures || []).find(x => x.id === f.id)
-      || !!(state.persistentFeatures || []).find(x => x.id === f.id);
+      || !!(state.persistentFeatures || []).find(x => x.id === f.id)
+      || replayable;
 
   const img = document.getElementById('featDetailImg');
   const title = document.getElementById('featDetailTitle');
@@ -1797,7 +1801,12 @@ function showFeatureDetail(featureId) {
   const how = document.getElementById('featDetailHow');
   const vfx = document.getElementById('featDetailVfx');
   const status = document.getElementById('featDetailStatus');
+  const replayBtn = document.getElementById('btnReplayFeature');
   if (!img || !title) return;
+  if (replayBtn) {
+    replayBtn.style.display = replayable ? '' : 'none';
+    replayBtn.dataset.featureId = f.id;
+  }
 
   const order = meterItems().findIndex(x => x.id === f.id) + 1;
   const whenVi =
@@ -1820,7 +1829,13 @@ function showFeatureDetail(featureId) {
   if (vfx) vfx.textContent = vi.see || f.vfx || '';
 
   if (status) {
-    if (active) {
+    if (replayable) {
+      status.style.display = 'block';
+      status.textContent = '● Có trên spin vừa rồi — bấm Replay để diễn lại VFX';
+      status.style.color = f.color || 'var(--green)';
+      status.style.background = 'rgba(0,255,136,.08)';
+      status.style.border = '1px solid ' + (f.color || 'var(--green)');
+    } else if (active) {
       status.style.display = 'block';
       status.textContent = '● ĐANG BẬT trên spin này / Free Spins';
       status.style.color = f.color || 'var(--green)';
@@ -1848,12 +1863,16 @@ function renderFeatureMeter(activeIds = []) {
       + (f.id === CORE_HACK.id ? ' core-hack' : '')
       + (on ? ' active' : '');
     const viName = (FEATURE_EXPLAIN_VI[f.id] && FEATURE_EXPLAIN_VI[f.id].nameVi) || f.name;
-    badge.title = viName + ' — bấm để xem giải thích' + (on ? ' (đang bật)' : '');
+    const replayable = canReplayFeature(f.id);
+    if (replayable) badge.classList.add('replayable');
+    badge.title = replayable
+      ? viName + ' — bấm để replay feature này (Shift+bấm xem giải thích)'
+      : viName + ' — bấm để xem giải thích' + (on ? ' (đang bật)' : '');
     badge.style.color = f.color;
     badge.dataset.featureId = f.id;
     badge.setAttribute('role', 'button');
     badge.setAttribute('tabindex', '0');
-    badge.setAttribute('aria-label', 'Chi tiết ' + viName);
+    badge.setAttribute('aria-label', replayable ? ('Replay ' + viName) : ('Chi tiết ' + viName));
     if (on) badge.setAttribute('aria-current', 'true');
     if (f.img) {
       const img = document.createElement('img');
@@ -1865,6 +1884,10 @@ function renderFeatureMeter(activeIds = []) {
     const open = (e) => {
       e.preventDefault();
       e.stopPropagation();
+      if (canReplayFeature(f.id) && !e.shiftKey && !e.altKey) {
+        replayLastFeature(f.id);
+        return;
+      }
       showFeatureDetail(f.id);
     };
     badge.addEventListener('click', open);
@@ -3409,13 +3432,25 @@ async function doSpin(forcedScatters = 0) {
     renderGrid();
   }
 
+  const landScreen = gridToServerScreen(state.grid);
+  const offlineSteps = [];
+  if (features.find(f => f.id === 'firewall')) {
+    offlineSteps.push({
+      name: 'FirewallBlock',
+      bannedLows: (state.blockedSymbols || []).map(s => SYM_TO_ID[s]).filter(n => n != null),
+      changes: [],
+    });
+  }
+
   // Post-stop features
   for (const feat of features) {
     if (feat.timing === 'post' || feat.timing === 'spin') {
       if (feat.timing === 'post' && FEATURE_HANDLERS[feat.id]) {
+        const before = snapshotBoard();
         if (state.featureExplain) await playFeatureExplainBeat(feat.id, null);
         await FEATURE_HANDLERS[feat.id]();
         renderGrid();
+        offlineSteps.push(diffBoardsToStep(feat, before, snapshotBoard()));
       }
     }
   }
@@ -3423,10 +3458,23 @@ async function doSpin(forcedScatters = 0) {
   // Win-time features
   for (const feat of features) {
     if (feat.timing === 'win' && FEATURE_HANDLERS[feat.id]) {
+      const before = snapshotBoard();
       if (state.featureExplain) await playFeatureExplainBeat(feat.id, null);
       FEATURE_HANDLERS[feat.id]();
+      offlineSteps.push(diffBoardsToStep(feat, before, snapshotBoard()));
     }
   }
+
+  captureLastFeatureReplay({
+    featureSteps: offlineSteps,
+    featObjs: features,
+    baseScreen: landScreen,
+    finalScreen: gridToServerScreen(state.grid),
+    splitCounts: cellMetaToSplitCounts(state.cellMeta),
+    cellMultipliers: cellMetaToMultMap(state.cellMeta),
+    finalGlobalMult: state.globalMultiplier,
+    finalBypass: state.bypassProtocol,
+  });
 
   // Jackpot check (rare)
   let jackpotWin = 0;
@@ -3522,7 +3570,7 @@ async function doSpin(forcedScatters = 0) {
   document.getElementById('btnSpin').disabled = false;
   updateUI();
   updateAutoUI();
-  renderFeatureMeter((state.inFreeSpins ? (state.persistentFeatures || []) : []).map(f => f.id));
+  renderLastSpinFeatureMeter();
 
   // FS continue / Autospin — chỉ sau settle
   await continueAfterSpin();
@@ -3759,6 +3807,10 @@ function initUI() {
   document.getElementById('menuRules').addEventListener('click', () => { closeModal('modalMenu'); openModal('modalRules'); });
   document.getElementById('closeRules').addEventListener('click', () => closeModal('modalRules'));
   document.getElementById('closeFeatureDetail')?.addEventListener('click', () => closeModal('modalFeatureDetail'));
+  document.getElementById('btnReplayFeature')?.addEventListener('click', () => {
+    const id = document.getElementById('btnReplayFeature')?.dataset.featureId;
+    if (id) replayLastFeature(id);
+  });
   document.getElementById('modalFeatureDetail')?.addEventListener('click', (e) => {
     if (e.target.id === 'modalFeatureDetail') closeModal('modalFeatureDetail');
   });
@@ -4243,6 +4295,7 @@ async function splash() {
 
 /** Server symbol id → client key. 13 = MYSTERY (TrojanHorse intermediate only). */
 const SYM_MAP = { 1:'A',2:'B',3:'C',4:'D',5:'E',6:'F',7:'G',8:'H',9:'I',10:'K',11:'W',12:'S',13:'M' };
+const SYM_TO_ID = Object.fromEntries(Object.entries(SYM_MAP).map(([id, k]) => [k, Number(id)]));
 
 let ws = null;
 let accessToken = '';
@@ -7489,6 +7542,229 @@ async function presentFeatureSteps(featureSteps, opts = {}) {
   return true;
 }
 
+function snapshotBoard() {
+  return {
+    grid: (state.grid || []).map(col => (Array.isArray(col) ? col.slice() : [])),
+    cellMeta: (state.cellMeta || []).map(col =>
+      (Array.isArray(col) ? col.map(m => ({ split: !!m?.split, multiplier: m?.multiplier || 1, mystery: !!m?.mystery })) : [])
+    ),
+    globalMultiplier: state.globalMultiplier || 1,
+    bypassProtocol: !!state.bypassProtocol,
+    blockedSymbols: [...(state.blockedSymbols || [])],
+  };
+}
+
+function gridToServerScreen(grid) {
+  if (!Array.isArray(grid) || grid.length !== REELS) return null;
+  return grid.map(col => (Array.isArray(col) ? col.map(s => SYM_TO_ID[s] ?? 6) : []));
+}
+
+function cellMetaToSplitCounts(meta) {
+  if (!Array.isArray(meta) || meta.length !== REELS) return null;
+  return meta.map(col => (Array.isArray(col) ? col.map(m => (m?.split ? 2 : 1)) : []));
+}
+
+function cellMetaToMultMap(meta) {
+  if (!Array.isArray(meta)) return null;
+  const map = {};
+  for (let c = 0; c < REELS; c++) {
+    for (let r = 0; r < ROWS; r++) {
+      const m = Number(meta[c]?.[r]?.multiplier) || 1;
+      if (m > 1) map[`${r},${c}`] = m;
+    }
+  }
+  return Object.keys(map).length ? map : null;
+}
+
+function clientToServerFeatureName(id) {
+  for (const [name, cid] of Object.entries(SERVER_FEATURE_MAP)) {
+    if (cid === id) return name;
+  }
+  return id;
+}
+
+function diffBoardsToStep(feat, before, after) {
+  const changes = [];
+  const splitChanges = [];
+  const positions = [];
+  for (let c = 0; c < REELS; c++) {
+    for (let r = 0; r < ROWS; r++) {
+      const pos = [c, r];
+      const bg = before.grid[c]?.[r];
+      const ag = after.grid[c]?.[r];
+      const bm = before.cellMeta[c]?.[r] || {};
+      const am = after.cellMeta[c]?.[r] || {};
+      if (bg !== ag && ag != null) changes.push({ pos, to: SYM_TO_ID[ag] ?? ag });
+      if (!bm.split && am.split) splitChanges.push({ pos, to: 2 });
+      if ((am.multiplier || 1) > 1 && am.multiplier !== bm.multiplier) positions.push(pos);
+    }
+  }
+  const step = {
+    name: clientToServerFeatureName(feat.id),
+    changes,
+    splitChanges,
+  };
+  if (feat.id === 'firewall') {
+    step.bannedLows = (after.blockedSymbols || []).map(s => SYM_TO_ID[s]).filter(n => n != null);
+  }
+  if (feat.id === 'trojan' && changes.length) {
+    step.revealTo = changes[0].to;
+    step.mysteryPositions = changes.map(ch => ch.pos);
+  }
+  if (feat.id === 'overclock') {
+    step.positions = positions;
+    const sample = positions[0];
+    step.multiplier = sample
+      ? (after.cellMeta[sample[0]]?.[sample[1]]?.multiplier || 1)
+      : 1;
+  }
+  if (feat.id === 'bandwidth') step.multiplier = after.globalMultiplier || 1;
+  if (feat.id === 'overload') {
+    const cols = [];
+    for (let c = 0; c < REELS; c++) {
+      const nowWild = after.grid[c]?.every(s => s === 'W');
+      const wasWild = before.grid[c]?.every(s => s === 'W');
+      if (nowWild && !wasWild) cols.push(c);
+    }
+    step.columns = cols;
+  }
+  if (feat.id === 'root') {
+    const reels = [];
+    for (let c = 0; c < REELS; c++) {
+      let newly = 0;
+      for (let r = 0; r < ROWS; r++) {
+        if (after.cellMeta[c]?.[r]?.split && !before.cellMeta[c]?.[r]?.split) newly++;
+      }
+      if (newly >= 2) reels.push(c);
+    }
+    step.reels = reels;
+  }
+  return step;
+}
+
+function captureLastFeatureReplay(pack) {
+  const steps = Array.isArray(pack?.featureSteps) ? pack.featureSteps.filter(s => s && s.name) : [];
+  if (!steps.length) {
+    state.lastFeatureReplay = null;
+    return;
+  }
+  let cloned;
+  try {
+    cloned = JSON.parse(JSON.stringify(steps));
+  } catch (_) {
+    cloned = steps.slice();
+  }
+  state.lastFeatureReplay = {
+    featureSteps: cloned,
+    featObjs: pack.featObjs || [],
+    baseScreen: pack.baseScreen || null,
+    finalScreen: pack.finalScreen || null,
+    splitCounts: pack.splitCounts || null,
+    cellMultipliers: pack.cellMultipliers || null,
+    finalGlobalMult: pack.finalGlobalMult ?? state.globalMultiplier ?? 1,
+    finalBypass: pack.finalBypass ?? !!state.bypassProtocol,
+    finalBoard: pack.finalBoard || snapshotBoard(),
+  };
+}
+
+function lastReplayMeterIds() {
+  const pack = state.lastFeatureReplay;
+  if (!pack) {
+    return [
+      ...(state.inFreeSpins ? (state.persistentFeatures || []).map(f => f.id) : []),
+      ...(state.triggeredFeatures || []).map(f => f.id),
+    ].filter((id, i, a) => a.indexOf(id) === i);
+  }
+  const ids = [
+    ...(pack.featObjs || []).map(f => f.id),
+    ...(pack.featureSteps || []).map(s => mapServerFeatureName(s?.name)).filter(Boolean),
+  ];
+  if (state.inFreeSpins) ids.push(...(state.persistentFeatures || []).map(f => f.id));
+  return ids.filter((id, i, a) => a.indexOf(id) === i);
+}
+
+function renderLastSpinFeatureMeter() {
+  renderFeatureMeter(lastReplayMeterIds());
+}
+
+function findReplayStepIndex(featId) {
+  const steps = state.lastFeatureReplay?.featureSteps;
+  if (!steps?.length || !featId) return -1;
+  return steps.findIndex(s => mapServerFeatureName(s?.name) === featId);
+}
+
+function replayHoldReason() {
+  if (state.spinning || state.fxPlaying) return 'Đợi spin / VFX xong rồi replay';
+  if ((state.autoSpins || 0) > 0) return 'Tắt Autospin để replay feature';
+  if (state.inFreeSpins && state.fsRemaining > 0 && !isEditFsGridOn()) {
+    return 'Bật Edit Grid (pause FS) hoặc đợi hết Free Spins để replay';
+  }
+  return '';
+}
+
+function canReplayFeature(featId) {
+  return !replayHoldReason() && findReplayStepIndex(featId) >= 0;
+}
+
+function restoreReplayBeforeStep(stepIndex) {
+  const pack = state.lastFeatureReplay;
+  if (!pack) return false;
+  state.globalMultiplier = 1;
+  state.bypassProtocol = false;
+  const land = pack.baseScreen || pack.finalScreen;
+  if (land) applyServerScreen(land, null);
+  else if (pack.finalBoard) {
+    state.grid = pack.finalBoard.grid.map(col => col.slice());
+    state.cellMeta = pack.finalBoard.cellMeta.map(col => col.map(m => ({ ...m })));
+  }
+  for (let i = 0; i < stepIndex; i++) applyFeatureStepDataOnly(pack.featureSteps[i]);
+  const box = document.getElementById('multDisplay');
+  if (box) box.textContent = String(state.globalMultiplier || 1).padStart(2, '0');
+  renderGrid();
+  return true;
+}
+
+async function replayLastFeature(featId) {
+  const hold = replayHoldReason();
+  if (hold) {
+    showToast(hold, '#ff8800');
+    return;
+  }
+  const idx = findReplayStepIndex(featId);
+  if (idx < 0) {
+    showFeatureDetail(featId);
+    return;
+  }
+  const pack = state.lastFeatureReplay;
+  const step = pack.featureSteps[idx];
+  const f = FEATURES.find(x => x.id === featId);
+  closeModal('modalFeatureDetail');
+  resetVfxSkip();
+  setSkipBarVisible(true);
+  beginFx();
+  try {
+    restoreReplayBeforeStep(idx);
+    renderFeatureMeter(lastReplayMeterIds());
+    showToast(`▶ Replay: ${f?.name || featId}`, f?.color || 'var(--cyan)');
+    await applyFeatureStep(step, {
+      firewallAnnounced: false,
+      stepIndex: idx,
+      stepTotal: pack.featureSteps.length,
+      isReplay: true,
+    });
+  } finally {
+    setSkipBarVisible(false);
+    clearMeterStepActive();
+    hideFeatureIntro(true);
+    hideFeatureExplain(true);
+    hideVfxBanner();
+    clearVfxStage();
+    setVfxVignette(false);
+    endFx();
+    renderLastSpinFeatureMeter();
+  }
+}
+
 /** Map server screen matrix → client symbol keys for animateReelSpin */
 function screenToForcedResults(screen) {
   if (!Array.isArray(screen) || screen.length !== REELS) return null;
@@ -8056,6 +8332,20 @@ async function doOnlineSpin(opts = {}) {
     // 5) Authority snap — final grid always from stages[0].screen
     applyServerScreen(screen, splitCounts);
     applyCellMultipliers(cellMultipliers);
+    if (hasStepTrace) {
+      captureLastFeatureReplay({
+        featureSteps,
+        featObjs,
+        baseScreen: landScreen,
+        finalScreen: screen,
+        splitCounts,
+        cellMultipliers,
+        finalGlobalMult: state.globalMultiplier,
+        finalBypass: state.bypassProtocol,
+      });
+    } else {
+      state.lastFeatureReplay = null;
+    }
     // Bandwidth mult display if step set it; ensure UI matches
     if (state.globalMultiplier > 1) {
       const box = document.getElementById('multDisplay');
@@ -8143,14 +8433,7 @@ async function doOnlineSpin(opts = {}) {
   document.getElementById('btnSpin').disabled = false;
   updateUI();
   updateAutoUI();
-  renderFeatureMeter(
-    state.inFreeSpins
-      ? [
-          ...(state.persistentFeatures || []).map(f => f.id),
-          ...(state.triggeredFeatures || []).map(f => f.id),
-        ].filter((id, i, a) => a.indexOf(id) === i)
-      : []
-  );
+  renderLastSpinFeatureMeter();
 
   // 11) Continue FS / Autospin — chỉ sau settle (wsSpin kế tiếp nằm trong doOnlineSpin)
   await continueAfterSpin();

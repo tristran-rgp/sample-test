@@ -923,6 +923,21 @@
         drop-shadow(0 0 12px rgba(0,255,200,.65))
         brightness(1.15);
     }
+    .feat-badge.replayable {
+      cursor: pointer;
+    }
+    .feat-badge.replayable::after {
+      content: '▶';
+      position: absolute;
+      right: 1px;
+      bottom: 1px;
+      font-size: 9px;
+      line-height: 1;
+      color: #fff;
+      text-shadow: 0 0 6px #00f0ff, 0 0 10px currentColor;
+      pointer-events: none;
+      opacity: .9;
+    }
     @keyframes featPulse {
       0%,100% {
         transform: scale(1.24);
