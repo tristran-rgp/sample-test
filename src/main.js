@@ -1570,72 +1570,38 @@ async function applyRootAccess() {
 }
 
 async function applyPowerSurge() {
-  const present = [];
+  // GDD §4.3: pick 1–2 pay cells (ids 1–10, không Wild/Scatter) → Wild;
+  // 8 ô kề (cả chéo) bị split ×2 trừ Scatter; epicenter không tự tách.
+  const eligible = [];
   for (let c = 0; c < REELS; c++) {
     for (let r = 0; r < ROWS; r++) {
       const sym = state.grid[c][r];
-      if ((PAYING.includes(sym) || sym === 'W') && !present.includes(sym)) present.push(sym);
+      if (PAYING.includes(sym)) eligible.push({ c, r });
     }
   }
-  if (!present.length) {
-    showToast('⚡ Power Surge: no pay types on grid', '#ffff00');
+  if (!eligible.length) {
+    showToast('⚡ Power Surge: no pay cells on grid', '#ffff00');
     await sleep(400);
     return;
   }
-  const counts = {};
-  for (let c = 0; c < REELS; c++) {
-    for (let r = 0; r < ROWS; r++) {
-      const sym = state.grid[c][r];
-      if (present.includes(sym)) counts[sym] = (counts[sym] || 0) + 1;
-    }
-  }
-  const n = present.length >= 2 && Math.random() < 0.1 ? 2 : 1;
-  let min = Infinity;
-  let second = Infinity;
-  for (const s of present) {
-    const cells = counts[s] || 1;
-    if (cells < min) { second = min; min = cells; }
-    else if (cells > min && cells < second) second = cells;
-  }
-  const pool = present.filter(s => {
-    const cells = counts[s] || 1;
-    return cells === min || cells === second;
-  });
-  const targets = [];
-  for (let i = 0; i < n && pool.length; i++) {
-    let total = 0;
-    const weights = pool.map(s => {
-      const w = Math.max(1, Math.floor(16 / Math.max(1, counts[s] || 1)));
-      total += w;
-      return w;
-    });
-    let roll = Math.floor(Math.random() * total);
-    let idx = 0;
-    for (let j = 0; j < weights.length; j++) {
-      roll -= weights[j];
-      if (roll < 0) { idx = j; break; }
-    }
-    targets.push(pool.splice(idx, 1)[0]);
-  }
-  const wildPositions = [];
-  for (let c = 0; c < REELS; c++) {
-    for (let r = 0; r < ROWS; r++) {
-      if (targets.includes(state.grid[c][r])) {
-        state.grid[c][r] = 'W';
-        wildPositions.push({ c, r });
-      }
-    }
+  const n = eligible.length >= 2 && Math.random() < 0.1 ? 2 : 1;
+  const epicenters = shuffle(eligible).slice(0, Math.min(n, eligible.length));
+  const epicenterSet = new Set(epicenters.map(p => `${p.c},${p.r}`));
+  for (const { c, r } of epicenters) {
+    state.grid[c][r] = 'W';
   }
   const dirs = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
-  for (const { c, r } of wildPositions) {
+  for (const { c, r } of epicenters) {
     for (const [dc, dr] of dirs) {
       const nc = c + dc, nr = r + dr;
-      if (nc >= 0 && nc < REELS && nr >= 0 && nr < ROWS && state.grid[nc][nr] !== 'S') {
+      if (nc >= 0 && nc < REELS && nr >= 0 && nr < ROWS
+          && state.grid[nc][nr] !== 'S'
+          && !epicenterSet.has(`${nc},${nr}`)) {
         stackCellSplit(nc, nr);
       }
     }
   }
-  showToast(`⚡ Power Surge: ${targets.map(s => SYMBOLS[s].name).join(', ')} → Wild`, '#ffff00');
+  showToast(`⚡ Power Surge: ${epicenters.length} ô → Wild`, '#ffff00');
   await sleep(700);
 }
 
@@ -5183,6 +5149,27 @@ function symNameFromId(id) {
   return SYMBOLS[SYM_MAP[id]]?.name || String(id);
 }
 
+/** PowerSurge now emits epicenter `positions` only (no `convertedTypes`). Derive source symbols from `changes` → 11. */
+function surgeConvertedNames(step) {
+  const names = [];
+  const seen = new Set();
+  for (const ch of step.changes || []) {
+    if (ch.from != null && Number(ch.to) === 11 && !seen.has(ch.from)) {
+      seen.add(ch.from);
+      names.push(symNameFromId(ch.from));
+    }
+  }
+  return names;
+}
+
+/** Label for the new PowerSurge payload: source symbols, else epicenter count. */
+function surgeStepLabel(step) {
+  const conv = surgeConvertedNames(step);
+  if (conv.length) return conv.join(', ');
+  if (Array.isArray(step.positions) && step.positions.length) return `${step.positions.length} ô`;
+  return 'targets';
+}
+
 function featureStepToast(step, featId) {
   const p = FEATURE_PRESENT[featId];
   if (featId === 'firewall' && Array.isArray(step.bannedLows) && step.bannedLows.length) {
@@ -5219,8 +5206,8 @@ function featureStepToast(step, featId) {
     showToast(`🧬 Data Cloning: ${symNameFromId(step.targetSymbol)} split ×2`, p?.color || '#00ff88');
     return;
   }
-  if (featId === 'surge' && Array.isArray(step.convertedTypes)) {
-    showToast(`⚡ Power Surge: ${step.convertedTypes.map(symNameFromId).join(', ')} → Wild`, p?.color || '#ffff00');
+  if (featId === 'surge') {
+    showToast(`⚡ Power Surge: ${surgeStepLabel(step)} → Wild`, p?.color || '#ffff00');
     return;
   }
   if (featId === 'scan' && Array.isArray(step.convertedTypes)) {
@@ -5617,8 +5604,8 @@ function buildFeatureExplainTip(featId, step) {
     if (featId === 'cloning' && step.targetSymbol != null) {
       return `Biểu tượng bị tách đôi: ${symNameFromId(step.targetSymbol)}.`;
     }
-    if (featId === 'surge' && Array.isArray(step.convertedTypes) && step.convertedTypes.length) {
-      return `Đổi thành Wild: ${step.convertedTypes.map(symNameFromId).join(', ')} (ô kề bên có thể bị Split).`;
+    if (featId === 'surge') {
+      return `Đổi thành Wild: ${surgeStepLabel(step)} (ô kề bên có thể bị Split).`;
     }
     if (featId === 'scan' && Array.isArray(step.convertedTypes) && step.convertedTypes.length) {
       return `Khóa và đổi thành Wild: ${step.convertedTypes.map(symNameFromId).join(', ')}.`;
@@ -6840,9 +6827,7 @@ async function presentVfxRoot(step, featId) {
 }
 
 async function presentVfxSurge(step, featId) {
-  const types = Array.isArray(step.convertedTypes)
-    ? step.convertedTypes.map(symNameFromId).join(', ')
-    : 'targets';
+  const types = surgeStepLabel(step);
   showVfxBanner(`Power Surge — lightning · ${types}`, 'surge');
   featureStepToast(step, featId);
   clearVfxStage();
@@ -8755,7 +8740,7 @@ const CHEAT_PRESETS = [
   { group: 'Features', code: 'FORCE_SYSTEM_OVERCLOCK', label: 'Overclock', value: { targetSymbol: 1, multiplier: 8 } },
   { group: 'Features', code: 'FORCE_DATA_CLONING', label: 'Cloning', value: { targetSymbol: 8 } },
   { group: 'Features', code: 'FORCE_ROOT_ACCESS', label: 'Root', value: { reels: [2] } },
-  { group: 'Features', code: 'FORCE_POWER_SURGE', label: 'Surge', value: { convertedTypes: [1, 6] } },
+  { group: 'Features', code: 'FORCE_POWER_SURGE', label: 'Surge', value: { positions: [[1, 1]] } },
   { group: 'Features', code: 'FORCE_SYSTEM_GLITCH', label: 'Glitch', value: { protectWinning: true } },
   { group: 'Features', code: 'FORCE_ALGORITHMIC_SCAN', label: 'Scan', value: { convertedTypes: [8] } },
   { group: 'Features', code: 'FORCE_BANDWIDTH_MULTIPLIER', label: 'Bandwidth', value: { multiplier: 10 } },
@@ -9253,8 +9238,8 @@ const CHEAT_FEATURE_TUNES = {
   },
   FORCE_POWER_SURGE: {
     title: 'PowerSurge',
-    help: '1–2 loại pay đang có trên lưới → Wild + split 8 ô kề (cả chéo), trừ Scatter. Tick loại, tối đa 2.',
-    fields: ['types2'],
+    help: '1–2 ô pay (ids 1–10, không Wild/Scatter) [col,row] → Wild. Epicenter không tự tách; 8 ô kề (cả chéo) bị Split ×2, trừ Scatter. Chọn tối đa 2 ô.',
+    fields: ['positions'],
   },
   FORCE_SYSTEM_GLITCH: {
     title: 'SystemGlitch',
@@ -9357,9 +9342,10 @@ function renderCheatTune(code, value) {
       const on = v.protectWinning !== false;
       html += `<div class="cheat-tune-row"><label>protectWinning</label><button type="button" class="cheat-chip${on ? ' is-on' : ''}" data-tune="protectWinning">${on ? 'true' : 'false'}</button></div>`;
     } else if (field === 'positions') {
+      const posMax = code === 'FORCE_POWER_SURGE' ? 2 : 6;
       html += `<div class="cheat-tune-row"><label>positions</label><div class="cheat-pos-wrap">`;
       html += `<div class="cheat-pos-head"><span></span><span>R1</span><span>R2</span><span>R3</span><span>R4</span><span>R5</span></div>`;
-      html += `<div class="cheat-pos-grid" data-tune="positions">`;
+      html += `<div class="cheat-pos-grid" data-tune="positions" data-max="${posMax}">`;
       for (let r = 0; r < 3; r++) {
         html += `<span class="cheat-pos-rowlab">r${r}</span>`;
         for (let c = 0; c < 5; c++) {
@@ -9395,8 +9381,10 @@ function renderCheatTune(code, value) {
   root.querySelectorAll('.cheat-pos-cell').forEach(btn => {
     btn.addEventListener('click', () => {
       btn.classList.toggle('is-on');
+      const posRoot = root.querySelector('[data-tune="positions"]');
+      const posMax = Number(posRoot?.dataset.max || 6);
       const ons = root.querySelectorAll('.cheat-pos-cell.is-on');
-      if (ons.length > 6) ons[0].classList.remove('is-on');
+      if (ons.length > posMax) ons[0].classList.remove('is-on');
       writeCheatTuneToJson();
     });
   });
