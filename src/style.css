@@ -1451,10 +1451,9 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       grid-template-rows: 1fr 1fr;
-      gap: 3%;
-      place-items: center;
+      gap: 2%;
     }
-    .cell.split .split-pair.quad::before {
+    .cell.split .split-pair.quad::after {
       content: '';
       position: absolute;
       left: 0;
@@ -1468,16 +1467,13 @@
       pointer-events: none;
     }
     .cell.split .split-pair.quad .sym-img {
-      width: 78%;
-      height: 78%;
-      max-width: 78%;
-      max-height: 78%;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
       flex: none;
     }
-    .cell.split .split-pair.quad .sym-img.split-a { transform-origin: right top; }
-    .cell.split .split-pair.quad .sym-img.split-b { transform-origin: left top; }
-    .cell.split .split-pair.quad .sym-img.split-c { transform-origin: right bottom; }
-    .cell.split .split-pair.quad .sym-img.split-d { transform-origin: left bottom; }
     .cell.vfx-split .split-pair.quad .sym-img {
       animation: splitPopQuad .5s cubic-bezier(.2,1.2,.3,1);
     }
