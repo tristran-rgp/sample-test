@@ -199,7 +199,7 @@
 * [**Tính Năng System Glitch**](https://drive.google.com/file/d/1F5rJZbYYidYm8oTGzsh7PfG7NI31sXwF/view?usp=drive_link)  
   * Tất cả các biểu tượng không thuộc tổ hợp thắng trên lưới sẽ được xáo trộn vị trí ngẫu nhiên, ngoại trừ Scatter Symbol. Sau khi xáo trộn vị trí, các biểu tượng vẫn giữ nguyên hệ số nhân (Multiplier) và kích thước biểu tượng (Symbol Size).  
 * [**Tính Năng Algorithmic Scan**](https://drive.google.com/file/d/1bcBhcu4qPAzHRfkJDhH4vlMPUbidEQZ5/view?usp=drive_link)  
-  * Hệ thống sẽ ngẫu nhiên chọn từ 1 đến 3 loại biểu tượng trả thưởng thông thường và thay thế toàn bộ các biểu tượng cùng loại trên lưới bằng Wild Symbol.  
+  * Hệ thống sẽ ngẫu nhiên chọn từ 1 đến 3 ô biểu tượng trả thưởng thông thường trên lưới và thay thế các ô được chọn bằng Wild Symbol.  
 * [**Tính Năng Bandwidth Multiplier**](https://drive.google.com/file/d/1Q9AxG1O0VsnJz6uv-7wcCKncYsNcHM1m/view?usp=drive_link)  
   * Một hệ số nhân thắng ngẫu nhiên sẽ được kích hoạt và áp dụng cho tất cả các tổ hợp thắng. Hệ số nhân kích hoạt có giá trị ngẫu nhiên từ x3, x5, x8 hoặc x10.  
 * [**Tính Năng Bypass Protocol**](https://drive.google.com/file/d/1qbujL5-nJQtfECy_iQpH5uGZZSqfnELQ/view?usp=drive_link)  

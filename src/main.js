@@ -516,9 +516,9 @@ const FEATURE_EXPLAIN_VI = {
   },
   scan: {
     nameVi: 'Quét thuật toán (Algorithmic Scan)',
-    what: 'Khóa 1–3 loại biểu tượng và biến tất cả ô cùng loại đó thành Wild.',
-    how: 'Nhiều Wild cùng lúc → ways dễ nối dài và trúng nhiều hơn.',
-    see: 'Radar/hồng tâm khóa mục tiêu rồi ô đó thành Wild.',
+    what: 'Khóa 1–3 ô biểu tượng trả thưởng thường trên lưới và biến chúng thành Wild.',
+    how: 'Thêm Wild tại các ô bị khóa → ways dễ nối dài và trúng nhiều hơn.',
+    see: 'Radar/hồng tâm khóa từng ô rồi ô đó thành Wild.',
   },
   bandwidth: {
     nameVi: 'Nhân băng thông (Bandwidth Multiplier)',
@@ -1634,12 +1634,22 @@ async function applySystemGlitch() {
 }
 
 async function applyAlgorithmicScan() {
-  const n = randInt(1, 3);
-  const targets = shuffle(PAYING).slice(0, n);
-  for (let c = 0; c < REELS; c++)
-    for (let r = 0; r < ROWS; r++)
-      if (targets.includes(state.grid[c][r])) state.grid[c][r] = 'W';
-  showToast(`🎯 Algorithmic Scan: ${targets.map(s => SYMBOLS[s].name).join(', ')} → Wild`, '#00f0ff');
+  // Pick 1–3 pay cells (ids 1–10) → Wild — matches BE AlgorithmicScanFeature.
+  const payCells = [];
+  for (let c = 0; c < REELS; c++) {
+    for (let r = 0; r < ROWS; r++) {
+      if (PAYING.includes(state.grid[c][r])) payCells.push({ c, r });
+    }
+  }
+  if (!payCells.length) {
+    showToast('🎯 Algorithmic Scan: no pay cells on grid', '#00f0ff');
+    await sleep(400);
+    return;
+  }
+  const n = Math.min(randInt(1, 3), payCells.length);
+  const targets = shuffle(payCells).slice(0, n);
+  for (const { c, r } of targets) state.grid[c][r] = 'W';
+  showToast(`🎯 Algorithmic Scan: ${targets.length} ô → Wild`, '#00f0ff');
   await sleep(600);
 }
 
@@ -5149,8 +5159,8 @@ function symNameFromId(id) {
   return SYMBOLS[SYM_MAP[id]]?.name || String(id);
 }
 
-/** PowerSurge now emits epicenter `positions` only (no `convertedTypes`). Derive source symbols from `changes` → 11. */
-function surgeConvertedNames(step) {
+/** PowerSurge / AlgorithmicScan emit cell `positions` (no `convertedTypes`). Derive names from `changes` → 11. */
+function wildChangeNames(step) {
   const names = [];
   const seen = new Set();
   for (const ch of step.changes || []) {
@@ -5162,12 +5172,20 @@ function surgeConvertedNames(step) {
   return names;
 }
 
-/** Label for the new PowerSurge payload: source symbols, else epicenter count. */
-function surgeStepLabel(step) {
-  const conv = surgeConvertedNames(step);
-  if (conv.length) return conv.join(', ');
-  if (Array.isArray(step.positions) && step.positions.length) return `${step.positions.length} ô`;
+/** Label for cell→Wild steps: source symbols, else cell count. */
+function cellWildStepLabel(step) {
+  const names = wildChangeNames(step);
+  if (names.length) return names.join(', ');
+  const n = Array.isArray(step.positions) && step.positions.length
+    ? step.positions.length
+    : (Array.isArray(step.changes) ? step.changes.length : 0);
+  if (n) return `${n} ô`;
   return 'targets';
+}
+
+/** @deprecated alias — PowerSurge callers */
+function surgeStepLabel(step) {
+  return cellWildStepLabel(step);
 }
 
 function featureStepToast(step, featId) {
@@ -5210,8 +5228,8 @@ function featureStepToast(step, featId) {
     showToast(`⚡ Power Surge: ${surgeStepLabel(step)} → Wild`, p?.color || '#ffff00');
     return;
   }
-  if (featId === 'scan' && Array.isArray(step.convertedTypes)) {
-    showToast(`🎯 Algorithmic Scan: ${step.convertedTypes.map(symNameFromId).join(', ')} → Wild`, p?.color || '#00f0ff');
+  if (featId === 'scan') {
+    showToast(`🎯 Algorithmic Scan: ${cellWildStepLabel(step)} → Wild`, p?.color || '#00f0ff');
     return;
   }
   if (p) showToast(p.msg, p.color);
@@ -5607,8 +5625,8 @@ function buildFeatureExplainTip(featId, step) {
     if (featId === 'surge') {
       return `Đổi thành Wild: ${surgeStepLabel(step)} (ô kề bên có thể bị Split).`;
     }
-    if (featId === 'scan' && Array.isArray(step.convertedTypes) && step.convertedTypes.length) {
-      return `Khóa và đổi thành Wild: ${step.convertedTypes.map(symNameFromId).join(', ')}.`;
+    if (featId === 'scan') {
+      return `Khóa và đổi thành Wild: ${cellWildStepLabel(step)}.`;
     }
     if (featId === 'decrypt' && Array.isArray(step.changes) && step.changes.length) {
       return `Lần này nâng cấp ${step.changes.length} ô từ thấp → cao.`;
@@ -7057,10 +7075,7 @@ async function presentVfxGlitch(step, featId) {
 }
 
 async function presentVfxScan(step, featId) {
-  const types = Array.isArray(step.convertedTypes)
-    ? step.convertedTypes.map(symNameFromId).join(', ')
-    : 'targets';
-  showVfxBanner(`Algorithmic Scan — lock ${types}`, 'scan');
+  showVfxBanner(`Algorithmic Scan — lock ${cellWildStepLabel(step)}`, 'scan');
   featureStepToast(step, featId);
   clearVfxStage();
   const canvas = prepVfxCanvas();
@@ -8742,7 +8757,7 @@ const CHEAT_PRESETS = [
   { group: 'Features', code: 'FORCE_ROOT_ACCESS', label: 'Root', value: { reels: [2] } },
   { group: 'Features', code: 'FORCE_POWER_SURGE', label: 'Surge', value: { positions: [[1, 1]] } },
   { group: 'Features', code: 'FORCE_SYSTEM_GLITCH', label: 'Glitch', value: { protectWinning: true } },
-  { group: 'Features', code: 'FORCE_ALGORITHMIC_SCAN', label: 'Scan', value: { convertedTypes: [8] } },
+  { group: 'Features', code: 'FORCE_ALGORITHMIC_SCAN', label: 'Scan', value: { positions: [[0, 2], [2, 1]] } },
   { group: 'Features', code: 'FORCE_BANDWIDTH_MULTIPLIER', label: 'Bandwidth', value: { multiplier: 10 } },
   { group: 'Features', code: 'FORCE_BYPASS_PROTOCOL', label: 'Bypass', value: {} },
   { group: 'Session', code: 'FORCE_LAST_FREE_SPIN', label: 'Last FS = 1', value: { game_id: 'yama_01023' } },
@@ -9248,8 +9263,8 @@ const CHEAT_FEATURE_TUNES = {
   },
   FORCE_ALGORITHMIC_SCAN: {
     title: 'AlgorithmicScan',
-    help: '1–3 loại pay → Wild. Tick loại, tối đa 3.',
-    fields: ['types3'],
+    help: '1–3 ô pay (ids 1–10, không Wild/Scatter) [col,row] → Wild. Chọn tối đa 3 ô.',
+    fields: ['positions'],
   },
   FORCE_BANDWIDTH_MULTIPLIER: {
     title: 'BandwidthMultiplier',
@@ -9342,7 +9357,10 @@ function renderCheatTune(code, value) {
       const on = v.protectWinning !== false;
       html += `<div class="cheat-tune-row"><label>protectWinning</label><button type="button" class="cheat-chip${on ? ' is-on' : ''}" data-tune="protectWinning">${on ? 'true' : 'false'}</button></div>`;
     } else if (field === 'positions') {
-      const posMax = code === 'FORCE_POWER_SURGE' ? 2 : 6;
+      const posMax =
+        code === 'FORCE_POWER_SURGE' ? 2
+        : code === 'FORCE_ALGORITHMIC_SCAN' ? 3
+        : 6;
       html += `<div class="cheat-tune-row"><label>positions</label><div class="cheat-pos-wrap">`;
       html += `<div class="cheat-pos-head"><span></span><span>R1</span><span>R2</span><span>R3</span><span>R4</span><span>R5</span></div>`;
       html += `<div class="cheat-pos-grid" data-tune="positions" data-max="${posMax}">`;
