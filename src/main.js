@@ -1307,16 +1307,28 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 function createEmptyGrid() {
   state.grid = Array.from({ length: REELS }, () => Array(ROWS).fill('F'));
   state.cellMeta = Array.from({ length: REELS }, () =>
-    Array.from({ length: ROWS }, () => ({ split: false, multiplier: 1, mystery: false }))
+    Array.from({ length: ROWS }, () => ({ split: 1, multiplier: 1, mystery: false }))
   );
+}
+
+/** Piece count of a split cell: 1 = no split, 2 / 4 = pieces (stacked 1 → 2 → 4, cap 4). */
+function splitCountOf(meta) {
+  const n = Number(meta?.split);
+  if (!n || n <= 1) return 1;
+  return n >= 4 ? 4 : 2;
+}
+
+/** Double a cell's pieces (1 → 2 → 4), capped at 4. */
+function stackCellSplit(c, r) {
+  if (!state.cellMeta?.[c]?.[r]) return;
+  setCellSplit(c, r, splitCountOf(state.cellMeta[c][r]) * 2);
 }
 
 function getEffectiveSymbols(reel, row) {
   const sym = state.grid[reel][row];
   const meta = state.cellMeta[reel][row];
   if (meta.mystery) return ['M'];
-  const count = meta.split ? 2 : 1;
-  return Array(count).fill(sym);
+  return Array(splitCountOf(meta)).fill(sym);
 }
 
 function getReelSymbols(reel) {
@@ -1338,7 +1350,16 @@ function calcWays(direction = 'ltr') {
   const reels = direction === 'ltr' ? [...Array(REELS).keys()] : [...Array(REELS).keys()].reverse();
   const startReel = reels[0];
 
+  // Wild chỉ substitute cho pay symbol có mặt trên grid (không stand-in cho type vắng mặt).
+  const presentPay = new Set();
+  for (let c = 0; c < REELS; c++) {
+    for (let r = 0; r < ROWS; r++) {
+      if (PAYING.includes(state.grid[c][r])) presentPay.add(state.grid[c][r]);
+    }
+  }
+
   for (const sym of PAYING) {
+    if (!presentPay.has(sym)) continue;
     let length = 0;
     const counts = [];
 
@@ -1498,17 +1519,30 @@ async function applySystemOverclock() {
 }
 
 async function applyDataCloning() {
-  const sym = rand(PAYING);
+  const present = [];
+  for (let c = 0; c < REELS; c++) {
+    for (let r = 0; r < ROWS; r++) {
+      const s = state.grid[c][r];
+      if ((PAYING.includes(s) || s === 'W') && !present.includes(s)) present.push(s);
+    }
+  }
+  if (!present.length) {
+    showToast('🧬 Data Cloning: no pay types on grid', '#00ff88');
+    await sleep(400);
+    return;
+  }
+  const sym = rand(present);
   const keys = [];
   for (let c = 0; c < REELS; c++) {
     for (let r = 0; r < ROWS; r++) {
       if (state.grid[c][r] === sym) {
-        state.cellMeta[c][r].split = true;
+        stackCellSplit(c, r);
         keys.push(`${c},${r}`);
       }
     }
   }
-  showToast(`🧬 Data Cloning: ${SYMBOLS[sym].name} tách đôi ×2`, '#00ff88');
+  const pieces = keys.some(k => splitCountOf(state.cellMeta[k.split(',')[0]]?.[k.split(',')[1]]) === 4) ? '×4' : '×2';
+  showToast(`🧬 Data Cloning: ${SYMBOLS[sym].name} ${pieces}`, '#00ff88');
   renderGrid();
   await highlightCells(keys, 'vfx-split', state.fastSpin ? 280 : 600);
 }
@@ -1521,7 +1555,7 @@ async function applyRootAccess() {
     document.getElementById(`reel-${c}`)?.classList.add('vfx-col-root');
     for (let r = 0; r < ROWS; r++) {
       if (state.grid[c][r] !== 'S') {
-        state.cellMeta[c][r].split = true;
+        stackCellSplit(c, r);
         keys.push(`${c},${r}`);
       }
     }
@@ -1540,7 +1574,7 @@ async function applyPowerSurge() {
   for (let c = 0; c < REELS; c++) {
     for (let r = 0; r < ROWS; r++) {
       const sym = state.grid[c][r];
-      if (PAYING.includes(sym) && !present.includes(sym)) present.push(sym);
+      if ((PAYING.includes(sym) || sym === 'W') && !present.includes(sym)) present.push(sym);
     }
   }
   if (!present.length) {
@@ -1597,7 +1631,7 @@ async function applyPowerSurge() {
     for (const [dc, dr] of dirs) {
       const nc = c + dc, nr = r + dr;
       if (nc >= 0 && nc < REELS && nr >= 0 && nr < ROWS && state.grid[nc][nr] !== 'S') {
-        state.cellMeta[nc][nr].split = true;
+        stackCellSplit(nc, nr);
       }
     }
   }
@@ -1676,25 +1710,29 @@ const FEATURE_HANDLERS = {
 };
 
 // ─── Render ──────────────────────────────────────────────────
-/** Build symbol node(s). Split cells show TWO icons side-by-side (GDD Split Symbol). */
-function appendSymbolVisual(cell, sym, isSplit, fx) {
+/** Build symbol node(s). Split cells show 2 or 4 icons (GDD Split Symbol, stacked 1 → 2 → 4). */
+function appendSymbolVisual(cell, sym, pieces, fx) {
   const s = SYMBOLS[sym];
   if (!s?.img) {
     cell.textContent = '?';
     return;
   }
-  if (isSplit) {
+  if (pieces > 1) {
+    const count = pieces >= 4 ? 4 : 2;
     const pair = document.createElement('div');
-    pair.className = 'split-pair';
-    for (const side of ['split-a', 'split-b']) {
+    pair.className = `split-pair${count === 4 ? ' quad' : ''}`;
+    const sides = count === 4
+      ? ['split-a', 'split-b', 'split-c', 'split-d']
+      : ['split-a', 'split-b'];
+    for (const side of sides) {
       const img = createSymbolEl(sym, { fx, splitSide: side });
-      img.alt = `${s.name} ×2`;
+      img.alt = `${s.name} ×${count}`;
       pair.appendChild(img);
     }
     cell.appendChild(pair);
     const badge = document.createElement('span');
     badge.className = 'split-badge';
-    badge.textContent = '×2';
+    badge.textContent = `×${count}`;
     cell.appendChild(badge);
   } else {
     cell.appendChild(createSymbolEl(sym, { fx }));
@@ -1717,10 +1755,11 @@ function bindGridClicksOnce() {
 
 function paintCell(cell, c, r, highlightSet) {
   const sym = state.grid[c][r];
-  const meta = state.cellMeta[c][r] || { split: false, multiplier: 1, mystery: false };
-  const split = !!meta.split && sym !== 'S';
+  const meta = state.cellMeta[c][r] || { split: 1, multiplier: 1, mystery: false };
+  const splitCount = splitCountOf(meta);
+  const split = splitCount > 1 && sym !== 'S';
   const win = highlightSet.has(`${c},${r}`);
-  const key = `${sym}|${split ? 1 : 0}|${meta.multiplier || 1}|${win ? 1 : 0}|${meta.mystery || sym === 'M' ? 1 : 0}`;
+  const key = `${sym}|${splitCount}|${meta.multiplier || 1}|${win ? 1 : 0}|${meta.mystery || sym === 'M' ? 1 : 0}`;
   if (cell.dataset.rk === key) return;
   cell.dataset.rk = key;
   cell.dataset.reel = String(c);
@@ -1729,7 +1768,7 @@ function paintCell(cell, c, r, highlightSet) {
   if (win) cell.classList.add('win');
   if (sym === 'S') cell.classList.add('scatter-win');
   if (meta.mystery || sym === 'M') cell.classList.add('mystery');
-  if (meta.split) cell.classList.add('split');
+  if (split) cell.classList.add('split');
   cell.replaceChildren();
   if (meta.multiplier > 1) {
     const tag = document.createElement('span');
@@ -1737,7 +1776,7 @@ function paintCell(cell, c, r, highlightSet) {
     tag.textContent = `×${meta.multiplier}`;
     cell.appendChild(tag);
   }
-  appendSymbolVisual(cell, sym, split);
+  appendSymbolVisual(cell, sym, split ? splitCount : 1);
 }
 
 function renderGrid(highlight = []) {
@@ -4491,15 +4530,15 @@ function applyServerScreen(screen, splitCounts) {
     if (!Array.isArray(col) || col.length < ROWS) return false;
     for (let r = 0; r < ROWS; r++) {
       state.grid[c][r] = SYM_MAP[col[r]] || 'A';
-      state.cellMeta[c][r] = { split: false, multiplier: 1, mystery: false };
+      state.cellMeta[c][r] = { split: 1, multiplier: 1, mystery: false };
     }
   }
-  // Áp splitCounts nếu server gửi (init thường toàn 1)
+  // Áp splitCounts nếu server gửi (1 = không tách, 2 / 4 = số mảnh)
   if (Array.isArray(splitCounts) && splitCounts.length === REELS) {
     for (let c = 0; c < REELS; c++) {
       for (let r = 0; r < ROWS; r++) {
         const n = splitCounts[c]?.[r];
-        if (n != null && Number(n) > 1) state.cellMeta[c][r].split = true;
+        if (n != null) state.cellMeta[c][r].split = splitCountOf({ split: n });
       }
     }
   }
@@ -4947,7 +4986,8 @@ function setCellSymbol(c, r, symIdOrKey) {
 
 function setCellSplit(c, r, splitCount) {
   if (!state.cellMeta?.[c]?.[r]) return;
-  state.cellMeta[c][r].split = Number(splitCount) > 1;
+  const n = Number(splitCount);
+  state.cellMeta[c][r].split = !n || n <= 1 ? 1 : n >= 4 ? 4 : 2;
 }
 
 function setCellMystery(c, r, on) {
@@ -6664,7 +6704,7 @@ async function presentVfxCloning(step, featId) {
   } else {
     for (const k of keys) {
       const [c, r] = k.split(',').map(Number);
-      setCellSplit(c, r, 2);
+      stackCellSplit(c, r);
     }
     renderGrid();
     await highlightCells(keys, 'vfx-split', vfxMs(420, 150));
@@ -6762,13 +6802,13 @@ async function presentVfxRoot(step, featId) {
     keys = posKeys(step.positions);
     for (const k of keys) {
       const [c, r] = k.split(',').map(Number);
-      setCellSplit(c, r, 2);
+      stackCellSplit(c, r);
     }
     renderGrid();
     // reuse animated split feel
     const fake = keys.map(k => {
       const [c, r] = k.split(',').map(Number);
-      return { pos: [c, r], to: 2 };
+      return { pos: [c, r], to: splitCountOf(state.cellMeta[c]?.[r]) };
     });
     await applySplitsAnimated(fake);
   } else if (reels.length) {
@@ -6776,7 +6816,7 @@ async function presentVfxRoot(step, featId) {
     for (const c of reels) {
       for (let r = 0; r < ROWS; r++) {
         if (state.grid[c]?.[r] !== 'S') {
-          setCellSplit(c, r, 2);
+          stackCellSplit(c, r);
           keys.push(`${c},${r}`);
         }
       }
@@ -7547,7 +7587,7 @@ function snapshotBoard() {
   return {
     grid: (state.grid || []).map(col => (Array.isArray(col) ? col.slice() : [])),
     cellMeta: (state.cellMeta || []).map(col =>
-      (Array.isArray(col) ? col.map(m => ({ split: !!m?.split, multiplier: m?.multiplier || 1, mystery: !!m?.mystery })) : [])
+      (Array.isArray(col) ? col.map(m => ({ split: splitCountOf(m), multiplier: m?.multiplier || 1, mystery: !!m?.mystery })) : [])
     ),
     globalMultiplier: state.globalMultiplier || 1,
     bypassProtocol: !!state.bypassProtocol,
@@ -7562,7 +7602,7 @@ function gridToServerScreen(grid) {
 
 function cellMetaToSplitCounts(meta) {
   if (!Array.isArray(meta) || meta.length !== REELS) return null;
-  return meta.map(col => (Array.isArray(col) ? col.map(m => (m?.split ? 2 : 1)) : []));
+  return meta.map(col => (Array.isArray(col) ? col.map(m => splitCountOf(m)) : []));
 }
 
 function cellMetaToMultMap(meta) {
@@ -7596,7 +7636,9 @@ function diffBoardsToStep(feat, before, after) {
       const bm = before.cellMeta[c]?.[r] || {};
       const am = after.cellMeta[c]?.[r] || {};
       if (bg !== ag && ag != null) changes.push({ pos, to: SYM_TO_ID[ag] ?? ag });
-      if (!bm.split && am.split) splitChanges.push({ pos, to: 2 });
+      const bmSplit = splitCountOf(bm);
+      const amSplit = splitCountOf(am);
+      if (bmSplit !== amSplit) splitChanges.push({ pos, from: bmSplit, to: amSplit });
       if ((am.multiplier || 1) > 1 && am.multiplier !== bm.multiplier) positions.push(pos);
     }
   }
@@ -7634,7 +7676,7 @@ function diffBoardsToStep(feat, before, after) {
     for (let c = 0; c < REELS; c++) {
       let newly = 0;
       for (let r = 0; r < ROWS; r++) {
-        if (after.cellMeta[c]?.[r]?.split && !before.cellMeta[c]?.[r]?.split) newly++;
+        if (splitCountOf(after.cellMeta[c]?.[r]) > 1 && !(splitCountOf(before.cellMeta[c]?.[r]) > 1)) newly++;
       }
       if (newly >= 2) reels.push(c);
     }
