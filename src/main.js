@@ -9642,14 +9642,19 @@ function parseCheatValue() {
 }
 
 /**
- * Send cheat via WebSocket cmd 1999.
- * Backend PluginServiceHandler injects agency_id / user_id from session.
+ * Send cheat via WebSocket cmd 1999. When another session is targeted
+ * (cmd 1998 list), attach its session_id — backend CheatHandler resolves
+ * the target agency/user from the session store.
  */
 async function sendCheatViaWs(code, value) {
   if (!online || !ws || ws.readyState !== WebSocket.OPEN) {
     throw new Error('WebSocket not connected');
   }
-  const payload = await requestGameCmd('1999', { cheat: code, value }, 12000);
+  const extra = { cheat: code, value };
+  if (cheatTargetSession?.sessionId) {
+    extra.session_id = cheatTargetSession.sessionId;
+  }
+  const payload = await requestGameCmd('1999', extra, 12000);
   if (!payload) {
     throw new Error('No response / timeout (is server profile dev|staging?)');
   }
@@ -9804,10 +9809,7 @@ async function sendCheatFromPanel(opts = {}) {
   }
 
   saveCheatPrefs();
-  const transportRaw = document.getElementById('cheatTransport')?.value || 'auto';
-  // WS cmd 1999 always cheats the calling session (server injects auth identity),
-  // so a selected other-session target must go through REST.
-  const transport = cheatTargetSession && transportRaw !== 'rest' ? 'rest' : transportRaw;
+  const transport = document.getElementById('cheatTransport')?.value || 'auto';
   const btnSend = document.getElementById('cheatSend');
   const btnSpin = document.getElementById('cheatSendSpin');
   if (btnSend) btnSend.disabled = true;
