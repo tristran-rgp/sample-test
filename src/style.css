@@ -2499,7 +2499,7 @@
     }
     .side-pt-head {
       flex-shrink: 0;
-      font-size: .62rem;
+      font-size: .72rem;
       letter-spacing: 1.6px;
       font-weight: 800;
       color: var(--cyan);
@@ -2509,13 +2509,13 @@
     .side-pt-cols,
     .side-pt-row {
       display: grid;
-      grid-template-columns: 30px 42px 1fr 1fr 1fr;
+      grid-template-columns: 40px 60px 1fr 1fr 1fr;
       align-items: center;
       gap: 4px;
     }
     .side-pt-cols {
       flex-shrink: 0;
-      font-size: .72rem;
+      font-size: .82rem;
       color: var(--dim);
       letter-spacing: .3px;
       padding: 0 2px 5px;
@@ -2536,20 +2536,20 @@
     }
     .side-pt-row:nth-child(odd) { background: rgba(255,255,255,.025); }
     .side-pt-icon {
-      width: 30px;
-      height: 30px;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     .side-paytable .sym-img {
-      width: 28px;
-      height: 28px;
-      max-width: 28px;
-      max-height: 28px;
+      width: 38px;
+      height: 38px;
+      max-width: 38px;
+      max-height: 38px;
     }
     .side-pt-row span {
-      font-size: .88rem;
+      font-size: 1.02rem;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       color: var(--green);
@@ -2565,20 +2565,20 @@
       text-align: left !important;
     }
     .side-pt-id .sid {
-      font-size: .62rem;
+      font-size: .7rem;
       font-weight: 600;
       color: var(--dim);
       letter-spacing: .3px;
     }
     .side-pt-id .sname {
-      font-size: .78rem;
+      font-size: .9rem;
       font-weight: 800;
       color: var(--text);
     }
     .side-pt-row[data-type="high"] span:not(.side-pt-icon):not(.side-pt-id):not(.sid):not(.sname) { color: var(--yellow); }
     .side-pt-row.special .side-pt-note {
       grid-column: 3 / -1;
-      font-size: .68rem;
+      font-size: .78rem;
       font-weight: 600;
       color: var(--dim);
       text-align: left;
@@ -2932,10 +2932,10 @@
     .form-group { margin-bottom: 10px; }
     .form-group label { display:block; font-size:.65rem; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px; }
     .pay-sym img.sym-img {
-      width: 56px;
-      height: 56px;
-      max-width: 56px;
-      max-height: 56px;
+      width: 72px;
+      height: 72px;
+      max-width: 72px;
+      max-height: 72px;
       aspect-ratio: 1 / 1;
       object-fit: fill;
       object-position: center center;
@@ -3703,8 +3703,8 @@
 
     .paytable-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .pay-sym { text-align: center; padding: 8px; background: #0d0d1a; border-radius: 8px; border: 1px solid #1e3a5f; }
-    .pay-sym .name { font-size: .65rem; color: var(--dim); margin: 4px 0; }
-    .pay-sym .pays { font-size: .7rem; color: var(--green); }
+    .pay-sym .name { font-size: .8rem; color: var(--dim); margin: 4px 0; }
+    .pay-sym .pays { font-size: .85rem; color: var(--green); }
 
     .history-item {
       padding: 10px; border-bottom: 1px solid #1e3a5f;
@@ -3977,8 +3977,8 @@
     /* Desktop: paytable rail bên phải reels để đối chiếu 3/4/5× */
     @media (min-width: 1180px) {
       .stage {
-        grid-template-columns: clamp(64px, 8vw, 100px) minmax(0, 1fr) clamp(236px, 17vw, 292px);
-        max-width: min(1660px, 100%);
+        grid-template-columns: clamp(64px, 8vw, 100px) minmax(0, 1fr) clamp(280px, 21vw, 360px);
+        max-width: min(1720px, 100%);
       }
       .side-paytable {
         display: flex;

@@ -399,6 +399,16 @@
           </details>
         </div>
 
+        <div class="cheat-field" style="margin-top:10px">
+          <label>Target session <span style="color:var(--cyan);font-weight:400">(cmd 1998 · cheat user khác → REST)</span></label>
+          <div style="display:flex;gap:8px">
+            <select id="cheatSessionSelect" style="flex:1;min-width:0">
+              <option value="">(self — current login)</option>
+            </select>
+            <button type="button" class="btn" id="cheatLoadSessions" title="Load active sessions from Redis (cmd 1998)" style="white-space:nowrap">&#x21bb; Load</button>
+          </div>
+        </div>
+
         <details class="cheat-rest">
           <summary>REST options (local backend)</summary>
           <div class="cheat-rest-grid">

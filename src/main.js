@@ -4324,6 +4324,10 @@ let pendingSpinResolve = null;
 let pendingSpinData = null;
 /** cmd string → { resolve, timer } for non-spin request/response (1502/1504–1507) */
 let pendingCmdWaiters = {};
+/** Active sessions from cmd 1998 — target pool for cross-user cheat (REST only) */
+let activeSessionsCache = [];
+/** Selected cheat target session (null = self / current login) */
+let cheatTargetSession = null;
 let onlineBalance = 0;
 let spinQueue = [];
 let pingSeq = 0;
@@ -8154,6 +8158,10 @@ function handleWSMessage(msg) {
         resolvePendingCmd('1507', payload);
         break;
 
+      case '1998': // GET_ACTIVE_SESSIONS — active session list for cheat targeting
+        resolvePendingCmd('1998', payload);
+        break;
+
       case '1999': // CHEAT (dev/staging)
         resolvePendingCmd('1999', payload);
         break;
@@ -9655,8 +9663,9 @@ async function sendCheatViaWs(code, value) {
 async function sendCheatViaRest(code, value) {
   const base = (document.getElementById('cheatDebugBase')?.value || '').replace(/\/$/, '');
   const token = document.getElementById('cheatDebugToken')?.value || 'zeroday-debug-2024';
-  const agencyId = resolveSessionAgencyId();
-  const userId = resolveSessionUserId();
+  const target = resolveCheatTarget();
+  const agencyId = target.agencyId;
+  const userId = target.userId;
   if (!base) throw new Error('Missing debug base URL');
   if (!userId) throw new Error('Missing user ID for REST cheat — login or fill User ID');
   if (!agencyId) throw new Error('Missing agency ID — Pull session or fill Agency ID');
@@ -9682,6 +9691,76 @@ async function sendCheatViaRest(code, value) {
     );
   }
   return body;
+}
+
+/**
+ * Cheat target: selected active session (cmd 1998) or self identity.
+ * WS cmd 1999 always targets the calling session (server overwrites
+ * agency/user from auth), so a selected other-session must go via REST.
+ */
+function resolveCheatTarget() {
+  if (cheatTargetSession?.agency && cheatTargetSession?.userId) {
+    return { agencyId: cheatTargetSession.agency, userId: cheatTargetSession.userId };
+  }
+  return { agencyId: resolveSessionAgencyId(), userId: resolveSessionUserId() };
+}
+
+/** Load active sessions via cmd 1998 and populate the target select. */
+async function loadActiveSessions() {
+  if (!online || !ws || ws.readyState !== WebSocket.OPEN) {
+    setCheatLog('Load sessions failed: WebSocket not connected', 'err');
+    return;
+  }
+  setCheatLog('Loading active sessions (cmd 1998)…', '');
+  const payload = await requestGameCmd('1998', {}, 12000);
+  if (!payload) {
+    setCheatLog('Load sessions: no response / timeout', 'err');
+    return;
+  }
+  const sessions = Array.isArray(payload.sessions) ? payload.sessions : [];
+  activeSessionsCache = sessions.filter(s => s.authFound);
+  renderActiveSessionOptions();
+  const stale = sessions.length - activeSessionsCache.length;
+  setCheatLog(
+    `Loaded ${activeSessionsCache.length} active session(s)` +
+      (stale > 0 ? ` (${stale} without auth skipped)` : '') +
+      ` · zone=${payload.zone ?? '?'} plugin=${payload.pluginName ?? '?'}`,
+    'ok'
+  );
+}
+
+function renderActiveSessionOptions() {
+  const sel = document.getElementById('cheatSessionSelect');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML =
+    '<option value="">(self — current login)</option>' +
+    activeSessionsCache
+      .map((s, i) => {
+        const name = s.username || s.userId || s.sessionId;
+        const label = `${name} · ${s.agency || '?'} · ${String(s.userId || '').slice(0, 28)}`;
+        return `<option value="${i}">${escapeHtmlLite(label)}</option>`;
+      })
+      .join('');
+  if ([...sel.options].some(o => o.value === current)) sel.value = current;
+}
+
+/** Apply selected target to the Agency/User ID fields (REST path reads them). */
+function applyCheatTargetToFields() {
+  const agencyEl = document.getElementById('cheatAgencyId');
+  const userEl = document.getElementById('cheatUserId');
+  if (cheatTargetSession) {
+    if (agencyEl) {
+      agencyEl.value = cheatTargetSession.agency || '';
+      agencyEl.dataset.auto = '0';
+    }
+    if (userEl) {
+      userEl.value = cheatTargetSession.userId || '';
+      userEl.dataset.auto = '0';
+    }
+  } else {
+    syncCheatSessionFields();
+  }
 }
 
 /**
@@ -9725,14 +9804,20 @@ async function sendCheatFromPanel(opts = {}) {
   }
 
   saveCheatPrefs();
-  const transport = document.getElementById('cheatTransport')?.value || 'auto';
+  const transportRaw = document.getElementById('cheatTransport')?.value || 'auto';
+  // WS cmd 1999 always cheats the calling session (server injects auth identity),
+  // so a selected other-session target must go through REST.
+  const transport = cheatTargetSession && transportRaw !== 'rest' ? 'rest' : transportRaw;
   const btnSend = document.getElementById('cheatSend');
   const btnSpin = document.getElementById('cheatSendSpin');
   if (btnSend) btnSend.disabled = true;
   if (btnSpin) btnSpin.disabled = true;
+  const target = resolveCheatTarget();
   setCheatLog(
     `Sending ${code} via ${transport}${andSpin ? ' + spin' : ''}…\n` +
-      `agency=${resolveSessionAgencyId()} userId=${resolveSessionUserId()}\n` +
+      `agency=${target.agencyId} userId=${target.userId}` +
+      (cheatTargetSession ? ` (target: ${cheatTargetSession.username || cheatTargetSession.sessionId})` : '') +
+      `\n` +
       JSON.stringify(value),
     ''
   );
@@ -9827,6 +9912,21 @@ function bindCheatPanelEvents() {
     syncCheatSessionFields();
     setCheatLog(
       `Pulled session\nagency=${resolveSessionAgencyId()}\nuserId=${resolveSessionUserId()}`,
+      'ok'
+    );
+  });
+  document.getElementById('cheatLoadSessions')?.addEventListener('click', () =>
+    loadActiveSessions()
+  );
+  document.getElementById('cheatSessionSelect')?.addEventListener('change', e => {
+    const idx = Number(e.target.value);
+    cheatTargetSession =
+      e.target.value !== '' && activeSessionsCache[idx] ? activeSessionsCache[idx] : null;
+    applyCheatTargetToFields();
+    setCheatLog(
+      cheatTargetSession
+        ? `Target: ${cheatTargetSession.username || '?'} · agency=${cheatTargetSession.agency} · userId=${cheatTargetSession.userId}`
+        : 'Target: self (current login)',
       'ok'
     );
   });
