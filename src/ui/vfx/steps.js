@@ -110,7 +110,7 @@ export async function applyFeatureStep(step, opts = {}) {
     clearCellClasses([
       'vfx-hit', 'vfx-split', 'vfx-mult', 'vfx-morph', 'vfx-decrypt',
       'vfx-lock', 'vfx-surge', 'vfx-firewall', 'scrub', 'vfx-shake',
-      'vfx-wild-glow',
+      'vfx-wild-glow', 'vfx-anticipate',
     ]);
   }
   await vfxWait(vfxMs(beat.settle || 120, 40));
@@ -128,6 +128,11 @@ export async function presentFeatureSteps(featureSteps, opts = {}) {
     `⚡ KÍCH HOẠT ${featureSteps.length} FEATURE`,
     ''
   );
+  // Sweep beat ripples across the feature meter before the chain resolves
+  const meter = document.getElementById('featureMeter');
+  meter?.classList.remove('chain-sweep');
+  void meter?.offsetWidth;
+  meter?.classList.add('chain-sweep');
   await vfxWait(vfxMs(320, 100));
   hideVfxBanner();
   setVfxVignette(false);
@@ -150,6 +155,7 @@ export async function presentFeatureSteps(featureSteps, opts = {}) {
   } finally {
     setSkipBarVisible(false);
     clearMeterStepActive();
+    meter?.classList.remove('chain-sweep');
     hideFeatureIntro(true);
     hideFeatureExplain(true);
   }

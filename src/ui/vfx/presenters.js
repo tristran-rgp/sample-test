@@ -269,7 +269,18 @@ export async function presentVfxTrojan(step, featId) {
     await vfxWait(vfxMs(55, 20));
   }
 
-  // 4) Hit-stop → mass reveal
+  // 4) Anticipation: all mystery cells shake in sync before the mass flip
+  if (!isVfxSkip()) {
+    const mysteryCells = targets
+      .map(({ p }) => cellEl(p.c, p.r))
+      .filter(Boolean);
+    for (const el of mysteryCells) el.classList.add('vfx-anticipate');
+    sfx('charge', { gain: 0.6, pitch: 1.35 });
+    await vfxWait(vfxMs(420, 150));
+    for (const el of mysteryCells) el.classList.remove('vfx-anticipate');
+  }
+
+  // 5) Hit-stop → mass reveal
   await hitStop(70);
   showVfxBanner(`Trojan Horse — reveal ${revName}`, 'trojan');
   sfx('hit', { gain: 1 });
@@ -1087,7 +1098,40 @@ export async function presentVfxBandwidth(step, featId) {
   bar?.classList.add('show');
   label?.classList.add('show');
   if (fill) fill.style.width = '0%';
-  if (label) label.textContent = '×01';
+
+  // Split-flap departure board: × + 2 rolling digit tiles
+  let bwD1 = null;
+  let bwD2 = null;
+  const flipBwDigit = (el) => {
+    el.classList.remove('flip');
+    void el.offsetWidth;
+    el.classList.add('flip');
+  };
+  const setBwDigits = (n, flip = true) => {
+    if (!bwD1 || !bwD2) return;
+    const txt = String(n).padStart(2, '0');
+    if (bwD1.textContent !== txt[0]) {
+      bwD1.textContent = txt[0];
+      if (flip) flipBwDigit(bwD1);
+    }
+    if (bwD2.textContent !== txt[1]) {
+      bwD2.textContent = txt[1];
+      if (flip) flipBwDigit(bwD2);
+    }
+  };
+  if (label) {
+    label.innerHTML = '';
+    const bwX = document.createElement('span');
+    bwX.className = 'bw-x';
+    bwX.textContent = '×';
+    bwD1 = document.createElement('span');
+    bwD1.className = 'bw-digit';
+    bwD1.textContent = '0';
+    bwD2 = document.createElement('span');
+    bwD2.className = 'bw-digit';
+    bwD2.textContent = '1';
+    label.append(bwX, bwD1, bwD2);
+  }
 
   // Tick through known mult marks for drama
   const marks = [3, 5, 8, 10].filter(m => m <= mult);
@@ -1101,7 +1145,7 @@ export async function presentVfxBandwidth(step, featId) {
     const eased = 1 - Math.pow(1 - t, 3);
     if (fill) fill.style.width = `${Math.round(eased * 100)}%`;
     const cur = Math.max(1, Math.round(1 + (mult - 1) * eased));
-    if (label) label.textContent = `×${String(cur).padStart(2, '0')}`;
+    setBwDigits(cur);
     if (cur !== lastMark && marks.includes(cur)) {
       lastMark = cur;
       sfx('tick', { gain: 0.4, pitch: 0.9 + cur * 0.05 });
@@ -1145,7 +1189,7 @@ export async function presentVfxBandwidth(step, featId) {
     }
   });
 
-  if (label) label.textContent = `×${String(mult).padStart(2, '0')}`;
+  setBwDigits(mult);
   const box = document.getElementById('multDisplay');
   if (box) {
     box.textContent = String(mult).padStart(2, '0');

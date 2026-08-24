@@ -222,9 +222,20 @@ export async function applySplitsAnimated(splitChanges) {
     const rc = cellRectInWrap(c, r);
     if (canvas && rc) {
       parts = parts.concat(burstParticles(canvas.ctx, rc.x, rc.y, '#00ff88', vfxParticleN(6), 'star'));
-      await runAnimFrame(vfxMs(90, 32), (t) => {
+      await runAnimFrame(vfxMs(150, 55), (t) => {
         canvas.ctx.clearRect(0, 0, canvas.w, canvas.h);
-        drawShockwave(canvas.ctx, rc.x, rc.y, t, [0, 255, 136], 40);
+        // xSplit divider: bright line slices the cell, then fades
+        const lw = Math.max(2, rc.w * 0.035);
+        const grow = Math.min(1, t * 2.2);
+        const lh = rc.h * 0.92 * grow;
+        canvas.ctx.save();
+        canvas.ctx.globalAlpha = grow >= 1 ? Math.max(0, 1 - (t - 0.45) / 0.55) : 1;
+        canvas.ctx.fillStyle = '#eafff4';
+        canvas.ctx.shadowColor = '#00ff88';
+        canvas.ctx.shadowBlur = 14;
+        canvas.ctx.fillRect(rc.x - lw / 2, rc.y - lh / 2, lw, lh);
+        canvas.ctx.restore();
+        drawShockwave(canvas.ctx, rc.x, rc.y, Math.max(0, t * 1.4 - 0.3), [0, 255, 136], 40);
         parts = drawParts(canvas.ctx, parts, 1 / 55);
       });
     } else {

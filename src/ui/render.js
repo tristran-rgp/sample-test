@@ -203,8 +203,9 @@ export function renderFeatureMeter(activeIds = []) {
   meter.innerHTML = '';
   // has-active → CSS dim các badge không trúng, phóng to badge trúng
   meter.classList.toggle('has-active', ids.length > 0);
-  meterItems().forEach(f => {
+  meterItems().forEach((f, idx) => {
     const badge = document.createElement('span');
+    badge.style.setProperty('--i', String(idx));
     const on = ids.includes(f.id);
     badge.className = 'feat-badge'
       + (f.id === CORE_HACK.id ? ' core-hack' : '')
