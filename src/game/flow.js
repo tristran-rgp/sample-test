@@ -37,7 +37,7 @@ export async function settleAfterSpinPresentation({
     wrap?.classList.remove('dim-win', 'tease-dim');
     document.querySelectorAll('.win-float').forEach(el => el.remove());
     document.querySelectorAll('.reel').forEach(el => {
-      el.classList.remove('spinning-reel', 'landing', 'tease', 'stopping');
+      el.classList.remove('spinning-reel', 'landing', 'tease', 'tease-hot', 'stopping');
     });
 
     // Beat cuối trước khi cho phép lệnh spin tiếp theo

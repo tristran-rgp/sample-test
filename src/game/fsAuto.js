@@ -6,6 +6,7 @@ import { waitFxIdle } from './flow.js';
 import { doSpin } from './spin.js';
 import { closeFsGridEditor, isEditFsGridOn, openFsGridEditor, syncEditFsGridChip } from '../ui/cheat/fsEditor.js';
 import { closeModal, openModal, showToast } from '../ui/feedback.js';
+import { playFsIntroCinematic } from '../ui/fsIntro.js';
 import { renderFeatureMeter, setInfoBar } from '../ui/render.js';
 
 // ─── Free Spins ──────────────────────────────────────────────
@@ -98,6 +99,10 @@ export async function triggerFreeSpins(scatterCount, opts = {}) {
   state.persistentFeatures = [...features];
   state.fsSessionWin = sessionWin;
   state.fsBet = state.bet;
+  document.body.classList.add('fs-active');
+
+  // Cinematic: glitch → logo → spins countdown, then the trigger modal
+  await playFsIntroCinematic({ remain, features, scatters: scatterCount });
 
   document.getElementById('fsTriggerInfo').textContent =
     `${remain} Free Spins` +
@@ -127,6 +132,7 @@ export async function endFreeSpins() {
   state.fsRemaining = 0;
   state.persistentFeatures = [];
   state.fsActiveFeatures = [];
+  document.body.classList.remove('fs-active');
   closeFsGridEditor();
   document.getElementById('fsBanner').classList.remove('visible');
   renderFeatureMeter([]);

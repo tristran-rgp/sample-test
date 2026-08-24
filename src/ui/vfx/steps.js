@@ -153,9 +153,11 @@ export async function presentFeatureSteps(featureSteps, opts = {}) {
   );
   // Sweep beat ripples across the feature meter before the chain resolves
   const meter = document.getElementById('featureMeter');
+  const bgScene = document.getElementById('bgScene');
   meter?.classList.remove('chain-sweep');
   void meter?.offsetWidth;
   meter?.classList.add('chain-sweep');
+  bgScene?.classList.add('chain-fast');
   await vfxWait(vfxMs(320, 100));
   hideVfxBanner();
   setVfxVignette(false);
@@ -185,6 +187,7 @@ export async function presentFeatureSteps(featureSteps, opts = {}) {
     setSkipBarVisible(false);
     clearMeterStepActive();
     meter?.classList.remove('chain-sweep');
+    bgScene?.classList.remove('chain-fast');
     comboEl?.remove();
     hideFeatureIntro(true);
     hideFeatureExplain(true);

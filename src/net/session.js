@@ -53,6 +53,7 @@ export function returnToLogin(opts = {}) {
   state.extraFee = 0;
   state.globalMultiplier = 1;
   state.bypassProtocol = false;
+  document.body.classList.remove('fs-active');
   document.getElementById('fsBanner')?.classList.remove('visible');
   document.getElementById('multDisplay') && (document.getElementById('multDisplay').textContent = '01');
   set_vfxSkipAll(true);

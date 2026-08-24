@@ -8,7 +8,7 @@ import { imgTag } from './assets.js';
 import { closeModal, openModal, showToast } from './feedback.js';
 import { renderGrid, setInfoBar } from './render.js';
 import { boostSpritePack, useSpritePackAnim } from './sprites.js';
-import { hideVfxBanner, showVfxBanner } from './vfx/core.js';
+import { cellRectInWrap, hideVfxBanner, prepVfxCanvas, runAnimFrame, showVfxBanner } from './vfx/core.js';
 import { cellsForWin, runMoneyTicker } from './winfx.js';
 import { wsTrafficState } from './wsTrafficDock.js';
 
@@ -563,6 +563,75 @@ export function highlightExplainOnMainGrid() {
   }, 4500);
 }
 
+/** Energy path flowing through the winning cells along the chain direction */
+async function animateWayPath(w, cells) {
+  const canvas = prepVfxCanvas();
+  if (!canvas || !cells.length) return;
+  const dir = w.direction === 'rtl' ? -1 : 1;
+  const pts = cells
+    .map(k => k.split(',').map(Number))
+    .map(([c, r]) => ({ c, r, rc: cellRectInWrap(c, r) }))
+    .filter(x => x.rc)
+    .sort((a, b) => (dir * (a.c - b.c)) || (a.r - b.r))
+    .map(x => x.rc);
+  if (pts.length < 2) return;
+  const rgb = dir < 0 ? [0, 255, 176] : [0, 240, 255];
+  // cumulative segment lengths for point-at-t
+  const segLens = [];
+  let total = 0;
+  for (let i = 1; i < pts.length; i++) {
+    const d = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+    segLens.push(d);
+    total += d;
+  }
+  const pointAt = (frac) => {
+    let d = frac * total;
+    for (let i = 0; i < segLens.length; i++) {
+      if (d <= segLens[i] || i === segLens.length - 1) {
+        const t = Math.min(1, d / segLens[i]);
+        return {
+          x: pts[i].x + (pts[i + 1].x - pts[i].x) * t,
+          y: pts[i].y + (pts[i + 1].y - pts[i].y) * t,
+        };
+      }
+      d -= segLens[i];
+    }
+    return pts[pts.length - 1];
+  };
+
+  await runAnimFrame(state.fastSpin ? 260 : 460, (t) => {
+    canvas.ctx.clearRect(0, 0, canvas.w, canvas.h);
+    canvas.ctx.save();
+    // full path glow
+    canvas.ctx.strokeStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.5)`;
+    canvas.ctx.lineWidth = 3;
+    canvas.ctx.lineJoin = 'round';
+    canvas.ctx.shadowColor = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+    canvas.ctx.shadowBlur = 14;
+    canvas.ctx.beginPath();
+    pts.forEach((rc, i) => (i ? canvas.ctx.lineTo(rc.x, rc.y) : canvas.ctx.moveTo(rc.x, rc.y)));
+    canvas.ctx.stroke();
+    // traveling energy pulse
+    const head = pointAt(t);
+    const tail = pointAt(Math.max(0, t - 0.35));
+    const grad = canvas.ctx.createLinearGradient(tail.x, tail.y, head.x, head.y);
+    grad.addColorStop(0, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`);
+    grad.addColorStop(1, '#ffffff');
+    canvas.ctx.strokeStyle = grad;
+    canvas.ctx.lineWidth = 5;
+    canvas.ctx.beginPath();
+    canvas.ctx.moveTo(tail.x, tail.y);
+    canvas.ctx.lineTo(head.x, head.y);
+    canvas.ctx.stroke();
+    canvas.ctx.fillStyle = '#fff';
+    canvas.ctx.beginPath();
+    canvas.ctx.arc(head.x, head.y, 5 + Math.sin(t * Math.PI * 2) * 1.5, 0, Math.PI * 2);
+    canvas.ctx.fill();
+    canvas.ctx.restore();
+  });
+  canvas.ctx.clearRect(0, 0, canvas.w, canvas.h);
+}
+
 export async function animateWinWays(wins, total) {
   const wrap = document.getElementById('reelsWrapper');
   wrap?.classList.add('dim-win');
@@ -640,12 +709,15 @@ export async function animateWinWays(wins, total) {
     }
     // Cộng dồn nhanh theo từng way (phần còn lại tickerWin bù về total)
     const next = running + (Number(w.win) || 0);
-    await runMoneyTicker(running, next, {
-      durationMs: state.fastSpin ? 80 : 140,
-      onTick: (val) => {
-        document.getElementById('headerWin').textContent = val.toFixed(2);
-      },
-    });
+    await Promise.all([
+      animateWayPath(w, cells),
+      runMoneyTicker(running, next, {
+        durationMs: state.fastSpin ? 80 : 140,
+        onTick: (val) => {
+          document.getElementById('headerWin').textContent = val.toFixed(2);
+        },
+      }),
+    ]);
     running = next;
     await sleepRaw(wayHold);
   }

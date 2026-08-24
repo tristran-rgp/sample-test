@@ -110,6 +110,7 @@ export async function animateReelSpin(strips, forcedResults = null) {
   }
 
   let teaseActive = false;
+  let hotTeaseActive = false;
 
   await new Promise(resolve => {
     const t0 = performance.now();
@@ -140,13 +141,30 @@ export async function animateReelSpin(strips, forcedResults = null) {
         }
       }
 
+      // Hot anticipation: 4 scatters landed on reels 1-4 → last reel crawls, red pulse
+      if (!hotTeaseActive && reelData[3]?.done && reelData[4] && !reelData[4].done) {
+        let s03 = 0;
+        for (let pc = 0; pc < 4; pc++)
+          for (let r = 0; r < ROWS; r++) if (results[pc][r] === 'S') s03++;
+        if (s03 >= 4) {
+          hotTeaseActive = true;
+          reelData[4].hot = true;
+          reelData[4].reel.classList.add('tease-hot');
+          sfx('charge', { gain: 0.7, pitch: 1.5, force: true });
+          if (!reelData[4].captured) {
+            reelData[4].stopAt += 0.45;
+            reelData[4].decelEnd += 0.45;
+          }
+        }
+      }
+
       for (let c = 0; c < REELS; c++) {
         const r = reelData[c];
         if (r.done) continue;
 
         if (elapsed < r.stopAt) {
           anySpinning = true;
-          const spd = speed * (r.teased ? 0.5 : 1);
+          const spd = speed * (r.hot ? 0.28 : r.teased ? 0.5 : 1);
           // Scroll DOWN: strip moves down (y increases toward 0)
           r.y += spd * dt;
           // Keep headroom before landing on results (y=0)
@@ -177,7 +195,7 @@ export async function animateReelSpin(strips, forcedResults = null) {
           if (t >= 1) {
             r.y = r.finalY;
             r.done = true;
-            r.reel.classList.remove('stopping', 'spinning-reel', 'tease');
+            r.reel.classList.remove('stopping', 'spinning-reel', 'tease', 'tease-hot');
             r.reel.style.setProperty('--land-y', `${r.finalY}px`);
             r.stripEl.style.transform = `translate3d(0, ${r.finalY}px, 0)`;
             r.reel.classList.add('landing');

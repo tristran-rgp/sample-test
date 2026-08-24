@@ -335,18 +335,24 @@
       animation: matrixFall linear infinite;
       opacity: .7;
     }
-    #bgScene .bg-matrix span:nth-child(1)  { left: 4%;  animation-duration: 14s; animation-delay: 0s; color: rgba(0,255,200,.5); }
-    #bgScene .bg-matrix span:nth-child(2)  { left: 11%; animation-duration: 18s; animation-delay: -3s; color: rgba(0,200,255,.4); }
-    #bgScene .bg-matrix span:nth-child(3)  { left: 19%; animation-duration: 12s; animation-delay: -6s; }
-    #bgScene .bg-matrix span:nth-child(4)  { left: 28%; animation-duration: 16s; animation-delay: -2s; color: rgba(170,100,255,.4); }
-    #bgScene .bg-matrix span:nth-child(5)  { left: 37%; animation-duration: 13s; animation-delay: -8s; }
-    #bgScene .bg-matrix span:nth-child(6)  { left: 46%; animation-duration: 15s; animation-delay: -4s; color: rgba(0,255,255,.45); }
-    #bgScene .bg-matrix span:nth-child(7)  { left: 55%; animation-duration: 17s; animation-delay: -1s; color: rgba(170,80,255,.35); }
-    #bgScene .bg-matrix span:nth-child(8)  { left: 64%; animation-duration: 11s; animation-delay: -7s; }
-    #bgScene .bg-matrix span:nth-child(9)  { left: 73%; animation-duration: 19s; animation-delay: -5s; color: rgba(0,240,255,.4); }
-    #bgScene .bg-matrix span:nth-child(10) { left: 82%; animation-duration: 14s; animation-delay: -9s; color: rgba(0,255,160,.4); }
-    #bgScene .bg-matrix span:nth-child(11) { left: 90%; animation-duration: 16s; animation-delay: -2.5s; }
-    #bgScene .bg-matrix span:nth-child(12) { left: 97%; animation-duration: 13s; animation-delay: -6.5s; color: rgba(255,100,200,.3); }
+    #bgScene .bg-matrix span:nth-child(1)  { left: 4%;  animation-duration: calc(14s * var(--rain-scale, 1)); animation-delay: 0s; color: rgba(0,255,200,.5); }
+    #bgScene .bg-matrix span:nth-child(2)  { left: 11%; animation-duration: calc(18s * var(--rain-scale, 1)); animation-delay: -3s; color: rgba(0,200,255,.4); }
+    #bgScene .bg-matrix span:nth-child(3)  { left: 19%; animation-duration: calc(12s * var(--rain-scale, 1)); animation-delay: -6s; }
+    #bgScene .bg-matrix span:nth-child(4)  { left: 28%; animation-duration: calc(16s * var(--rain-scale, 1)); animation-delay: -2s; color: rgba(170,100,255,.4); }
+    #bgScene .bg-matrix span:nth-child(5)  { left: 37%; animation-duration: calc(13s * var(--rain-scale, 1)); animation-delay: -8s; }
+    #bgScene .bg-matrix span:nth-child(6)  { left: 46%; animation-duration: calc(15s * var(--rain-scale, 1)); animation-delay: -4s; color: rgba(0,255,255,.45); }
+    #bgScene .bg-matrix span:nth-child(7)  { left: 55%; animation-duration: calc(17s * var(--rain-scale, 1)); animation-delay: -1s; color: rgba(170,80,255,.35); }
+    #bgScene .bg-matrix span:nth-child(8)  { left: 64%; animation-duration: calc(11s * var(--rain-scale, 1)); animation-delay: -7s; }
+    #bgScene .bg-matrix span:nth-child(9)  { left: 73%; animation-duration: calc(19s * var(--rain-scale, 1)); animation-delay: -5s; color: rgba(0,240,255,.4); }
+    #bgScene .bg-matrix span:nth-child(10) { left: 82%; animation-duration: calc(14s * var(--rain-scale, 1)); animation-delay: -9s; color: rgba(0,255,160,.4); }
+    #bgScene .bg-matrix span:nth-child(11) { left: 90%; animation-duration: calc(16s * var(--rain-scale, 1)); animation-delay: -2.5s; }
+    #bgScene .bg-matrix span:nth-child(12) { left: 97%; animation-duration: calc(13s * var(--rain-scale, 1)); animation-delay: -6.5s; color: rgba(255,100,200,.3); }
+    /* Free Spins scene: rain pours faster, brighter, shifts toxic green */
+    body.fs-active { --rain-scale: .42; }
+    body.fs-active #bgScene .bg-matrix {
+      opacity: .5;
+      filter: brightness(1.45) saturate(1.5) hue-rotate(-12deg);
+    }
     @keyframes matrixFall {
       0%   { transform: translateY(0); opacity: 0; }
       10%  { opacity: .8; }
@@ -1753,6 +1759,110 @@
     }
     @keyframes conveyorMove { to { background-position: 92px 0; } }
     @keyframes conveyorMoveRev { to { background-position: -102px 0; } }
+    /* Chain active: conveyor belts into overdrive */
+    #bgScene.chain-fast .bg-conveyor { animation-duration: 1.3s; }
+    #bgScene.chain-fast .bg-conveyor::before { animation-duration: .8s; }
+    #bgScene.chain-fast .bg-conveyor::after { animation-duration: 1.05s; }
+    /* Reel 5 hot anticipation: red pulse border while the last scatter crawls in */
+    .reel.tease-hot {
+      animation: teaseHotPulse .45s ease-in-out infinite;
+      z-index: 3;
+    }
+    @keyframes teaseHotPulse {
+      0%, 100% { box-shadow: inset 0 0 0 2px rgba(255,40,40,.25), 0 0 12px rgba(255,40,40,.25); }
+      50% { box-shadow: inset 0 0 0 3px rgba(255,60,60,.95), 0 0 28px rgba(255,50,50,.65); }
+    }
+    /* FS trigger cinematic: DEEP WEB INFILTRATION */
+    #fsIntroCine {
+      position: fixed; inset: 0; z-index: 9000;
+      display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at center, rgba(0,20,14,.88) 0%, rgba(0,4,2,.97) 75%);
+      opacity: 0;
+      transition: opacity .18s ease-out;
+    }
+    #fsIntroCine.out { opacity: 0; }
+    #fsIntroCine .fs-cine-glitch {
+      position: absolute; inset: 0;
+      background:
+        repeating-linear-gradient(0deg, rgba(0,255,150,.05) 0 2px, transparent 2px 5px),
+        repeating-linear-gradient(90deg, rgba(0,240,255,.04) 0 1px, transparent 1px 7px);
+      animation: fsCineGlitch .12s steps(2) infinite;
+      opacity: 0;
+    }
+    #fsIntroCine.logo-in .fs-cine-glitch { opacity: 1; animation-duration: .4s; }
+    @keyframes fsCineGlitch {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(-4px, 2px); }
+      50% { transform: translate(3px, -2px); }
+      75% { transform: translate(-2px, -1px); }
+      100% { transform: translate(0, 0); }
+    }
+    #fsIntroCine .fs-cine-core {
+      text-align: center; padding: 0 16px;
+      transform: scale(.6); opacity: 0;
+      filter: blur(6px);
+      transition: transform .22s cubic-bezier(.2, 1.2, .3, 1), opacity .18s, filter .22s;
+    }
+    #fsIntroCine.logo-in .fs-cine-core {
+      transform: scale(1); opacity: 1; filter: blur(0);
+    }
+    #fsIntroCine .fs-cine-kicker {
+      font-size: .8rem; letter-spacing: 4px; color: #00ff9c;
+      text-shadow: 0 0 12px rgba(0,255,150,.8);
+      margin-bottom: 10px;
+    }
+    #fsIntroCine .fs-cine-title {
+      position: relative;
+      font-size: clamp(1.6rem, 6vw, 3.2rem); font-weight: 900; letter-spacing: 3px;
+      color: #eafff4;
+      text-shadow: 0 0 24px rgba(0,255,140,.9), 0 0 60px rgba(0,255,140,.45), 0 3px 10px #000;
+      margin: 0 0 14px;
+    }
+    /* glitch slice ghosts */
+    #fsIntroCine .fs-cine-title::before,
+    #fsIntroCine .fs-cine-title::after {
+      content: attr(data-text);
+      position: absolute; inset: 0;
+      opacity: .75; pointer-events: none;
+    }
+    #fsIntroCine .fs-cine-title::before {
+      color: #ff3355; animation: fsCineSliceA .5s steps(3) infinite;
+    }
+    #fsIntroCine .fs-cine-title::after {
+      color: #00f0ff; animation: fsCineSliceB .6s steps(3) infinite;
+    }
+    @keyframes fsCineSliceA {
+      0%, 100% { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
+      33% { transform: translate(-4px, 2px); clip-path: inset(12% 0 58% 0); }
+      66% { transform: translate(3px, -1px); clip-path: inset(62% 0 8% 0); }
+    }
+    @keyframes fsCineSliceB {
+      0%, 100% { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
+      33% { transform: translate(4px, -2px); clip-path: inset(48% 0 22% 0); }
+      66% { transform: translate(-3px, 1px); clip-path: inset(8% 0 72% 0); }
+    }
+    #fsIntroCine .fs-cine-spins {
+      font-size: clamp(1rem, 3.4vw, 1.7rem); font-weight: 800; letter-spacing: 4px;
+      color: #9cffd9; opacity: 0; transform: translateY(14px);
+      transition: opacity .2s, transform .25s cubic-bezier(.2, 1.2, .3, 1);
+    }
+    #fsIntroCine.count-in .fs-cine-spins { opacity: 1; transform: translateY(0); }
+    #fsIntroCine .fs-cine-count {
+      display: inline-block;
+      font-size: 1.7em; font-weight: 900; color: #fff;
+      text-shadow: 0 0 18px rgba(0,255,150,1), 0 0 44px rgba(0,255,140,.6);
+      margin-right: 8px;
+      animation: fsCineCountPulse .9s ease-in-out infinite;
+    }
+    @keyframes fsCineCountPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
+    #fsIntroCine .fs-cine-feats {
+      margin-top: 10px;
+      font-size: .85rem; letter-spacing: 1px; color: #ffd166;
+      text-shadow: 0 0 10px rgba(255,180,60,.6);
+    }
     .cell.vfx-mult::before {
       content: '';
       position: absolute;
