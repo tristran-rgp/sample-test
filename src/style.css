@@ -1671,6 +1671,88 @@
       50% { transform: translate(2px, -1px) rotate(1.2deg); }
       75% { transform: translate(-1px, -2px) rotate(-.6deg); }
     }
+    /* ×N CHAIN combo counter during feature chains */
+    #vfxCombo {
+      position: absolute; top: 5%; left: 50%;
+      transform: translateX(-50%);
+      z-index: 20; pointer-events: none;
+      font-size: 1.7rem; font-weight: 900; letter-spacing: 3px;
+      color: #fff; opacity: 0;
+      text-shadow: 0 0 16px rgba(0,240,255,.95), 0 2px 8px #000;
+      transition: opacity .18s;
+    }
+    #vfxCombo.show { opacity: 1; }
+    #vfxCombo.pop { animation: comboPop .3s cubic-bezier(.2, 1.4, .3, 1); }
+    @keyframes comboPop {
+      0% { transform: translateX(-50%) scale(1.7); filter: brightness(1.8); }
+      100% { transform: translateX(-50%) scale(1); filter: none; }
+    }
+    /* Glitch shuffle: cell blur-slides into its new symbol */
+    .cell.vfx-shuffle .sym-img {
+      animation: shuffleSlide .2s ease-out;
+    }
+    @keyframes shuffleSlide {
+      0% { transform: translateX(-26%) skewX(-8deg); filter: blur(3px) brightness(1.7); opacity: .4; }
+      60% { transform: translateX(8%) skewX(3deg); filter: blur(1px) brightness(1.2); opacity: 1; }
+      100% { transform: translateX(0) skewX(0); filter: none; }
+    }
+    /* Firewall confiscation: clamp brackets + symbol dragged out of the tray */
+    .cell.vfx-clamp::before {
+      content: '';
+      position: absolute; inset: 2px;
+      border: 2px solid rgba(255, 60, 40, .9);
+      border-radius: 6px;
+      box-shadow: 0 0 10px rgba(255, 60, 40, .6), inset 0 0 8px rgba(255, 60, 40, .3);
+      z-index: 3;
+      pointer-events: none;
+      animation: clampFlash .25s ease-out;
+    }
+    @keyframes clampFlash {
+      0% { transform: scale(1.25); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .cell.vfx-confiscate .sym-img {
+      animation: confiscateUp .55s cubic-bezier(.55, 0, .8, .4) forwards;
+    }
+    @keyframes confiscateUp {
+      0% { transform: translateY(0); opacity: 1; filter: brightness(1); }
+      15% { transform: translateY(5%); }
+      100% { transform: translateY(-140%); opacity: 0; filter: brightness(1.7) saturate(.3); }
+    }
+    /* Overload: wild slides down into place, row by row */
+    .cell.vfx-wild-slide .sym-img {
+      animation: wildSlideIn .34s cubic-bezier(.2, .8, .2, 1);
+    }
+    @keyframes wildSlideIn {
+      0% { transform: translateY(-60%); opacity: 0; filter: brightness(2.2); }
+      70% { transform: translateY(6%); opacity: 1; filter: brightness(1.4); }
+      100% { transform: translateY(0); filter: none; }
+    }
+    /* Ambient conveyor: data packets drifting behind the reels (NLC baggage belt) */
+    #bgScene .bg-conveyor {
+      position: absolute; left: 0; right: 0; top: 36%; height: 28%;
+      pointer-events: none;
+      background: repeating-linear-gradient(90deg,
+        rgba(0, 240, 255, .05) 0 2px, transparent 2px 46px);
+      animation: conveyorMove 5.5s linear infinite;
+    }
+    #bgScene .bg-conveyor::before,
+    #bgScene .bg-conveyor::after {
+      content: '';
+      position: absolute; left: 0; right: 0; height: 10px;
+    }
+    #bgScene .bg-conveyor::before {
+      top: 16%;
+      background: radial-gradient(circle, rgba(0, 240, 255, .32) 0 2px, transparent 3px) 0 0 / 34px 10px repeat-x;
+      animation: conveyorMove 3.2s linear infinite;
+    }
+    #bgScene .bg-conveyor::after {
+      bottom: 16%;
+      background: radial-gradient(circle, rgba(0, 255, 170, .26) 0 2px, transparent 3px) 0 0 / 34px 10px repeat-x;
+      animation: conveyorMoveRev 4.1s linear infinite;
+    }
+    @keyframes conveyorMove { to { background-position: 92px 0; } }
+    @keyframes conveyorMoveRev { to { background-position: -102px 0; } }
     .cell.vfx-mult::before {
       content: '';
       position: absolute;

@@ -61,6 +61,22 @@ export async function presentVfxFirewall(step, featId, opts) {
     }
   }
 
+  // Confiscation: red clamp locks each banned cell, then the symbol is
+  // dragged up out of the tray before the heat wave burns the rest
+  if (!isVfxSkip()) {
+    burnKeys.forEach((k, i) => {
+      const [c, r] = k.split(',').map(Number);
+      const el = cellEl(c, r);
+      if (!el) return;
+      setTimeout(() => {
+        el.classList.add('vfx-clamp');
+        sfx('tick', { gain: 0.4, pitch: 1.15 + i * 0.07, force: true });
+        setTimeout(() => el.classList.add('vfx-confiscate'), vfxMs(130, 45));
+      }, i * vfxMs(90, 30));
+    });
+    await vfxWait(vfxMs(260, 90));
+  }
+
   if (canvas) {
     await runAnimFrame(vfxMs(900, 320), (t) => {
       canvas.ctx.clearRect(0, 0, canvas.w, canvas.h);
@@ -101,7 +117,7 @@ export async function presentVfxFirewall(step, featId, opts) {
   if (step.changes?.length) applyStepChanges(step.changes);
   renderGrid();
   await highlightCells(burnKeys, 'vfx-hit', vfxMs(280, 95));
-  clearCellClasses(['vfx-firewall', 'scrub']);
+  clearCellClasses(['vfx-firewall', 'scrub', 'vfx-clamp', 'vfx-confiscate']);
   setVfxBloom(null, false);
   setVfxVignette(false);
   clearVfxStage();
@@ -117,68 +133,83 @@ export async function presentVfxDecrypt(step, featId) {
   const st = vfxStage();
   const gridFx = document.createElement('div');
   gridFx.className = 'vfx-laser-grid';
-  const beam = document.createElement('div');
-  beam.className = 'vfx-laser-beam';
   st?.appendChild(gridFx);
-  st?.appendChild(beam);
   await sleepRaw(20);
   gridFx.classList.add('on');
-  beam.style.opacity = '1';
 
-  const wrap = document.getElementById('reelsWrapper');
-  const h = wrap?.clientHeight || 200;
   const canvas = prepVfxCanvas();
   let parts = [];
-  // Pre-mark upgrade targets for beam "lock" sparks
-  const targets = [];
+  // Group upgrade targets per column — the scanner arm decrypts as it passes
+  const byCol = new Map();
   for (const ch of (step.changes || [])) {
     const p = stepPos(ch?.pos);
     if (!p) continue;
-    const rc = cellRectInWrap(p.c, p.r);
-    if (rc) targets.push(rc);
+    if (!byCol.has(p.c)) byCol.set(p.c, []);
+    byCol.get(p.c).push({ ch, p, rc: cellRectInWrap(p.c, p.r) });
+  }
+  const colOrder = [...byCol.keys()].sort((a, b) => a - b);
+  const colX = new Map();
+  for (const col of colOrder) {
+    const rr = reelRectInWrap(col);
+    if (rr) colX.set(col, rr.x);
   }
 
-  await runAnimFrame(vfxMs(820, 300), (t) => {
-    beam.style.top = `${t * (h - 4)}px`;
-    beam.style.opacity = String(0.45 + 0.55 * Math.sin(t * Math.PI));
-    if (canvas) {
+  if (canvas) {
+    const firedCols = new Set();
+    await runAnimFrame(vfxMs(1150, 420), (t) => {
       canvas.ctx.clearRect(0, 0, canvas.w, canvas.h);
-      drawScanlines(canvas.ctx, canvas.w, canvas.h, t, 0.08);
-      const y = t * canvas.h;
-      const g = canvas.ctx.createLinearGradient(0, y - 36, 0, y + 14);
+      drawScanlines(canvas.ctx, canvas.w, canvas.h, t, 0.07);
+      const armX = t * (canvas.w + 60) - 30;
+      // trail behind the arm
+      const g = canvas.ctx.createLinearGradient(armX - 90, 0, armX, 0);
       g.addColorStop(0, 'rgba(0,240,255,0)');
-      g.addColorStop(0.7, 'rgba(0,240,255,0.18)');
-      g.addColorStop(1, 'rgba(180,255,255,0.35)');
+      g.addColorStop(1, 'rgba(0,240,255,0.22)');
       canvas.ctx.fillStyle = g;
-      canvas.ctx.fillRect(0, Math.max(0, y - 36), canvas.w, 50);
-      // horizontal laser core
-      canvas.ctx.fillStyle = `rgba(0,240,255,${0.55 + 0.35 * Math.sin(t * Math.PI)})`;
+      canvas.ctx.fillRect(Math.max(0, armX - 90), 0, Math.min(90, armX), canvas.h);
+      // vertical arm core
+      canvas.ctx.fillStyle = `rgba(0,240,255,${0.6 + 0.3 * Math.sin(t * Math.PI * 2)})`;
       canvas.ctx.shadowColor = '#00f0ff';
-      canvas.ctx.shadowBlur = 14;
-      canvas.ctx.fillRect(0, y - 1.5, canvas.w, 3);
+      canvas.ctx.shadowBlur = 16;
+      canvas.ctx.fillRect(armX - 1.5, 0, 3, canvas.h);
       canvas.ctx.shadowBlur = 0;
-      // spark when beam crosses target cells
-      for (const rc of targets) {
-        if (Math.abs(rc.y - y) < 14) {
-          parts = parts.concat(burstParticles(canvas.ctx, rc.x, rc.y, '#00f0ff', vfxParticleN(3), 'star'));
-          drawRadialWash(canvas.ctx, rc.x, rc.y, 28, 'rgba(0,240,255,0.25)');
+      // emitter caps
+      canvas.ctx.fillStyle = '#bfffff';
+      canvas.ctx.fillRect(armX - 5, 0, 10, 7);
+      canvas.ctx.fillRect(armX - 5, canvas.h - 7, 10, 7);
+      // decrypt each column as the arm crosses it
+      for (const col of colOrder) {
+        const cx = colX.get(col);
+        if (cx == null || firedCols.has(col) || armX < cx) continue;
+        firedCols.add(col);
+        sfx('tick', { gain: 0.5, pitch: 1 + col * 0.12 });
+        for (const { ch, p, rc } of byCol.get(col)) {
+          if (ch.to != null) setCellSymbol(p.c, p.r, ch.to);
+          setCellMystery(p.c, p.r, false);
+          cellEl(p.c, p.r)?.classList.add('vfx-decrypt', 'vfx-hit');
+          if (rc) {
+            parts = parts.concat(burstParticles(canvas.ctx, rc.x, rc.y, '#7dffff', vfxParticleN(10), 'star'));
+            drawRadialWash(canvas.ctx, rc.x, rc.y, 30, 'rgba(0,240,255,0.3)');
+          }
         }
+        renderGrid();
       }
-      if (Math.random() < 0.4) {
-        parts = parts.concat(burstParticles(canvas.ctx, Math.random() * canvas.w, y, '#00f0ff', vfxParticleN(3), 'star'));
+      if (Math.random() < 0.35) {
+        parts = parts.concat(burstParticles(canvas.ctx, armX, Math.random() * canvas.h, '#00f0ff', vfxParticleN(3), 'star'));
       }
       parts = drawParts(canvas.ctx, parts, 1 / 55);
-    }
-  });
+    });
 
-  await hitStop(40);
-  screenPunch('sm');
-  if (Array.isArray(step.changes) && step.changes.length) {
+    await hitStop(40);
+    screenPunch('sm');
+    if (step.changes?.length) renderGrid();
+    const keys = posKeys((step.changes || []).map(ch => ch.pos));
+    await highlightCells(keys, 'vfx-decrypt', vfxMs(300, 100));
+    clearCellClasses(['vfx-decrypt', 'vfx-hit']);
+  } else if (Array.isArray(step.changes) && step.changes.length) {
     await morphChangesSequential(step.changes, 'vfx-decrypt', {
       canvas, rgb: [0, 240, 255], partColor: '#7dffff',
     });
   }
-  beam.style.opacity = '0';
   gridFx.classList.remove('on');
   setVfxBloom(null, false);
   setVfxVignette(false);
@@ -383,8 +414,21 @@ export async function presentVfxOverload(step, featId) {
       }
       await hitStop(35);
       screenPunch('sm');
-      applyStepChanges(chs);
-      renderGrid();
+      // Wilds cascade down the reel one row at a time (arm-slide feel)
+      chs.sort((a, b) => (stepPos(a.pos)?.r ?? 0) - (stepPos(b.pos)?.r ?? 0));
+      for (const ch of chs) {
+        const p = stepPos(ch.pos);
+        if (!p) continue;
+        applyStepChanges([ch]);
+        renderGrid();
+        cellEl(p.c, p.r)?.classList.add('vfx-wild-glow', 'vfx-wild-slide');
+        const rc = cellRectInWrap(p.c, p.r);
+        if (canvas && rc) {
+          parts = parts.concat(burstParticles(canvas.ctx, rc.x, rc.y, '#ffcc44', vfxParticleN(8), 'spark'));
+        }
+        sfx('expand', { gain: 0.5, pitch: 0.9 + p.r * 0.12 });
+        await vfxWait(vfxMs(110, 40));
+      }
       for (const ch of chs) {
         const p = stepPos(ch.pos);
         if (!p) continue;
@@ -840,12 +884,13 @@ export async function presentVfxGlitch(step, featId) {
   showVfxBanner('System Glitch — noise / reshuffle', 'glitch');
   featureStepToast(step, featId);
   clearVfxStage();
+  sfx('glitch', { gain: 0.7 });
   const st = vfxStage();
   const bars = document.createElement('div');
   bars.className = 'vfx-glitch-bars on';
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < 24; i++) {
     const s = document.createElement('span');
-    s.style.top = `${(i / 16) * 100 + Math.random() * 3}%`;
+    s.style.top = `${(i / 24) * 100 + Math.random() * 3}%`;
     s.style.animationDelay = `${Math.random() * 0.12}s`;
     bars.appendChild(s);
   }
@@ -864,8 +909,8 @@ export async function presentVfxGlitch(step, featId) {
   if (canvas && !isVfxSkip()) {
     await runAnimFrame(vfxMs(700, 260), (t) => {
       canvas.ctx.clearRect(0, 0, canvas.w, canvas.h);
-      drawRgbSplit(canvas.ctx, canvas.w, canvas.h, t, 8 + t * 6);
-      drawScanlines(canvas.ctx, canvas.w, canvas.h, t, 0.16 + t * 0.08);
+      drawRgbSplit(canvas.ctx, canvas.w, canvas.h, t, 12 + t * 9);
+      drawScanlines(canvas.ctx, canvas.w, canvas.h, t, 0.2 + t * 0.1);
       if (Math.random() < 0.4) {
         parts = parts.concat(burstParticles(
           canvas.ctx,
@@ -882,7 +927,7 @@ export async function presentVfxGlitch(step, featId) {
     await vfxWait(vfxMs(480, 160));
   }
 
-  // Morph cells one-by-one with local glitch pop
+  // Morph cells one-by-one with local glitch pop + blur-slide
   const changes = Array.isArray(step.changes) ? step.changes : [];
   if (changes.length) {
     showVfxBanner('System Glitch — rewrite cells', 'glitch');
@@ -898,7 +943,8 @@ export async function presentVfxGlitch(step, featId) {
       setCellMystery(p.c, p.r, false);
       renderGrid();
       const el = cellEl(p.c, p.r);
-      el?.classList.add('vfx-morph', 'vfx-hit');
+      el?.classList.add('vfx-morph', 'vfx-hit', 'vfx-shuffle');
+      sfx('tick', { gain: 0.3, pitch: 0.8 + Math.random() * 0.5 });
       const rc = cellRectInWrap(p.c, p.r);
       if (canvas && rc) {
         await runAnimFrame(vfxMs(120, 45), (t) => {
@@ -912,7 +958,7 @@ export async function presentVfxGlitch(step, featId) {
       } else {
         await vfxWait(vfxMs(90, 30));
       }
-      el?.classList.remove('vfx-morph', 'vfx-hit');
+      el?.classList.remove('vfx-morph', 'vfx-hit', 'vfx-shuffle');
     }
     if (step.splitChanges) applyStepSplitChanges(step.splitChanges);
     renderGrid();

@@ -341,6 +341,32 @@ export function sfx(type, opts = {}) {
       }
       hold = 0.45;
       break;
+    case 'riser':
+      // Maelstrom intro — long tension sweep for big feature chains
+      try {
+        const ro = ctx.createOscillator();
+        const rg = ctx.createGain();
+        const rf = ctx.createBiquadFilter();
+        ro.type = 'sawtooth';
+        ro.frequency.setValueAtTime(90 * pitch, now);
+        ro.frequency.exponentialRampToValueAtTime(640 * pitch, now + 1.25);
+        rf.type = 'lowpass';
+        rf.frequency.setValueAtTime(220, now);
+        rf.frequency.exponentialRampToValueAtTime(3800, now + 1.25);
+        rg.gain.setValueAtTime(0.0001, now);
+        rg.gain.linearRampToValueAtTime(0.09 * gMul, now + 0.9);
+        rg.gain.exponentialRampToValueAtTime(0.0001, now + 1.45);
+        ro.connect(rf);
+        rf.connect(rg);
+        rg.connect(master);
+        ro.start(now);
+        ro.stop(now + 1.5);
+      } catch (_) {
+        tone(120, 'sawtooth', now, 1.2, 0.05);
+      }
+      noiseBurst(now, 1.2, 0.05, 300);
+      hold = 1.5;
+      break;
     case 'expand':
       // Overload wild expand
       tone(180, 'sine', now, 0.1, 0.07);

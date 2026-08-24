@@ -1,7 +1,7 @@
 // src/ui/vfx/steps.js — extracted from main.js
 import { state } from '../../core/state.js';
 import { mapServerFeatureName } from '../../net/session.js';
-import { sfxForFeatureHit, sfxForFeatureStart } from '../../sfx/sfx.js';
+import { sfx, sfxForFeatureHit, sfxForFeatureStart } from '../../sfx/sfx.js';
 import { renderFeatureMeter, renderGrid } from '../render.js';
 import { VFX_BEAT, VFX_BLOOM_COLOR, applyStepChanges, applyStepSplitChanges, clearCellClasses, clearMeterStepActive, clearVfxStage, flyFeatureIconFromMeter, hideFeatureExplain, hideFeatureIntro, hideVfxBanner, isVfxSkip, playFeatureExplainBeat, playFeatureIntro, resetVfxSkip, revealTrojanStep, setCellMultiplier, setMeterStepActive, setSkipBarVisible, setVfxVignette, showVfxBanner, stepPos, vfxHitImpact, vfxMs, vfxWait } from './core.js';
 import { presentVfxBandwidth, presentVfxBypass, presentVfxCloning, presentVfxDecrypt, presentVfxFirewall, presentVfxGeneric, presentVfxGlitch, presentVfxOverclock, presentVfxOverload, presentVfxRoot, presentVfxScan, presentVfxSurge, presentVfxTrojan } from './presenters.js';
@@ -97,6 +97,10 @@ export async function applyFeatureStep(step, opts = {}) {
     await presenter(step, featId, opts);
     if (!isVfxSkip()) {
       sfxForFeatureHit(featId);
+      // Escalation: rising tick per step when many features stack
+      if ((opts.stepTotal || 0) >= 4) {
+        sfx('tick', { gain: 0.4, pitch: 1 + (opts.stepIndex || 0) * 0.09, force: true });
+      }
       await vfxHitImpact(
         ['firewall', 'trojan', 'surge', 'scan', 'bandwidth'].includes(featId) ? 'full' : 'sm',
         bloom
@@ -114,6 +118,25 @@ export async function applyFeatureStep(step, opts = {}) {
     ]);
   }
   await vfxWait(vfxMs(beat.settle || 120, 40));
+}
+
+/** ×N CHAIN combo counter — floats over the reels while the chain resolves */
+function buildComboCounter() {
+  const wrap = document.getElementById('reelsWrapper');
+  if (!wrap) return null;
+  const el = document.createElement('div');
+  el.id = 'vfxCombo';
+  wrap.appendChild(el);
+  return el;
+}
+
+function bumpComboCounter(el, n) {
+  if (!el) return;
+  el.textContent = `×${n} CHAIN`;
+  el.classList.add('show');
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
 }
 
 /**
@@ -137,6 +160,11 @@ export async function presentFeatureSteps(featureSteps, opts = {}) {
   hideVfxBanner();
   setVfxVignette(false);
 
+  // Maelstrom: riser under the whole chain when ≥4 features stack
+  const maelstrom = featureSteps.length >= 4;
+  if (maelstrom) sfx('riser', { gain: 0.75, force: true });
+  const comboEl = featureSteps.length >= 2 ? buildComboCounter() : null;
+
   try {
     for (let i = 0; i < featureSteps.length; i++) {
       if (isVfxSkip()) {
@@ -151,11 +179,13 @@ export async function presentFeatureSteps(featureSteps, opts = {}) {
         stepIndex: i,
         stepTotal: featureSteps.length,
       });
+      bumpComboCounter(comboEl, i + 1);
     }
   } finally {
     setSkipBarVisible(false);
     clearMeterStepActive();
     meter?.classList.remove('chain-sweep');
+    comboEl?.remove();
     hideFeatureIntro(true);
     hideFeatureExplain(true);
   }
