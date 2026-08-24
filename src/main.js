@@ -8914,6 +8914,10 @@ function openCheatPanel() {
       `agency=${resolveSessionAgencyId()} userId=${resolveSessionUserId()}\ngame=${gid}`,
     ''
   );
+  // Auto-refresh active-session targets when connected (quiet — keep the log above).
+  if (online && ws?.readyState === WebSocket.OPEN) {
+    loadActiveSessions().catch(() => {});
+  }
 }
 
 function setCheatLog(text, kind) {
@@ -9664,9 +9668,32 @@ async function sendCheatViaWs(code, value) {
   return payload;
 }
 
+/**
+ * Debug REST base. Falls back to the game-server host from srvUrl when the
+ * configured base points at localhost but the client talks to a remote host —
+ * avoids ERR_CONNECTION_REFUSED on remote environments.
+ */
+function resolveDebugBaseUrl() {
+  let base = (document.getElementById('cheatDebugBase')?.value || '').replace(/\/$/, '');
+  try {
+    const srvRaw = document.getElementById('srvUrl')?.value || '';
+    const isLocalHost = h =>
+      !h || h === 'localhost' || h === '127.0.0.1' || /^\d{1,3}(\.\d{1,3}){3}$/.test(h);
+    if (base && srvRaw) {
+      const srvUrl = new URL(srvRaw);
+      if (isLocalHost(new URL(base).hostname) && !isLocalHost(srvUrl.hostname)) {
+        return `${srvUrl.origin}/api/game/zeroday`;
+      }
+    }
+  } catch (_) {
+    /* keep configured base */
+  }
+  return base;
+}
+
 /** Send cheat via REST POST /debug/cheat/{agencyId}/{userId} */
 async function sendCheatViaRest(code, value) {
-  const base = (document.getElementById('cheatDebugBase')?.value || '').replace(/\/$/, '');
+  const base = resolveDebugBaseUrl();
   const token = document.getElementById('cheatDebugToken')?.value || 'zeroday-debug-2024';
   const target = resolveCheatTarget();
   const agencyId = target.agencyId;
@@ -9711,20 +9738,22 @@ function resolveCheatTarget() {
 }
 
 /** Load active sessions via cmd 1998 and populate the target select. */
-async function loadActiveSessions() {
+async function loadActiveSessions(opts = {}) {
+  const quiet = !!opts.quiet;
   if (!online || !ws || ws.readyState !== WebSocket.OPEN) {
-    setCheatLog('Load sessions failed: WebSocket not connected', 'err');
+    if (!quiet) setCheatLog('Load sessions failed: WebSocket not connected', 'err');
     return;
   }
-  setCheatLog('Loading active sessions (cmd 1998)…', '');
+  if (!quiet) setCheatLog('Loading active sessions (cmd 1998)…', '');
   const payload = await requestGameCmd('1998', {}, 12000);
   if (!payload) {
-    setCheatLog('Load sessions: no response / timeout', 'err');
+    if (!quiet) setCheatLog('Load sessions: no response / timeout', 'err');
     return;
   }
   const sessions = Array.isArray(payload.sessions) ? payload.sessions : [];
   activeSessionsCache = sessions.filter(s => s.authFound);
   renderActiveSessionOptions();
+  if (quiet) return;
   const stale = sessions.length - activeSessionsCache.length;
   setCheatLog(
     `Loaded ${activeSessionsCache.length} active session(s)` +
@@ -9853,6 +9882,11 @@ async function sendCheatFromPanel(opts = {}) {
       'ok'
     );
     showToast(`Cheat OK: ${code}`, '#00ff88');
+
+    // Targeted cheat consumed → refresh the session list quietly (target may be gone).
+    if (cheatTargetSession) {
+      loadActiveSessions({ quiet: true }).catch(() => {});
+    }
 
     if (andSpin) {
       if (CHEAT_IMMEDIATE.has(code)) {
