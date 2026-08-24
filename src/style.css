@@ -2466,10 +2466,48 @@
       100% { opacity: 0; transform: translate(-50%, -120%); }
     }
     /* split badge is a real DOM node (.split-badge) — see renderGrid */
+    /* Multiplier badge — flip-clock digits ×NN, centered on cell */
     .cell .mult-tag {
-      position: absolute; top: 2px; left: 3px;
-      font-size: .55rem; font-weight: 800; color: var(--orange);
-      background: rgba(0,0,0,.7); padding: 1px 3px; border-radius: 3px; z-index: 2;
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex; align-items: center; gap: 6px;
+      z-index: 2; pointer-events: none;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.9));
+      animation: multPop .3s cubic-bezier(.2,.8,.2,1);
+    }
+    .cell .mult-tag .mult-x {
+      font-size: clamp(1.7rem, 5.2vw, 2.3rem); font-weight: 900; line-height: 1;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(0,240,255,.9), 0 1px 2px #000;
+      margin-right: 1px;
+    }
+    .cell .mult-tag .mult-digit {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: clamp(2.2rem, 6.8vw, 3rem); height: clamp(2.7rem, 8.4vw, 3.7rem);
+      font-size: clamp(1.9rem, 5.8vw, 2.6rem); font-weight: 900; line-height: 1;
+      color: #fff;
+      background: linear-gradient(180deg,
+        #46608f 0%, #26355c 46%, #101a36 52%, #1b2a4e 100%);
+      border-radius: 8px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.28),
+        inset 0 -1px 0 rgba(0,0,0,.65),
+        0 0 8px rgba(0,240,255,.3);
+      position: relative;
+      text-shadow: 0 1px 2px #000;
+    }
+    /* split-flap midline */
+    .cell .mult-tag .mult-digit::after {
+      content: '';
+      position: absolute; left: 1px; right: 1px; top: 50%;
+      height: 1px;
+      background: rgba(0,0,0,.55);
+      box-shadow: 0 1px 0 rgba(255,255,255,.1);
+    }
+    @keyframes multPop {
+      0% { transform: translate(-50%, -50%) scale(.4); opacity: 0; }
+      60% { transform: translate(-50%, -50%) scale(1.18); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1); }
     }
 
     /* Side controls */

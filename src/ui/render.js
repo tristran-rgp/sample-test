@@ -72,7 +72,16 @@ export function paintCell(cell, c, r, highlightSet) {
   if (meta.multiplier > 1 && sym !== 'W') {
     const tag = document.createElement('span');
     tag.className = 'mult-tag';
-    tag.textContent = `×${meta.multiplier}`;
+    const x = document.createElement('span');
+    x.className = 'mult-x';
+    x.textContent = '×';
+    tag.appendChild(x);
+    for (const ch of String(meta.multiplier).padStart(2, '0')) {
+      const digit = document.createElement('span');
+      digit.className = 'mult-digit';
+      digit.textContent = ch;
+      tag.appendChild(digit);
+    }
     cell.appendChild(tag);
   }
   appendSymbolVisual(cell, sym, split ? splitCount : 1);
