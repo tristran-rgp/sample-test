@@ -563,65 +563,87 @@ export function highlightExplainOnMainGrid() {
   }, 4500);
 }
 
-/** Energy path flowing through the winning cells along the chain direction */
+/** Energy path flowing smoothly (Catmull-Rom spline) through winning cells along the chain direction */
 async function animateWayPath(w, cells) {
   const canvas = prepVfxCanvas();
   if (!canvas || !cells.length) return;
   const dir = w.direction === 'rtl' ? -1 : 1;
-  const pts = cells
+  const ctrl = cells
     .map(k => k.split(',').map(Number))
     .map(([c, r]) => ({ c, r, rc: cellRectInWrap(c, r) }))
     .filter(x => x.rc)
     .sort((a, b) => (dir * (a.c - b.c)) || (a.r - b.r))
-    .map(x => x.rc);
+    .map(x => ({ x: x.rc.x, y: x.rc.y }));
+  // drop consecutive duplicates (same cell listed twice)
+  const pts = ctrl.filter((p, i) => !i || Math.hypot(p.x - ctrl[i - 1].x, p.y - ctrl[i - 1].y) > 1);
   if (pts.length < 2) return;
   const rgb = dir < 0 ? [0, 255, 176] : [0, 240, 255];
-  // cumulative segment lengths for point-at-t
+
+  // Dense samples along a Catmull-Rom spline through the cell centers
+  const samples = [];
+  const PER = 18;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(pts.length - 1, i + 2)];
+    for (let s = 0; s < PER; s++) {
+      const t = s / PER;
+      const t2 = t * t;
+      const t3 = t2 * t;
+      samples.push({
+        x: 0.5 * ((2 * p1.x) + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3),
+        y: 0.5 * ((2 * p1.y) + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3),
+      });
+    }
+  }
+  samples.push({ ...pts[pts.length - 1] });
+
   const segLens = [];
   let total = 0;
-  for (let i = 1; i < pts.length; i++) {
-    const d = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+  for (let i = 1; i < samples.length; i++) {
+    const d = Math.hypot(samples[i].x - samples[i - 1].x, samples[i].y - samples[i - 1].y);
     segLens.push(d);
     total += d;
   }
-  const pointAt = (frac) => {
-    let d = frac * total;
+  const fracToIndex = (frac) => {
+    let d = Math.max(0, Math.min(1, frac)) * total;
     for (let i = 0; i < segLens.length; i++) {
-      if (d <= segLens[i] || i === segLens.length - 1) {
-        const t = Math.min(1, d / segLens[i]);
-        return {
-          x: pts[i].x + (pts[i + 1].x - pts[i].x) * t,
-          y: pts[i].y + (pts[i + 1].y - pts[i].y) * t,
-        };
-      }
+      if (d <= segLens[i] || i === segLens.length - 1) return i;
       d -= segLens[i];
     }
-    return pts[pts.length - 1];
+    return segLens.length - 1;
   };
 
   await runAnimFrame(state.fastSpin ? 260 : 460, (t) => {
     canvas.ctx.clearRect(0, 0, canvas.w, canvas.h);
     canvas.ctx.save();
-    // full path glow
+    // smooth spline glow through all winning cells
     canvas.ctx.strokeStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.5)`;
     canvas.ctx.lineWidth = 3;
     canvas.ctx.lineJoin = 'round';
+    canvas.ctx.lineCap = 'round';
     canvas.ctx.shadowColor = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
     canvas.ctx.shadowBlur = 14;
     canvas.ctx.beginPath();
-    pts.forEach((rc, i) => (i ? canvas.ctx.lineTo(rc.x, rc.y) : canvas.ctx.moveTo(rc.x, rc.y)));
+    samples.forEach((p, i) => (i ? canvas.ctx.lineTo(p.x, p.y) : canvas.ctx.moveTo(p.x, p.y)));
     canvas.ctx.stroke();
-    // traveling energy pulse
-    const head = pointAt(t);
-    const tail = pointAt(Math.max(0, t - 0.35));
+    // traveling energy pulse hugs the curve
+    const headI = fracToIndex(t);
+    const tailI = fracToIndex(t - 0.35);
+    const head = samples[headI];
+    const tail = samples[tailI];
     const grad = canvas.ctx.createLinearGradient(tail.x, tail.y, head.x, head.y);
     grad.addColorStop(0, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`);
     grad.addColorStop(1, '#ffffff');
     canvas.ctx.strokeStyle = grad;
     canvas.ctx.lineWidth = 5;
     canvas.ctx.beginPath();
-    canvas.ctx.moveTo(tail.x, tail.y);
-    canvas.ctx.lineTo(head.x, head.y);
+    for (let i = tailI; i <= headI; i++) {
+      const p = samples[i];
+      if (i === tailI) canvas.ctx.moveTo(p.x, p.y);
+      else canvas.ctx.lineTo(p.x, p.y);
+    }
     canvas.ctx.stroke();
     canvas.ctx.fillStyle = '#fff';
     canvas.ctx.beginPath();
