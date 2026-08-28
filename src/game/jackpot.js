@@ -1,12 +1,34 @@
-// src/game/jackpot.js — extracted from main.js
+// src/game/jackpot.js — Core Hack (Jackpot) 2-phase reveal UI
+//
+// Backend contract (be-zero-day, JackpotServiceImpl / JackpotRevealHandler):
+//  - Trigger (inside SPIN 1500 / BUY 1501 response): features.progressiveJackpot =
+//      { isTriggered:true, pending:true, winId, expiresAt?, opened?:[{index,tier}] }
+//    NO tier / amount / nodes are ever sent here — the 15-node grid stays server-side.
+//  - REVEAL cmd 1509: send { cmd:"1509", win_id, index } → response:
+//      { winId, index, tier, paid, matched, opened:[{index}], expiresAt?, expired? }
+//      when paid=true also: tier(prize), amount, balance.
+//  - JACKPOT_WIN push 9000: { event:"JACKPOT_WIN", winner, jackpotType, totalWin }
+//  - One PENDING claim per user blocks SPIN/BUY (BE error 1362) until paid.
+//  - Reconnect (JOIN 1005 / LAST_SESSION 1502): progressiveJackpot carries winId +
+//    opened (only already-opened cells) → resume, never the full grid.
 import { state } from '../core/state.js';
 import { fmt, sleepRaw } from '../core/utils.js';
-import { CORE_HACK, JACKPOT_CORE_IMG, JACKPOT_TIERS } from './config.js';
+import {
+  CORE_HACK,
+  JACKPOT_CMD,
+  JACKPOT_CORE_IMG,
+  JACKPOT_TIERS,
+  JACKPOT_TTL_SECONDS,
+} from './config.js';
+import { applyOnlineBalance, requestGameCmd } from '../net/session.js';
 import { sfx } from '../sfx/sfx.js';
 import { setImgSrc } from '../ui/assets.js';
 import { closeModal, openModal, showToast } from '../ui/feedback.js';
 import { renderFeatureMeter } from '../ui/render.js';
 import { playJackpotClimax } from '../ui/vfx/core.js';
+
+// Active claim controller (module-level so the 9000 push can resolve it).
+let activeClaim = null;
 
 export function jackpotEmoji(tierName) {
   return JACKPOT_TIERS.find(t => t.name === tierName)?.emoji || '◆';
@@ -83,13 +105,245 @@ export function revealJackpotNode(node, tierName, idx) {
     '</div></div>';
 }
 
+/** Resume an interrupted claim from a stored/known winId (used on 1362 gate). */
+export function resumeActiveClaim() {
+  if (activeClaim) return Promise.resolve(false);
+  const winId = state.jackpotWinId;
+  const opened = state.jackpotOpened || {};
+  if (!winId) return Promise.resolve(false);
+  return playCoreHack({ winId, expiresAt: null, opened: Object.entries(opened).map(([i, t]) => ({ index: Number(i), tier: t })), _resumeOnly: true });
+}
+
 /**
- * Pick-and-click Core Hack.
- * @param {object|null} serverJp - online: { tier, win, isTriggered, nodes?[{index,tier}] }
- *   Online win đã credit trong totalWin — modal chỉ presentation; resolve win amount server.
- *   Offline: nodes random; win = tier.mult × bet.
+ * Handle a JACKPOT_WIN (9000) push. Resolves the active claim modal if one is open.
+ * @returns true if the push was consumed by an active claim.
+ */
+export function onJackpotWinPush(payload) {
+  if (!activeClaim || activeClaim.finished) return false;
+  const tier = payload?.jackpotType || activeClaim.targetTier || 'USER';
+  const amount = Number(payload?.totalWin || activeClaim.lastAmount || 0);
+  const resolve = activeClaim.done;
+  activeClaim.finished = true;
+  if (activeClaim.timer) clearInterval(activeClaim.timer);
+  activeClaim = null;
+  state.lastJackpotActive = false;
+  closeModal('modalJackpot');
+  showToast(`🏆 JACKPOT WIN: ${fmt(amount)}!`, '#ff3355');
+  if (amount > 0) {
+    (async () => {
+      try {
+        if (typeof playJackpotClimax === 'function') await playJackpotClimax(tier, amount);
+        else await sleepRaw(700);
+      } catch (_) { await sleepRaw(500); }
+    })();
+  }
+  state.jackpotWinId = null;
+  state.jackpotOpened = {};
+  if (resolve) resolve(amount);
+  return true;
+}
+
+/**
+ * Open the Core Hack pick-and-click UI for a 2-phase claim.
+ * @param {{winId:string, expiresAt?:string, opened?:Array<{index:number,tier?:string}>, _resumeOnly?:boolean}} claim
+ * @returns {Promise<number>} resolves with the paid amount (0 if closed without pay)
+ */
+export async function playCoreHack(claim) {
+  const winId = claim?.winId;
+  if (!winId) return 0;
+  // Idempotent: never run two modals for the same winId.
+  if (activeClaim && activeClaim.winId === winId) return activeClaim.done;
+  if (activeClaim) return 0;
+
+  state.jackpotWinId = winId;
+  state.jackpotOpened = state.jackpotOpened || {};
+
+  sfx('charge', { gain: 0.8 });
+  state.lastJackpotActive = true;
+  renderFeatureMeter([
+    CORE_HACK.id,
+    ...((state.persistentFeatures || []).map(f => f.id)),
+    ...((state.triggeredFeatures || []).map(f => f.id)),
+  ].filter((id, i, a) => a.indexOf(id) === i));
+
+  return new Promise(resolve => {
+    const controller = {
+      winId,
+      targetTier: null,
+      lastAmount: 0,
+      finished: false,
+      done: resolve,
+      timer: null,
+      expiresAt: claim.expiresAt ? new Date(claim.expiresAt).getTime() : null,
+    };
+    activeClaim = controller;
+
+    const grid = document.getElementById('jackpotGrid');
+    grid.innerHTML = '';
+    const picksEl = document.getElementById('jackpotPicks');
+    const timerEl = document.getElementById('jackpotTimer');
+    if (timerEl) timerEl.textContent = '';
+    picksEl.textContent = 'Decrypting Core Hack — open nodes to reveal fragments';
+    openModal('modalJackpot');
+
+    const nodeEls = [];
+
+    const setBanner = (extra = '') => {
+      const counts = {};
+      Object.values(state.jackpotOpened).forEach(t => { counts[t] = (counts[t] || 0) + 1; });
+      const parts = Object.entries(counts).map(([k, v]) => `${k}: ${v}`).join(' | ');
+      picksEl.textContent = (extra ? extra + ' — ' : '') + (parts || 'No fragments yet');
+    };
+
+    const buildNode = (idx) => {
+      const node = document.createElement('div');
+      node.className = 'jackpot-node';
+      const coreImg = document.createElement('img');
+      setImgSrc(coreImg, JACKPOT_CORE_IMG);
+      coreImg.alt = 'Encrypted Node';
+      node.appendChild(coreImg);
+      node.addEventListener('click', () => onClickNode(idx, node));
+      nodeEls[idx] = node;
+      grid.appendChild(node);
+      return node;
+    };
+
+    // Build all 15 hidden nodes first.
+    for (let i = 0; i < 15; i++) buildNode(i);
+
+    // Restore already-opened cells (reconnect / gate resume).
+    const resumed = Array.isArray(claim.opened) ? claim.opened : [];
+    resumed.forEach(o => {
+      const idx = Number(o.index);
+      if (idx < 0 || idx > 14) return;
+      const tier = o.tier || state.jackpotOpened[idx];
+      if (tier && nodeEls[idx]) {
+        state.jackpotOpened[idx] = tier;
+        revealJackpotNode(nodeEls[idx], tier, idx);
+        nodeEls[idx].classList.add('jp-resumed');
+      }
+    });
+    setBanner();
+    if (resumed.length) showToast('Core Hack resumed — continue opening nodes', '#00e8ff');
+
+    const finish = (tierName, amount, opts = {}) => {
+      if (controller.finished) return;
+      controller.finished = true;
+      if (controller.timer) clearInterval(controller.timer);
+      activeClaim = null;
+      state.lastJackpotActive = false;
+      sfx('jackpot', { gain: 1 });
+      closeModal('modalJackpot');
+      const label = opts.fromPush ? 'JACKPOT WIN' : `${tierName} JACKPOT`;
+      showToast(`🏆 ${label}: ${fmt(amount)}!`, '#ff3355');
+      if (amount > 0) {
+        (async () => {
+          try {
+            if (typeof playJackpotClimax === 'function') {
+              await playJackpotClimax(tierName, amount);
+            } else {
+              await sleepRaw(700);
+            }
+          } catch (_) {
+            await sleepRaw(500);
+          }
+        })();
+      }
+      state.jackpotWinId = null;
+      state.jackpotOpened = {};
+      resolve(amount);
+    };
+
+    const onClickNode = async (idx, node) => {
+      if (controller.finished) return;
+      if (node.classList.contains('opened')) return;
+      await revealCell(idx, node);
+    };
+
+    const revealCell = async (idx, node) => {
+      sfx('tick', { gain: 0.5 });
+      const resp = await sendReveal(winId, idx);
+      if (!resp) {
+        // No response (timeout/disconnect) — leave node clickable, let user retry.
+        showToast('Reveal failed — try again', '#ff8800');
+        return;
+      }
+      const tier = resp.tier || 'USER';
+      state.jackpotOpened[idx] = tier;
+      revealJackpotNode(node, tier, idx);
+      if (resp.matched) node.classList.add('jp-matched');
+      setBanner();
+
+      if (resp.paid) {
+        // Wallet credited server-side — mirror the new balance into the UI.
+        if (resp.balance != null) {
+          try { applyOnlineBalance({ control: { balance: String(resp.balance) } }); } catch (_) {}
+        }
+        controller.lastAmount = Number(resp.amount || 0);
+        controller.targetTier = resp.tier || tier;
+        finish(resp.tier || tier, Number(resp.amount || 0), { expired: resp.expired });
+        return;
+      }
+      // Still open — refresh countdown if server sent a fresh expiresAt.
+      if (resp.expiresAt) controller.expiresAt = new Date(resp.expiresAt).getTime();
+    };
+
+    // Countdown (TTL). On expiry, force a final reveal to let BE auto-pay.
+    const tickCountdown = () => {
+      if (!controller.expiresAt) {
+        if (timerEl) timerEl.textContent = '⏳ no timer';
+        return;
+      }
+      const remainMs = controller.expiresAt - Date.now();
+      if (remainMs <= 0) {
+        if (timerEl) timerEl.textContent = '⏰ expired';
+        if (!controller.finished) {
+          // Force settlement: reveal a still-closed node (BE auto-pays on expired).
+          const next = nodeEls.find((n, i) => n && !n.classList.contains('opened'));
+          const idx = next ? nodeEls.indexOf(next) : 0;
+          revealCell(idx, next || nodeEls[0]).catch(() => {});
+        }
+        return;
+      }
+      const s = Math.ceil(remainMs / 1000);
+      if (timerEl) timerEl.textContent = `⏳ ${s}s`;
+    };
+    tickCountdown();
+    controller.timer = setInterval(tickCountdown, 500);
+
+    // If no timer from server, allow manual expiry fallback.
+    if (!controller.expiresAt) {
+      controller.expiresAt = Date.now() + JACKPOT_TTL_SECONDS * 1000;
+    }
+  });
+}
+
+async function sendReveal(winId, index) {
+  const extra = {
+    win_id: winId,
+    index,
+    agency_id: state.sessionAgencyId || '',
+    user_id: state.sessionUserId || '',
+  };
+  try {
+    return await requestGameCmd(JACKPOT_CMD.REVEAL, extra, 15000);
+  } catch (_) {
+    return null;
+  }
+}
+
+/**
+ * Pick-and-click Core Hack entry. For 2-phase online the claim carries winId only.
+ * Offline (no arg) keeps the legacy random behaviour.
+ * @param {object|null} serverJp - online: progressiveJackpot {winId, expiresAt?, opened?}
  */
 export async function playJackpot(serverJp = null) {
+  // 2-phase online: backend only sends winId + pending (no tier/amount/nodes).
+  if (serverJp && serverJp.winId) {
+    return await playCoreHack(serverJp);
+  }
+
+  // Legacy offline: random grid, win = tier.mult × bet (no server).
   sfx('charge', { gain: 0.8 });
   state.lastJackpotActive = true;
   renderFeatureMeter([
@@ -98,35 +352,10 @@ export async function playJackpot(serverJp = null) {
     ...((state.triggeredFeatures || []).map(f => f.id)),
   ].filter((id, i, a) => a.indexOf(id) === i));
   return new Promise(resolve => {
-    let nodeTiers = []; // string tier names length 15
-    let winAmount = 0;
-    let targetTier = null;
-    let online = !!serverJp;
-
-    if (serverJp) {
-      targetTier = String(serverJp.tier || '').toUpperCase();
-      winAmount = parseFloat(serverJp.win) || 0;
-      const nodes = Array.isArray(serverJp.nodes) ? [...serverJp.nodes] : [];
-      nodes.sort((a, b) => Number(a.index) - Number(b.index));
-      if (nodes.length >= 15) {
-        nodeTiers = nodes.slice(0, 15).map(n => String(n.tier || '').toUpperCase());
-      } else if (nodes.length > 0) {
-        nodeTiers = nodes.map(n => String(n.tier || '').toUpperCase());
-      }
-      nodeTiers = constrainJackpotNodes(nodeTiers, targetTier);
-    } else {
-      const pick = JACKPOT_TIERS[Math.floor(Math.random() * JACKPOT_TIERS.length)];
-      targetTier = pick.name;
-      winAmount = pick.mult * state.bet;
-      nodeTiers = constrainJackpotNodes([], targetTier);
-    }
-
     const picks = {};
     const grid = document.getElementById('jackpotGrid');
     grid.innerHTML = '';
-    document.getElementById('jackpotPicks').textContent = online
-      ? `Core Hack: find 3× ${targetTier || '???'} — prize ${fmt(winAmount)}`
-      : 'Pick a node to decrypt...';
+    document.getElementById('jackpotPicks').textContent = 'Pick a node to decrypt...';
     openModal('modalJackpot');
 
     let finished = false;
@@ -134,7 +363,6 @@ export async function playJackpot(serverJp = null) {
       if (finished) return;
       finished = true;
       sfx('jackpot', { gain: 1 });
-      // Close pick UI first, then cinematic climax on reels canvas
       (async () => {
         closeModal('modalJackpot');
         showToast(`🏆 ${tierName} JACKPOT: ${fmt(amount)}!`, '#ff3355');
@@ -151,6 +379,10 @@ export async function playJackpot(serverJp = null) {
       })();
     };
 
+    const pick = JACKPOT_TIERS[Math.floor(Math.random() * JACKPOT_TIERS.length)];
+    const targetTier = pick.name;
+    const nodeTiers = constrainJackpotNodes([], targetTier);
+
     nodeTiers.forEach((tierName, idx) => {
       const node = document.createElement('div');
       node.className = 'jackpot-node';
@@ -165,14 +397,7 @@ export async function playJackpot(serverJp = null) {
         picks[tierName] = (picks[tierName] || 0) + 1;
         document.getElementById('jackpotPicks').textContent =
           Object.entries(picks).map(([k, v]) => `${k}: ${v}`).join(' | ');
-
-        if (online) {
-          // Server đã settle win — chỉ cần match 3 của tier thắng (hoặc 3 bất kỳ nếu không có target)
-          const hit = targetTier
-            ? (picks[targetTier] || 0) >= 3
-            : Object.values(picks).some(v => v >= 3);
-          if (hit) finish(targetTier || tierName, winAmount);
-        } else if (picks[tierName] >= 3) {
+        if (picks[tierName] >= 3) {
           const tier = JACKPOT_TIERS.find(t => t.name === tierName);
           finish(tierName, (tier?.mult || 15) * state.bet);
         }

@@ -5,7 +5,7 @@ import { CORE_HACK, REELS, REEL_STRIPS, SYMBOLS, SYM_MAP, WIN_CAP } from '../gam
 import { beginFx, settleAfterSpinPresentation } from '../game/flow.js';
 import { continueAfterSpin, stopAutoSpin, updateAutoUI } from '../game/fsAuto.js';
 import { createEmptyGrid } from '../game/grid.js';
-import { playJackpot } from '../game/jackpot.js';
+import { onJackpotWinPush, playJackpot, resumeActiveClaim } from '../game/jackpot.js';
 import { captureLastFeatureReplay, renderLastSpinFeatureMeter, screenToForcedResults } from '../game/replay.js';
 import { FEATURE_PRESENT, applyCellMultipliers, applyOnlineBalance, applyOnlineFreeSpinFlow, applyServerScreen, handleForceLogout, mapServerFeatureName, parseOnlineRound, presentOnlineFeatureSequence, resolvePendingCmd, restoreOnlineSessionFromPayload, returnToLogin } from './session.js';
 import { closeModal, openModal, showToast } from '../ui/feedback.js';
@@ -302,6 +302,8 @@ export function handleWSMessage(msg) {
       if (pendingSpinResolve) { pendingSpinResolve(false); setPendingSpinResolve(null); }
       // Fail any waiting cmd (history/detail/etc.)
       if (cmd) resolvePendingCmd(cmd, null);
+      // Gate: a pending Core Hack claim blocks SPIN/BUY — reopen the claim UI.
+      if (c === 1362) resumeActiveClaim();
       return;
     }
 
@@ -314,6 +316,7 @@ export function handleWSMessage(msg) {
         captureSessionIdentity(payload?.data?.control || {});
         syncCheatSessionFields();
         restoreOnlineSessionFromPayload(payload, { autoContinueFs: true });
+        resumePendingJackpot(payload);
         // Backup LAST_SESSION nếu JOIN thiếu freeSpins nhưng server có state
         setTimeout(() => {
           if (online && ws?.readyState === WebSocket.OPEN && !state.inFreeSpins) {
@@ -337,6 +340,7 @@ export function handleWSMessage(msg) {
 
       case '1502': // LAST_SESSION — same init shape as JOIN
         restoreOnlineSessionFromPayload(payload, { autoContinueFs: !state.spinning });
+        resumePendingJackpot(payload);
         resolvePendingCmd('1502', payload);
         break;
 
@@ -364,10 +368,34 @@ export function handleWSMessage(msg) {
         resolvePendingCmd('1999', payload);
         break;
 
+      case '1509': // JACKPOT_REVEAL response — resolved by requestGameCmd waiter
+        resolvePendingCmd('1509', payload);
+        break;
+
+      case '9000': // JACKPOT_WIN real-time push — resolves an active claim modal
+        onJackpotWinPush(payload);
+        break;
+
       case '1531': // BALANCE_UPDATED push
         applyOnlineBalance(payload, { syncBefore: !state.spinning });
         break;
     }
+  }
+}
+
+/**
+ * Reconnect resume: if the joined/last-session payload still carries a live Core Hack
+ * claim (2-phase pending), reopen the pick-and-click UI with the already-opened cells.
+ * Expired claims are not delivered here, so nothing is opened for them.
+ */
+export function resumePendingJackpot(payload) {
+  try {
+    const pjp = parseOnlineRound(payload).progressiveJackpot;
+    if (pjp && pjp.pending && pjp.winId) {
+      playJackpot(pjp); // routes to 2-phase playCoreHack (idempotent per winId)
+    }
+  } catch (_) {
+    /* ignore parse errors */
   }
 }
 

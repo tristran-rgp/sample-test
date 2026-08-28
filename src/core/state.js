@@ -50,6 +50,8 @@ export const state = {
   /** Spin vừa rồi — bấm badge để replay VFX từng feature */
   lastFeatureReplay: null,
   lastJackpotActive: false,
+  jackpotWinId: null,
+  jackpotOpened: {},
   blockedSymbols: [],
   globalMultiplier: 1,
   bypassProtocol: false,

@@ -219,6 +219,13 @@ export const JACKPOT_TIERS = [
 ];
 export const JACKPOT_CORE_IMG = ASSET + 'quantum-core-jackpot.webp';
 
+// Core Hack 2-phase wire (be-zero-day PluginCommand)
+export const JACKPOT_CMD = {
+  REVEAL: '1509', // open one Encrypted Node; BE auto-pays on Match-3
+  WIN_PUSH: '9000', // real-time JACKPOT_WIN broadcast
+};
+export const JACKPOT_TTL_SECONDS = 60; // fallback if server expiresAt missing
+
 export const REEL_STRIPS = [
   ['F','G','H','I','K','A','B','F','G','S','H','C','D','F','G','I','K','E','F','G','H','W','I','K','B','F','G','H','A','C'],
   ['F','G','H','I','K','B','C','F','G','H','D','I','K','E','F','G','S','H','I','K','A','F','G','W','H','I','K','C','D','F'],
