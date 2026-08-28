@@ -3,14 +3,16 @@
 // Backend contract (be-zero-day, JackpotServiceImpl / JackpotRevealHandler):
 //  - Trigger (inside SPIN 1500 / BUY 1501 response): features.progressiveJackpot =
 //      { isTriggered:true, pending:true, winId, expiresAt?, opened?:[{index,tier}] }
-//    NO tier / amount / nodes are ever sent here — the 15-node grid stays server-side.
+//    NO prize tier / amount / full nodes — the 15-node grid stays server-side.
 //  - REVEAL cmd 1509: send { cmd:"1509", win_id, index } → response:
-//      { winId, index, tier, paid, matched, opened:[{index}], expiresAt?, expired? }
+//      { winId, index, tier, paid, matched, opened:[{index,tier}], expiresAt?, expired? }
 //      when paid=true also: tier(prize), amount, balance.
+//  - opened[] always carries tier for already-opened cells so a NEW TAB can redraw
+//    icons without relying on in-session FE cache (index→tier).
 //  - JACKPOT_WIN push 9000: { event:"JACKPOT_WIN", winner, jackpotType, totalWin }
 //  - One PENDING claim per user blocks SPIN/BUY (BE error 1362) until paid.
 //  - Reconnect (JOIN 1005 / LAST_SESSION 1502): progressiveJackpot carries winId +
-//    opened (only already-opened cells) → resume, never the full grid.
+//    opened:[{index,tier}] only — never the full grid.
 import { state } from '../core/state.js';
 import { fmt, sleepRaw } from '../core/utils.js';
 import {
@@ -96,6 +98,7 @@ export function constrainJackpotNodes(rawTiers, winTier) {
 export function revealJackpotNode(node, tierName, idx) {
   const name = String(tierName || 'USER').toUpperCase();
   const num = String((idx | 0) + 1).padStart(2, '0');
+  node.classList.remove('jp-resumed');
   node.classList.add('opened', 'jp-' + name);
   node.innerHTML =
     '<div class="jp-hex-wrap"><div class="jp-hex-inner">' +
@@ -103,6 +106,42 @@ export function revealJackpotNode(node, tierName, idx) {
     '<span class="jp-ico">' + jackpotTierSvg(name) + '</span>' +
     '<span class="jp-name">' + name + '</span>' +
     '</div></div>';
+}
+
+/** Legacy/index-only opened cell — known opened but tier unknown (should be rare after BE fix). */
+function markResumedUnknown(node, idx) {
+  const num = String((idx | 0) + 1).padStart(2, '0');
+  node.classList.add('opened', 'jp-resumed');
+  node.innerHTML =
+    '<div class="jp-hex-wrap"><div class="jp-hex-inner">' +
+    '<span class="jp-num">' + num + '</span>' +
+    '<span class="jp-ico">◇</span>' +
+    '<span class="jp-name">OPEN</span>' +
+    '</div></div>';
+}
+
+/** Apply server opened[] into state + DOM. Prefers BE tier; falls back to session cache. */
+function applyOpenedFromServer(openedList, nodeEls) {
+  const list = Array.isArray(openedList) ? openedList : [];
+  list.forEach(o => {
+    const idx = Number(o?.index);
+    if (!Number.isFinite(idx) || idx < 0 || idx > 14) return;
+    const tierRaw = o?.tier || state.jackpotOpened?.[idx];
+    const tier = tierRaw ? String(tierRaw).toUpperCase() : '';
+    const node = nodeEls?.[idx];
+    if (!node) {
+      if (tier) state.jackpotOpened[idx] = tier;
+      return;
+    }
+    if (tier) {
+      state.jackpotOpened[idx] = tier;
+      if (!node.classList.contains('opened') || !node.classList.contains('jp-' + tier)) {
+        revealJackpotNode(node, tier, idx);
+      }
+    } else if (!node.classList.contains('opened')) {
+      markResumedUnknown(node, idx);
+    }
+  });
 }
 
 /** Resume an interrupted claim from a stored/known winId (used on 1362 gate). */
@@ -157,7 +196,13 @@ export async function playCoreHack(claim) {
     if (activeClaim) return 0;
 
   state.jackpotWinId = winId;
-  state.jackpotOpened = state.jackpotOpened || {};
+  // Server opened[] is source of truth for a fresh/resume claim; keep local cache only when
+  // resuming from gate (1362) without a full server opened payload.
+  if (!claim._resumeOnly) {
+    state.jackpotOpened = {};
+  } else {
+    state.jackpotOpened = state.jackpotOpened || {};
+  }
 
   sfx('charge', { gain: 0.8 });
   state.lastJackpotActive = true;
@@ -212,17 +257,9 @@ export async function playCoreHack(claim) {
     // Build all 15 hidden nodes first.
     for (let i = 0; i < 15; i++) buildNode(i);
 
-    // Restore already-opened cells (reconnect / gate resume).
+    // Restore already-opened cells (reconnect / JOIN / LAST_SESSION). Prefer BE tier.
     const resumed = Array.isArray(claim.opened) ? claim.opened : [];
-    resumed.forEach(o => {
-      const idx = Number(o.index);
-      if (idx < 0 || idx > 14) return;
-      const tier = o.tier || state.jackpotOpened[idx];
-      if (tier && nodeEls[idx]) {
-        state.jackpotOpened[idx] = tier;
-        revealJackpotNode(nodeEls[idx], tier, idx);
-      }
-    });
+    applyOpenedFromServer(resumed, nodeEls);
     setBanner();
     if (resumed.length) showToast('Core Hack resumed — continue opening nodes', '#00e8ff');
 
@@ -268,7 +305,11 @@ export async function playCoreHack(claim) {
         showToast('Reveal failed — try again', '#ff8800');
         return;
       }
-      const tier = resp.tier || 'USER';
+      // Sync full opened[] from BE (index+tier) so DOM/state stay consistent across tabs.
+      if (Array.isArray(resp.opened) && resp.opened.length) {
+        applyOpenedFromServer(resp.opened, nodeEls);
+      }
+      const tier = String(resp.tier || state.jackpotOpened[idx] || 'USER').toUpperCase();
       state.jackpotOpened[idx] = tier;
       revealJackpotNode(node, tier, idx);
       if (resp.matched) node.classList.add('jp-matched');

@@ -385,7 +385,8 @@ export function handleWSMessage(msg) {
 
 /**
  * Reconnect resume: if the joined/last-session payload still carries a live Core Hack
- * claim (2-phase pending), reopen the pick-and-click UI with the already-opened cells.
+ * claim (2-phase pending), reopen the pick-and-click UI with already-opened cells
+ * (`opened:[{index,tier}]` from BE — tiers required so a new tab can redraw icons).
  * Expired claims are not delivered here, so nothing is opened for them.
  */
 export function resumePendingJackpot(payload) {
