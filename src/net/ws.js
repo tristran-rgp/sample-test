@@ -630,13 +630,18 @@ export async function doOnlineSpin(opts = {}) {
     }
     renderGrid();
 
-    // 5b) Core Hack jackpot — pick-and-click VFX (win đã nằm trong totalWin)
+    // 5b) Core Hack jackpot — pick-and-click VFX (win đã nằm trong totalWin).
+    // Capture the paid amount so the post-spin balance section knows not to
+    // overwrite the paid balance (control.balance is pre-JP-pay).
+    let jpAmount = 0;
     if (jpOn) {
-      await playJackpot(jp);
+      jpAmount = await playJackpot(jp);
     }
 
     // Balance từ server
-    if (control?.balance != null && control.balance !== '') {
+    if (jpAmount > 0) {
+      // Balance đã mirror bởi applyOnlineBalance trong revealCell — không overwrite.
+    } else if (control?.balance != null && control.balance !== '') {
       setOnlineBalance(parseFloat(control.balance));
       state.balance = onlineBalance;
     } else if (payload) {

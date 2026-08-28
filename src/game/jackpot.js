@@ -127,6 +127,7 @@ export function onJackpotWinPush(payload) {
   if (activeClaim.timer) clearInterval(activeClaim.timer);
   activeClaim = null;
   state.lastJackpotActive = false;
+  sfx('jackpot', { gain: 1 });
   closeModal('modalJackpot');
   showToast(`🏆 JACKPOT WIN: ${fmt(amount)}!`, '#ff3355');
   if (amount > 0) {
@@ -151,9 +152,9 @@ export function onJackpotWinPush(payload) {
 export async function playCoreHack(claim) {
   const winId = claim?.winId;
   if (!winId) return 0;
-  // Idempotent: never run two modals for the same winId.
-  if (activeClaim && activeClaim.winId === winId) return activeClaim.done;
-  if (activeClaim) return 0;
+    // Idempotent: never run two modals for the same winId.
+    if (activeClaim && activeClaim.winId === winId) return 0;
+    if (activeClaim) return 0;
 
   state.jackpotWinId = winId;
   state.jackpotOpened = state.jackpotOpened || {};
@@ -220,7 +221,6 @@ export async function playCoreHack(claim) {
       if (tier && nodeEls[idx]) {
         state.jackpotOpened[idx] = tier;
         revealJackpotNode(nodeEls[idx], tier, idx);
-        nodeEls[idx].classList.add('jp-resumed');
       }
     });
     setBanner();
