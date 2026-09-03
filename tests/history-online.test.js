@@ -75,8 +75,8 @@ describe('1504 history list with jackpot rows', () => {
     expect(html).not.toContain('JACKPOT');
   });
 
-  it('detail with jackpotWin.nodes renders a read-only 15-node replay', async () => {
-    const nodes = ['USER', 'GOD', 'ELITE', 'GOD', 'USER', 'GHOST', 'GOD', 'ELITE', 'USER', 'GHOST', 'ELITE', 'USER', 'GOD', 'GHOST', 'USER'];
+  it('detail with jackpotWin.nodes renders opened cells, masks the rest', async () => {
+    const nodes = ['HIDDEN', 'GOD', 'HIDDEN', 'GOD', 'HIDDEN', 'HIDDEN', 'GOD', 'USER', 'HIDDEN', 'HIDDEN', 'HIDDEN', 'HIDDEN', 'HIDDEN', 'HIDDEN', 'HIDDEN'];
     requestGameCmd.mockImplementation(async (cmd) => {
       if (cmd === '1504') return { spins: [SPIN] };
       return {
@@ -95,6 +95,7 @@ describe('1504 history list with jackpot rows', () => {
               { index: 1, tier: 'GOD' },
               { index: 3, tier: 'GOD' },
               { index: 6, tier: 'GOD' },
+              { index: 7, tier: 'USER' },
             ],
           },
         },
@@ -103,10 +104,16 @@ describe('1504 history list with jackpot rows', () => {
     await renderHistoryOnline();
     document.querySelector('#historyList .history-item[data-kind="spin"]').click();
     for (let i = 0; i < 5; i++) await new Promise((r) => setTimeout(r, 0));
-    const cells = document.querySelectorAll('#spinDetailBody #sdJackpotGrid .jackpot-node.opened');
-    expect(cells.length).toBe(15);
-    expect(
-      document.querySelectorAll('#spinDetailBody #sdJackpotGrid .jp-matched').length,
-    ).toBe(3);
+    const grid = document.querySelector('#spinDetailBody #sdJackpotGrid');
+    expect(grid.querySelectorAll('.jackpot-node').length).toBe(15);
+    expect(grid.querySelectorAll('.jackpot-node.opened').length).toBe(4);
+    // Only opened cells with the winning tier are marked matched.
+    expect(grid.querySelectorAll('.jp-matched').length).toBe(3);
+    // Masked cells stay closed with the encrypted-core art, like the live board.
+    const closed = [...grid.querySelectorAll('.jackpot-node')].filter(
+      (el) => !el.classList.contains('opened'),
+    );
+    expect(closed.length).toBe(11);
+    expect(closed.every((el) => el.querySelector('img[alt="Encrypted Node"]'))).toBe(true);
   });
 });

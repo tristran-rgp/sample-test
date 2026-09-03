@@ -1,10 +1,10 @@
 // src/ui/historyOnline.js — extracted from main.js
 import { ws } from '../core/state.js';
 import { fmt } from '../core/utils.js';
-import { ROWS, SYMBOLS, SYM_MAP } from '../game/config.js';
+import { JACKPOT_CORE_IMG, ROWS, SYMBOLS, SYM_MAP } from '../game/config.js';
 import { revealJackpotNode } from '../game/jackpot.js';
 import { requestGameCmd } from '../net/session.js';
-import { imgTag } from './assets.js';
+import { imgTag, setImgSrc } from './assets.js';
 import { openModal } from './feedback.js';
 
 export let lastDetailSpinId = null;
@@ -114,8 +114,17 @@ export function paintJackpotReplay(root, jackpotWin) {
   );
   const winTier = String(jackpotWin.tier || '').toUpperCase();
   root.querySelectorAll('#sdJackpotGrid .jackpot-node').forEach((el, i) => {
-    revealJackpotNode(el, nodes[i], i);
-    if (openedSet.has(i) && String(nodes[i] || '').toUpperCase() === winTier) {
+    const tier = String(nodes[i] || '').toUpperCase();
+    // BE masks cells the player never opened — draw them closed like the live board.
+    if (!tier || tier === 'HIDDEN') {
+      const coreImg = document.createElement('img');
+      setImgSrc(coreImg, JACKPOT_CORE_IMG);
+      coreImg.alt = 'Encrypted Node';
+      el.appendChild(coreImg);
+      return;
+    }
+    revealJackpotNode(el, tier, i);
+    if (openedSet.has(i) && tier === winTier) {
       el.classList.add('jp-matched');
     }
   });
