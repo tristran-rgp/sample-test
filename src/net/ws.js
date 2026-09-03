@@ -5,7 +5,7 @@ import { CORE_HACK, REELS, REEL_STRIPS, SYMBOLS, SYM_MAP, WIN_CAP } from '../gam
 import { beginFx, settleAfterSpinPresentation } from '../game/flow.js';
 import { continueAfterSpin, stopAutoSpin, updateAutoUI } from '../game/fsAuto.js';
 import { createEmptyGrid } from '../game/grid.js';
-import { onJackpotWinPush, playJackpot, resumeActiveClaim } from '../game/jackpot.js';
+import { onJackpotAutoPayPush, onJackpotWinPush, playJackpot, resumeActiveClaim } from '../game/jackpot.js';
 import { captureLastFeatureReplay, renderLastSpinFeatureMeter, screenToForcedResults } from '../game/replay.js';
 import { FEATURE_PRESENT, applyCellMultipliers, applyOnlineBalance, applyOnlineFreeSpinFlow, applyServerScreen, handleForceLogout, mapServerFeatureName, parseOnlineRound, presentOnlineFeatureSequence, resolvePendingCmd, restoreOnlineSessionFromPayload, returnToLogin } from './session.js';
 import { closeModal, openModal, showToast } from '../ui/feedback.js';
@@ -368,8 +368,10 @@ export function handleWSMessage(msg) {
         resolvePendingCmd('1999', payload);
         break;
 
-      case '1509': // JACKPOT_REVEAL response — resolved by requestGameCmd waiter
-        resolvePendingCmd('1509', payload);
+      case '1509': // JACKPOT_REVEAL response — or unsolicited TTL auto-pay Match-3 push
+        if (!resolvePendingCmd('1509', payload)) {
+          onJackpotAutoPayPush(payload);
+        }
         break;
 
       case '9000': // JACKPOT_WIN real-time push — resolves an active claim modal
