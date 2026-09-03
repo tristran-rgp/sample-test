@@ -24,18 +24,32 @@ export async function renderHistoryOnline() {
     list.innerHTML = '<p style="color:var(--dim);text-align:center;padding:20px">No server history yet</p>';
     return;
   }
-  list.innerHTML = spins.map((h, idx) => {
-    const bet = Number(h.betAmount ?? h.totalBet ?? 0);
-    const win = Number(h.totalWin ?? h.win ?? 0);
-    const profit = Number(h.profit != null ? h.profit : win - bet);
-    const mode = h.mode || h.thisMode || 'base';
-    const ts = h.timestamp ? String(h.timestamp).replace('T', ' ').slice(0, 19) : '';
-    const spinId = h.spinId || '';
-    const roundId = h.roundId || '';
-    return `
-    <div class="history-item" data-spin-id="${spinId}" data-round-id="${roundId}" style="cursor:pointer" title="Open detail">
+  list.innerHTML = spins.map((h, idx) => rowHtml(h, idx)).join('');
+
+  list.querySelectorAll('.history-item[data-spin-id]').forEach(el => {
+    el.addEventListener('click', () => openSpinDetailOnline(el.dataset.spinId, el.dataset.roundId));
+  });
+}
+
+/** One 1504 row → list HTML. Jackpot rows share their trigger spin's roundId (BE display join). */
+export function rowHtml(h, idx) {
+  if (h?.kind === 'jackpot_win') return jackpotRowHtml(h);
+  return spinRowHtml(h, idx);
+}
+
+function spinRowHtml(h, idx) {
+  const bet = Number(h.betAmount ?? h.totalBet ?? 0);
+  const win = Number(h.totalWin ?? h.win ?? 0);
+  const profit = Number(h.profit != null ? h.profit : win - bet);
+  const mode = h.mode || h.thisMode || 'base';
+  const ts = h.timestamp ? String(h.timestamp).replace('T', ' ').slice(0, 19) : '';
+  const spinId = h.spinId || '';
+  const roundId = h.roundId || '';
+  const jpTag = h.jackpotWonTier ? ` · JP ${h.jackpotWonTier}` : '';
+  return `
+    <div class="history-item" data-kind="spin" data-spin-id="${spinId}" data-round-id="${roundId}" style="cursor:pointer" title="Open detail">
       <div style="display:flex;justify-content:space-between">
-        <span>${mode} · #${h.spinIndex || idx + 1}${h.buyFeatureTrigger ? ' · buy' : ''}${h.maxWinReached ? ' · CAP' : ''}</span>
+        <span>${mode} · #${h.spinIndex || idx + 1}${h.buyFeatureTrigger ? ' · buy' : ''}${h.maxWinReached ? ' · CAP' : ''}${jpTag}</span>
         <span class="${profit >= 0 ? 'history-profit-pos' : 'history-profit-neg'}">${profit >= 0 ? '+' : ''}${fmt(profit)}</span>
       </div>
       <div style="color:var(--dim);font-size:.7rem;margin-top:2px">
@@ -45,11 +59,30 @@ export async function renderHistoryOnline() {
         spinId: ${spinId || '—'} · roundId: ${roundId || '—'}
       </div>
     </div>`;
-  }).join('');
+}
 
-  list.querySelectorAll('.history-item[data-spin-id]').forEach(el => {
-    el.addEventListener('click', () => openSpinDetailOnline(el.dataset.spinId, el.dataset.roundId));
-  });
+function jackpotRowHtml(h) {
+  const amount = Number(h.totalWin ?? h.win ?? h.jackpotWonAmount ?? h.amount ?? 0);
+  const tier = h.jackpotWonTier || h.jackpotType || 'JACKPOT';
+  const ts = h.timestamp || h.createdAt
+    ? String(h.timestamp || h.createdAt).replace('T', ' ').slice(0, 19)
+    : '';
+  const spinId = h.spinId || '';
+  const roundId = h.roundId || '';
+  const winId = h.winId || '';
+  return `
+    <div class="history-item" data-kind="jackpot_win" data-spin-id="${spinId}" data-round-id="${roundId}" data-win-id="${winId}" style="cursor:pointer;border-color:var(--orange,#e8a33d)" title="Open triggering spin">
+      <div style="display:flex;justify-content:space-between">
+        <span style="color:var(--orange,#e8a33d)">◆ JACKPOT · ${tier}</span>
+        <span class="history-profit-pos">+${fmt(amount)}</span>
+      </div>
+      <div style="color:var(--dim);font-size:.7rem;margin-top:2px">
+        Win: ${fmt(amount)}${ts ? ` | ${ts}` : ''}
+      </div>
+      <div style="color:var(--dim);font-size:.65rem;margin-top:2px;word-break:break-all">
+        winId: ${winId || '—'} · roundId: ${roundId || '—'}
+      </div>
+    </div>`;
 }
 
 export async function openSpinDetailOnline(spinId, roundId) {
