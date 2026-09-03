@@ -74,4 +74,39 @@ describe('1504 history list with jackpot rows', () => {
     expect(html).toContain('data-kind="spin"');
     expect(html).not.toContain('JACKPOT');
   });
+
+  it('detail with jackpotWin.nodes renders a read-only 15-node replay', async () => {
+    const nodes = ['USER', 'GOD', 'ELITE', 'GOD', 'USER', 'GHOST', 'GOD', 'ELITE', 'USER', 'GHOST', 'ELITE', 'USER', 'GOD', 'GHOST', 'USER'];
+    requestGameCmd.mockImplementation(async (cmd) => {
+      if (cmd === '1504') return { spins: [SPIN] };
+      return {
+        detail: {
+          ...SPIN,
+          jackpotWonTier: 'GOD',
+          jackpotWonAmount: 100,
+          jackpotWin: {
+            winId: 'win-1',
+            tier: 'GOD',
+            amount: 100,
+            spinId: 'spin-1',
+            roundId: 'round-1',
+            nodes,
+            opened: [
+              { index: 1, tier: 'GOD' },
+              { index: 3, tier: 'GOD' },
+              { index: 6, tier: 'GOD' },
+            ],
+          },
+        },
+      };
+    });
+    await renderHistoryOnline();
+    document.querySelector('#historyList .history-item[data-kind="spin"]').click();
+    for (let i = 0; i < 5; i++) await new Promise((r) => setTimeout(r, 0));
+    const cells = document.querySelectorAll('#spinDetailBody #sdJackpotGrid .jackpot-node.opened');
+    expect(cells.length).toBe(15);
+    expect(
+      document.querySelectorAll('#spinDetailBody #sdJackpotGrid .jp-matched').length,
+    ).toBe(3);
+  });
 });

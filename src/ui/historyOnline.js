@@ -2,6 +2,7 @@
 import { ws } from '../core/state.js';
 import { fmt } from '../core/utils.js';
 import { ROWS, SYMBOLS, SYM_MAP } from '../game/config.js';
+import { revealJackpotNode } from '../game/jackpot.js';
 import { requestGameCmd } from '../net/session.js';
 import { imgTag } from './assets.js';
 import { openModal } from './feedback.js';
@@ -85,8 +86,42 @@ function jackpotRowHtml(h) {
     </div>`;
 }
 
-export async function openSpinDetailOnline(spinId, roundId) {
-  if (!spinId) return;
+/**
+ * Read-only Core Hack replay (1506 jackpotWin block). Same 15-node board as the live
+ * minigame, painted with the shared revealJackpotNode visuals; clicks disabled.
+ * Returns '' when the round has no PAID grid snapshot (legacy rows).
+ */
+export function jackpotReplayHtml(jackpotWin) {
+  const nodes = jackpotWin?.nodes;
+  if (!Array.isArray(nodes) || nodes.length !== 15) return '';
+  const cells = nodes.map((_, i) => `<div class="jackpot-node" data-jp="${i}"></div>`).join('');
+  return `
+    <div style="margin:4px 0 12px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+        <strong style="color:var(--orange,#e8a33d);font-size:.8rem;letter-spacing:1px">◆ CORE HACK REPLAY · ${jackpotWin.tier || ''}</strong>
+        <span class="history-profit-pos">+${fmt(jackpotWin.amount ?? 0)}</span>
+      </div>
+      <div class="jackpot-grid" id="sdJackpotGrid" style="pointer-events:none">${cells}</div>
+    </div>`;
+}
+
+/** Paint the replay board built by jackpotReplayHtml. No-op when absent. */
+export function paintJackpotReplay(root, jackpotWin) {
+  const nodes = jackpotWin?.nodes;
+  if (!Array.isArray(nodes) || nodes.length !== 15) return;
+  const openedSet = new Set(
+    (Array.isArray(jackpotWin.opened) ? jackpotWin.opened : []).map(o => Number(o?.index)),
+  );
+  const winTier = String(jackpotWin.tier || '').toUpperCase();
+  root.querySelectorAll('#sdJackpotGrid .jackpot-node').forEach((el, i) => {
+    revealJackpotNode(el, nodes[i], i);
+    if (openedSet.has(i) && String(nodes[i] || '').toUpperCase() === winTier) {
+      el.classList.add('jp-matched');
+    }
+  });
+}
+
+export async function openSpinDetailOnline(spinId, roundId) {  if (!spinId) return;
   lastDetailSpinId = spinId;
   lastDetailRoundId = roundId || spinId;
   const body = document.getElementById('spinDetailBody');
@@ -170,6 +205,7 @@ export async function openSpinDetailOnline(spinId, roundId) {
       <div style="background:rgba(0,0,0,.35);border:1px solid #1e3a5f;border-radius:8px;padding:8px;text-align:center"><div style="font-size:.65rem;color:var(--dim)">WIN</div><div style="color:var(--green)">${fmt(win)}</div></div>
       <div style="background:rgba(0,0,0,.35);border:1px solid #1e3a5f;border-radius:8px;padding:8px;text-align:center"><div style="font-size:.65rem;color:var(--dim)">PROFIT</div><div class="${profit >= 0 ? 'history-profit-pos' : 'history-profit-neg'}">${profit >= 0 ? '+' : ''}${fmt(profit)}</div></div>
     </div>
+    ${jackpotReplayHtml(d.jackpotWin)}
     ${gridHtml}
     <div style="display:flex;justify-content:space-between;align-items:baseline">
       <strong style="color:var(--text);font-size:.85rem;letter-spacing:1px">WAY WINS (${wins.length})</strong>
@@ -222,6 +258,7 @@ export async function openSpinDetailOnline(spinId, roundId) {
     bindWins();
   };
   bindWins(); bindPager();
+  paintJackpotReplay(body, d.jackpotWin);
   if (btnRounds) {
     btnRounds.style.display = 'inline-block';
     btnRounds.onclick = () => openSessionRoundsOnline(lastDetailRoundId || lastDetailSpinId);
