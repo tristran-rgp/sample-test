@@ -184,6 +184,22 @@ export function onJackpotWinPush(payload) {
 }
 
 /**
+ * Unsolicited 1509 push from TTL auto-pay (Match-3 shaped). Applies opened[] then finishes
+ * the active Core Hack modal. No-op when no claim is open or winId mismatches.
+ */
+export function onJackpotAutoPayPush(payload) {
+  if (!payload?.paid || !activeClaim || activeClaim.finished) return false;
+  if (payload.winId && activeClaim.winId && String(payload.winId) !== String(activeClaim.winId)) {
+    return false;
+  }
+  if (typeof activeClaim.applyPaidReveal === 'function') {
+    activeClaim.applyPaidReveal(payload);
+    return true;
+  }
+  return false;
+}
+
+/**
  * Open the Core Hack pick-and-click UI for a 2-phase claim.
  * @param {{winId:string, expiresAt?:string, opened?:Array<{index:number,tier?:string}>, _resumeOnly?:boolean}} claim
  * @returns {Promise<number>} resolves with the paid amount (0 if closed without pay)
@@ -221,6 +237,7 @@ export async function playCoreHack(claim) {
       done: resolve,
       timer: null,
       expiresAt: claim.expiresAt ? new Date(claim.expiresAt).getTime() : null,
+      applyPaidReveal: null,
     };
     activeClaim = controller;
 
@@ -291,6 +308,30 @@ export async function playCoreHack(claim) {
       resolve(amount);
     };
 
+    const applyPaidBoard = (resp) => {
+      if (Array.isArray(resp.opened) && resp.opened.length) {
+        applyOpenedFromServer(resp.opened, nodeEls);
+        const winTier = String(resp.tier || '').toUpperCase();
+        if (winTier) {
+          nodeEls.forEach((el, i) => {
+            if (!el) return;
+            const t = String(state.jackpotOpened[i] || '').toUpperCase();
+            if (t === winTier) el.classList.add('jp-matched');
+          });
+        }
+      }
+      setBanner(resp.expired ? 'Auto-paid' : 'Match-3');
+      if (resp.balance != null) {
+        try { applyOnlineBalance({ control: { balance: String(resp.balance) } }); } catch (_) {}
+      }
+      const tier = String(resp.tier || controller.targetTier || 'USER').toUpperCase();
+      const amount = Number(resp.amount || 0);
+      controller.lastAmount = amount;
+      controller.targetTier = tier;
+      finish(tier, amount, { expired: !!resp.expired, fromPush: !!resp._fromPush });
+    };
+    controller.applyPaidReveal = (payload) => applyPaidBoard({ ...payload, _fromPush: true });
+
     const onClickNode = async (idx, node) => {
       if (controller.finished) return;
       if (node.classList.contains('opened')) return;
@@ -316,13 +357,7 @@ export async function playCoreHack(claim) {
       setBanner();
 
       if (resp.paid) {
-        // Wallet credited server-side — mirror the new balance into the UI.
-        if (resp.balance != null) {
-          try { applyOnlineBalance({ control: { balance: String(resp.balance) } }); } catch (_) {}
-        }
-        controller.lastAmount = Number(resp.amount || 0);
-        controller.targetTier = resp.tier || tier;
-        finish(resp.tier || tier, Number(resp.amount || 0), { expired: resp.expired });
+        applyPaidBoard(resp);
         return;
       }
       // Still open — refresh countdown if server sent a fresh expiresAt.
