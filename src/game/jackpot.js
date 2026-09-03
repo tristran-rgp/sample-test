@@ -10,6 +10,8 @@
 //  - opened[] always carries tier for already-opened cells so a NEW TAB can redraw
 //    icons without relying on in-session FE cache (index→tier).
 //  - JACKPOT_WIN push 9000: { event:"JACKPOT_WIN", winner, jackpotType, totalWin }
+//  - TTL expiry: server auto-pays only. FE must NOT force-reveal / send 1509 on
+//    behalf of the player — wait for unsolicited 1509 Match-3 push (or 9000).
 //  - One PENDING claim per user blocks SPIN/BUY (BE error 1362) until paid.
 //  - Reconnect (JOIN 1005 / LAST_SESSION 1502): progressiveJackpot carries winId +
 //    opened:[{index,tier}] only — never the full grid.
@@ -234,6 +236,7 @@ export async function playCoreHack(claim) {
       targetTier: null,
       lastAmount: 0,
       finished: false,
+      expired: false,
       done: resolve,
       timer: null,
       expiresAt: claim.expiresAt ? new Date(claim.expiresAt).getTime() : null,
@@ -333,12 +336,13 @@ export async function playCoreHack(claim) {
     controller.applyPaidReveal = (payload) => applyPaidBoard({ ...payload, _fromPush: true });
 
     const onClickNode = async (idx, node) => {
-      if (controller.finished) return;
+      if (controller.finished || controller.expired) return;
       if (node.classList.contains('opened')) return;
       await revealCell(idx, node);
     };
 
     const revealCell = async (idx, node) => {
+      if (controller.finished || controller.expired) return;
       sfx('tick', { gain: 0.5 });
       const resp = await sendReveal(winId, idx);
       if (!resp) {
@@ -364,7 +368,16 @@ export async function playCoreHack(claim) {
       if (resp.expiresAt) controller.expiresAt = new Date(resp.expiresAt).getTime();
     };
 
-    // Countdown (TTL). On expiry, force a final reveal to let BE auto-pay.
+    const markClaimExpiredLocally = () => {
+      if (controller.finished || controller.expired) return;
+      controller.expired = true;
+      if (timerEl) timerEl.textContent = '⏰ expired — settling…';
+      setBanner('Waiting for auto-pay');
+      // Clicks disabled; settlement comes from server push (1509 / 9000), not FE reveal.
+      if (grid) grid.style.pointerEvents = 'none';
+    };
+
+    // Countdown (TTL). On expiry: stop clicks and wait for server auto-pay — never force-reveal.
     const tickCountdown = () => {
       if (!controller.expiresAt) {
         if (timerEl) timerEl.textContent = '⏳ no timer';
@@ -372,13 +385,7 @@ export async function playCoreHack(claim) {
       }
       const remainMs = controller.expiresAt - Date.now();
       if (remainMs <= 0) {
-        if (timerEl) timerEl.textContent = '⏰ expired';
-        if (!controller.finished) {
-          // Force settlement: reveal a still-closed node (BE auto-pays on expired).
-          const next = nodeEls.find((n, i) => n && !n.classList.contains('opened'));
-          const idx = next ? nodeEls.indexOf(next) : 0;
-          revealCell(idx, next || nodeEls[0]).catch(() => {});
-        }
+        markClaimExpiredLocally();
         return;
       }
       const s = Math.ceil(remainMs / 1000);
@@ -387,7 +394,7 @@ export async function playCoreHack(claim) {
     tickCountdown();
     controller.timer = setInterval(tickCountdown, 500);
 
-    // If no timer from server, allow manual expiry fallback.
+    // If no timer from server, allow manual expiry fallback (still no FE force-reveal).
     if (!controller.expiresAt) {
       controller.expiresAt = Date.now() + JACKPOT_TTL_SECONDS * 1000;
     }
