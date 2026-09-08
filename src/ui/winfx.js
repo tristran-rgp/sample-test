@@ -3,7 +3,6 @@ import { state } from '../core/state.js';
 import { fmt, sleepRaw } from '../core/utils.js';
 import { REELS, REF_BET, ROWS } from '../game/config.js';
 import { sfx } from '../sfx/sfx.js';
-import { setInfoBar } from './render.js';
 import { isVfxSkip } from './vfx/core.js';
 
 // ─── Win effects ─────────────────────────────────────────────
@@ -68,8 +67,8 @@ export const WIN_SEQ = {
 export function positionWinFxToReels() {
   const stage = document.querySelector('#winOverlay .win-fx-stage');
   const target =
-    document.getElementById('reelsWrapper') ||
-    document.getElementById('reelsGrid');
+    document.getElementById('reelsGrid') ||
+    document.getElementById('reelsWrapper');
   if (!stage || !target) return;
   const r = target.getBoundingClientRect();
   if (!r.width || !r.height) return;
@@ -219,11 +218,9 @@ export async function tickerWin(from, to) {
   await runMoneyTicker(from, to, {
     durationMs: state.fastSpin ? 140 : 320,
     onTick: (val) => {
-      setInfoBar('win', `WIN ${fmt(val)}`);
       document.getElementById('headerWin').textContent = val.toFixed(2);
     },
   });
-  setInfoBar('win', `WIN ${fmt(to)}`);
   document.getElementById('headerWin').textContent = Number(to).toFixed(2);
 }
 

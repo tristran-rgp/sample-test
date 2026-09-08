@@ -20,6 +20,19 @@ export function listPreloadUrls() {
   add(ASSET + 'spin.webp');
   add(ASSET + 'auto-spin.webp');
   add(ASSET + 'buy-free-spin.webp');
+  add(ASSET + 'art-new/background.webp');
+  add(ASSET + 'art-new/panel-reel.webp');
+  add(ASSET + 'art-new/layer-top-banner-bar.webp');
+  add(ASSET + 'art-new/panel-feature-meter.webp');
+  add(ASSET + 'art-new/panel-bottom.webp');
+  add(ASSET + 'art-new/panel-balance.webp');
+  add(ASSET + 'art-new/panel-bet.webp');
+  add(ASSET + 'art-new/panel-win-amount.webp');
+  add(ASSET + 'art-new/panel-show-multi.webp');
+  add(ASSET + 'art-new/pannel-total-balance.webp');
+  add(ASSET + 'art-new/btn-spin.webp');
+  add(ASSET + 'art-new/btn-auto-spin.webp');
+  add(ASSET + 'art-new/btn-fast-spin.webp');
   return [...urls];
 }
 

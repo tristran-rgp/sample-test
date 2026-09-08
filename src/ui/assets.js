@@ -3,9 +3,11 @@ import { SYMBOLS } from '../game/config.js';
 
 export const ASSET = 'assert/';
 
-/** All assets are WebP-only (PNG files removed). Canonical paths may still say .png. */
+/** All assets are WebP-only (PNG/JPG removed). Canonical paths may still say .png/.jpg. */
 export function toPngPath(path) {
-  return String(path || '').replace(/\.png(\?|#|$)/i, '.webp$1');
+  return String(path || '')
+    .replace(/\.png(\?|#|$)/i, '.webp$1')
+    .replace(/\.jpe?g(\?|#|$)/i, '.webp$1');
 }
 export function assetUrl(path) {
   const p = toPngPath(path);

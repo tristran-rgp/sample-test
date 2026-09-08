@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -8,6 +9,7 @@
   <script type="module" src="/src/main.js"></script>
   <link rel="stylesheet" href="/src/style.css" />
 </head>
+
 <body class="pack-art-new">
 
   <!-- Ambient cyber stage (behind UI) -->
@@ -77,575 +79,651 @@
       <p style="text-align:center;color:var(--dim);font-size:.8rem;margin-bottom:16px">Connect to server</p>
       <div class="form-group">
         <label>Server</label>
-        <input id="srvUrl" value="https://agency001.relaxwmestu.xyz" style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
+        <input id="srvUrl" value="https://agency001.relaxwmestu.xyz"
+          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
       </div>
       <div class="form-group">
         <label>Username</label>
-        <input id="loginUser" value="Tris12" style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
+        <input id="loginUser" value="Tris12"
+          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input id="loginPass" type="password" value="T12345678" style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
+        <input id="loginPass" type="password" value="T12345678"
+          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
       </div>
       <div class="form-group" style="margin-top:4px">
         <label>WS URL</label>
-        <input id="wsUrl" value="wss://gob02-ws.relaxwmestu.xyz/websocket" style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
+        <input id="wsUrl" value="wss://gob02-ws.relaxwmestu.xyz/websocket"
+          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
       </div>
       <div class="form-group" style="margin-top:4px">
         <label>Game ID</label>
-        <input id="gameId" value="yama_01023" style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
+        <input id="gameId" value="yama_01023"
+          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
       </div>
       <div style="display:flex;gap:8px;margin-top:14px">
-        <button id="btnPlayOnline" class="btn" title="Enter" style="flex:1;padding:12px;background:linear-gradient(135deg,#003344,#005566);border-color:var(--cyan);color:var(--cyan);font-size:1rem;font-weight:700;box-shadow:var(--glow-cyan)">Play Online</button>
-        <button id="btnPlayOffline" class="btn" style="flex:1;padding:12px;background:#1a1a2e;border-color:#555;color:#aaa;font-size:1rem">Play Offline</button>
+        <button id="btnPlayOnline" class="btn" title="Enter"
+          style="flex:1;padding:12px;background:linear-gradient(135deg,#003344,#005566);border-color:var(--cyan);color:var(--cyan);font-size:1rem;font-weight:700;box-shadow:var(--glow-cyan)">Play
+          Online</button>
+        <button id="btnPlayOffline" class="btn"
+          style="flex:1;padding:12px;background:#1a1a2e;border-color:#555;color:#aaa;font-size:1rem">Play
+          Offline</button>
       </div>
       <div id="loginStatus" style="margin-top:10px;font-size:.8rem;color:var(--dim);text-align:center"></div>
-      <div id="loginLoadStatus" style="margin-top:10px;font-size:.72rem;color:var(--dim);text-align:center;letter-spacing:.4px">Loading assets…</div>
+      <div id="loginLoadStatus"
+        style="margin-top:10px;font-size:.72rem;color:var(--dim);text-align:center;letter-spacing:.4px">Loading assets…
+      </div>
       <div style="height:3px;background:#12182a;border-radius:2px;margin-top:8px;overflow:hidden">
-        <div id="loginLoadFill" style="height:100%;width:0%;background:var(--cyan);box-shadow:var(--glow-cyan);transition:width .15s"></div>
+        <div id="loginLoadFill"
+          style="height:100%;width:0%;background:var(--cyan);box-shadow:var(--glow-cyan);transition:width .15s"></div>
       </div>
     </div>
   </div>
 
   <!-- Connection Status Bar -->
-  <div id="connBar" style="display:none;height:24px;background:rgba(0,0,0,.85);border-bottom:1px solid #1e3a5f;flex-shrink:0;align-items:center;padding:0 14px;font-size:.7rem;color:var(--dim);gap:12px;z-index:20">
+  <div id="connBar"
+    style="display:none;height:24px;background:rgba(0,0,0,.85);border-bottom:1px solid #1e3a5f;flex-shrink:0;align-items:center;padding:0 14px;font-size:.7rem;color:var(--dim);gap:12px;z-index:20">
     <span id="connDot" style="display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px"></span>
     <span id="connText">Disconnected</span>
     <span id="sessionLabel" style="margin-left:auto;color:#555"></span>
-    <button id="btnDisconnect" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.65rem">✕</button>
+    <button id="btnDisconnect"
+      style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.65rem">✕</button>
   </div>
 
   <!-- Splash -->
   <div id="splash">
     <div class="splash-logo">ZERO DAY</div>
     <div class="splash-sub">DEEP WEB INFILTRATION</div>
-    <div class="splash-bar"><div class="splash-fill" id="splashFill"></div></div>
+    <div class="splash-bar">
+      <div class="splash-fill" id="splashFill"></div>
+    </div>
   </div>
 
-<!-- Game -->
-<div id="game">
-  <div class="top-chrome">
-    <span id="clockLabel">PLAYING FOR FUN</span>
-    <span class="title-right">ZERO DAY</span>
-  </div>
-
-  <div class="stage">
-    <div class="logo-badge" title="ZERO DAY">
-      <div class="logo-main">ZERO</div>
-      <div class="logo-sub">DAY HACK</div>
+  <!-- Game -->
+  <div id="game">
+    <div class="top-chrome">
+      <span id="clockLabel">PLAYING FOR FUN</span>
+      <span class="title-right">ZERO DAY</span>
     </div>
 
-    <div class="playfield">
-      <div class="game-frame">
-        <div class="meter-shell">
-          <div class="feature-meter" id="featureMeter"></div>
-          <div class="info-bar" id="infoBar">
-            <div class="marquee" id="infoMarquee">Win up to 19,693× Bet &nbsp;•&nbsp; 3 Scatters trigger Deep Web Infiltration &nbsp;•&nbsp; 12 Hacking Features &nbsp;•&nbsp; Good luck, hacker</div>
-          </div>
-          <div class="mult-box"><span class="x">x</span><span id="multDisplay">01</span></div>
-        </div>
+    <div class="stage">
+      <div class="logo-badge" title="ZERO DAY">
+        <div class="logo-main">ZERO</div>
+        <div class="logo-sub">DAY HACK</div>
+      </div>
 
-        <div class="fs-banner" id="fsBanner">
-          ⚡ DEEP WEB INFILTRATION — SPINS LEFT: <span id="fsCount">0</span>
-          <button type="button" class="fs-edit-chip" id="btnFsEditGrid" title="Sửa grid lượt FS này">EDIT GRID</button>
-        </div>
-
-        <div class="reels-wrapper ambient-on" id="reelsWrapper">
-          <div class="reels-grid" id="reelsGrid"></div>
-          <div id="vfxLayer" aria-hidden="true">
-            <canvas id="vfxCanvas"></canvas>
-            <div id="vfxStage"></div>
-            <div id="vfxVignette"></div>
-            <div id="vfxBloom"></div>
-            <div id="vfxFeatureIntro">
-              <div class="intro-ring"></div>
-              <img id="vfxIntroImg" src="" alt="">
-              <div class="intro-name" id="vfxIntroName">FEATURE</div>
+      <div class="playfield">
+        <div class="game-frame">
+          <div class="meter-shell">
+            <div class="feature-meter" id="featureMeter"></div>
+            <div class="info-bar" id="infoBar">
+              <div class="marquee" id="infoMarquee">Win up to 19,693× Bet &nbsp;•&nbsp; 3 Scatters trigger Deep Web
+                Infiltration &nbsp;•&nbsp; 12 Hacking Features &nbsp;•&nbsp; Good luck, hacker</div>
             </div>
-            <div id="vfxExplainCard">
-              <div class="explain-head">
-                <img id="vfxExplainImg" src="" alt="">
-                <div class="explain-titles">
-                  <div class="explain-kicker">TÍNH NĂNG ĐANG KÍCH HOẠT</div>
-                  <div class="explain-name" id="vfxExplainName">—</div>
+          </div>
+
+          <div class="fs-banner" id="fsBanner">
+            ⚡ DEEP WEB INFILTRATION — SPINS LEFT: <span id="fsCount">0</span>
+            <button type="button" class="fs-edit-chip" id="btnFsEditGrid" title="Sửa grid lượt FS này">EDIT
+              GRID</button>
+          </div>
+
+          <div class="reels-wrapper ambient-on" id="reelsWrapper">
+            <div class="reels-grid-host">
+              <div class="reels-stack">
+                <div class="grid-top-hud" id="gridTopHud">
+                  <div class="grid-hud-left" aria-hidden="true"></div>
+                  <div class="grid-hud-win win-block" title="Bấm để xem cách tính win">
+                    <span class="val win-slot" id="headerWin">0.00</span>
+                    <button type="button" class="win-explain-btn" id="btnWinExplain"
+                      title="Giải thích win spin vừa rồi">⌕</button>
+                  </div>
+                  <div class="mult-box"><span class="x">x</span><span id="multDisplay">01</span></div>
+                </div>
+                <div class="reels-grid" id="reelsGrid"></div>
+              </div>
+            </div>
+            <div id="vfxLayer" aria-hidden="true">
+              <canvas id="vfxCanvas"></canvas>
+              <div id="vfxStage"></div>
+              <div id="vfxVignette"></div>
+              <div id="vfxBloom"></div>
+              <div id="vfxFeatureIntro">
+                <div class="intro-ring"></div>
+                <img id="vfxIntroImg" src="" alt="">
+                <div class="intro-name" id="vfxIntroName">FEATURE</div>
+              </div>
+              <div id="vfxExplainCard">
+                <div class="explain-head">
+                  <img id="vfxExplainImg" src="" alt="">
+                  <div class="explain-titles">
+                    <div class="explain-kicker">TÍNH NĂNG ĐANG KÍCH HOẠT</div>
+                    <div class="explain-name" id="vfxExplainName">—</div>
+                  </div>
+                </div>
+                <div class="explain-label" id="vfxExplainLabelWhat">Feature sẽ làm gì?</div>
+                <div class="explain-body" id="vfxExplainBody">—</div>
+                <div class="explain-label" id="vfxExplainLabelHow">Ảnh hưởng thế nào?</div>
+                <div class="explain-how" id="vfxExplainHow">—</div>
+                <div class="explain-tip" id="vfxExplainTip"></div>
+                <button type="button" id="vfxExplainContinue">Tiếp tục ▶</button>
+                <div class="explain-foot">Bấm «Tiếp tục» hoặc đợi hết giờ · 📖 tắt chế độ này</div>
+              </div>
+              <div class="vfx-banner" id="vfxBanner"></div>
+              <div id="vfxCenterHud">
+                <div id="vfxBwBar">
+                  <div id="vfxBwFill"></div>
+                </div>
+                <div id="vfxBwLabel">×01</div>
+                <div id="vfxCpuBadge">⚡ OVERCLOCK</div>
+              </div>
+              <div id="vfxBypassArrows">
+                <span class="arr-l">◀ DATA</span>
+                <span class="flow-mid">⟷ BOTH WAYS ⟷</span>
+                <span class="arr-r">DATA ▶</span>
+              </div>
+              <div id="vfxFlash"></div>
+              <div id="vfxWhiteFlash"></div>
+              <div id="vfxSkipBar">
+                <button type="button" id="btnSkipVfx" title="Bỏ qua phần hiệu ứng còn lại">⏭ Bỏ qua VFX</button>
+              </div>
+            </div>
+          </div>
+          <img id="vfxFlyIcon" alt="" draggable="false">
+
+          <div class="spin-controls">
+            <button class="circle-btn turbo" id="btnFast" title="Fast Spin">
+              <img class="img-art" src="assert/art-new/btn-fast-spin.webp" alt="Fast">
+              <span class="turbo-fallback" aria-hidden="true">⚡</span>
+            </button>
+            <button class="circle-btn" id="btnExplainFeat"
+              title="Feature Explain Mode — pause & show what each feature does">📖</button>
+            <button class="spin-btn" id="btnSpin" title="SPIN (Space)">
+              <img class="img-classic" src="assert/spin.webp" alt="SPIN">
+              <img class="img-art" src="assert/art-new/btn-spin.webp" alt="SPIN">
+            </button>
+            <button class="circle-btn" id="btnAuto" title="Autospin">
+              <img class="img-art" src="assert/art-new/btn-auto-spin.webp" alt="Auto">
+            </button>
+          </div>
+        </div>
+        <div class="bottom-bar">
+          <div class="bb-chip bb-bet"><span class="label">BET</span><span class="val" id="betAmount">$1.00</span></div>
+          <div class="bb-chip bb-before"><span class="label">BALANCE BEFORE</span><span class="val bal-before" id="balanceBeforeDisplay">10,000.00 ₫</span></div>
+          <div class="bb-chip bb-balance"><span class="label">BALANCE</span><span class="val" id="balanceDisplay">10,000.00 ₫</span></div>
+        </div>
+      </div>
+
+      <aside class="side-paytable" id="sidePaytable" aria-label="Paytable">
+        <div class="side-pt-head">PAYTABLE</div>
+        <div class="side-pt-cols" aria-hidden="true">
+          <span></span><span>ID</span><span>3×</span><span>4×</span><span>5×</span>
+        </div>
+        <div class="side-pt-body" id="sidePaytableBody"></div>
+        <div class="side-pt-foot">× bet · 243 ways · cap 19,693×</div>
+      </aside>
+
+      <div class="side-left">
+        <div class="side-stack">
+          <button class="circle-btn buy" id="btnBuyFeature" title="Execute Script / Buy Feature">★</button>
+          <button class="circle-btn" id="btnBuyFS" title="Buy Free Spin"><img src="assert/buy-free-spin.webp"
+              alt="Buy FS"></button>
+          <button class="circle-btn" id="btnMenu" title="Menu">☰</button>
+        </div>
+        <div class="side-row">
+          <button class="circle-btn sound" id="btnSound" title="Sound">🔊</button>
+          <button class="circle-btn bet-coin" id="betDisplay" title="Change Bet">◎</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal-overlay" id="modalWinExplain">
+    <div class="modal">
+      <h2>WIN BREAKDOWN · từ IN SPIN gần nhất</h2>
+      <div class="wx-toolbar">
+        <button type="button" class="btn-sm" id="wxZoomOut" title="Thu nhỏ">−</button>
+        <span class="wx-zoom-label" id="wxZoomLabel">100%</span>
+        <button type="button" class="btn-sm" id="wxZoomIn" title="Phóng to">+</button>
+        <button type="button" class="btn-sm" id="wxZoomReset">Reset</button>
+        <button type="button" class="btn-sm" id="wxHighlightGrid" title="Highlight ô thắng trên lưới chính">Highlight
+          lưới</button>
+      </div>
+      <div class="wx-scroll" id="wxScroll">
+        <div class="wx-zoom-stage" id="wxZoomStage">
+          <div id="winExplainBody" class="wx-empty">Chưa có spin — quay một ván rồi mở lại.</div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="closeWinExplain">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalBet">
+    <div class="modal">
+      <h2>SELECT BET LEVEL</h2>
+      <div id="betOptions"></div>
+      <div class="modal-actions"><button class="btn" id="closeBet">Close</button></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalMenu">
+    <div class="modal">
+      <h2>MENU</h2>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn" id="menuPaytable">📋 Paytable</button>
+        <button class="btn" id="menuRules">📖 Game Rules</button>
+        <button class="btn" id="menuSymbolPack" title="Đổi bộ symbol art">🎨 Symbols: Art New</button>
+        <button class="btn" id="menuSound">🔊 Sound: ON</button>
+        <button class="btn" id="menuMusic">🎵 Music: ON</button>
+        <button class="btn" id="menuHistory">📜 History</button>
+        <button class="btn" id="menuJackpotHistory">🏆 Jackpot History</button>
+        <button class="btn" id="menuCheat" style="border-color:rgba(255,208,0,.4);color:var(--yellow)">🛠 Cheat /
+          Debug</button>
+      </div>
+      <div class="modal-actions"><button class="btn" id="closeMenu">Close</button></div>
+    </div>
+  </div>
+
+  <!-- WS traffic inspector (send / recv) — floating, draggable, resizable -->
+  <div id="wsTrafficDock" aria-label="WebSocket traffic inspector">
+    <div class="ws-traffic-head" id="wsTrafficHead" title="Kéo để di chuyển">
+      <span class="ws-traffic-title-text">WS TRAFFIC</span>
+      <span class="ws-traffic-count" id="wsTrafficCount">0</span>
+      <div class="ws-traffic-head-btns">
+        <button type="button" id="wsTrafficCollapse" title="Thu nhỏ / mở rộng">−</button>
+        <button type="button" id="wsTrafficHide" title="Ẩn panel">×</button>
+      </div>
+    </div>
+    <div class="ws-traffic-toolbar">
+      <label><input type="checkbox" id="wsTrafficHidePing" checked> Ẩn ping</label>
+      <label><input type="checkbox" id="wsTrafficAutoScroll" checked> Auto-scroll</label>
+      <button type="button" id="wsTrafficPause" title="Tạm dừng ghi log">❚❚</button>
+      <button type="button" id="wsTrafficClear" title="Xóa log">Clear</button>
+      <button type="button" id="wsTrafficCopy" title="Copy log JSON">Copy</button>
+    </div>
+    <div class="ws-traffic-body" id="wsTrafficBody">
+      <div class="ws-traffic-empty" id="wsTrafficEmpty">
+        Chưa có traffic.<br>Connect &amp; spin — OUT (gửi) / IN (nhận) hiện ở đây.
+      </div>
+    </div>
+  </div>
+  <button type="button" id="wsTrafficFab" title="Hiện WS Traffic (Ctrl+Shift+L)">📡</button>
+
+  <!-- Cheat / Debug popup (dev-staging: WS cmd 1999 or REST /debug/cheat) -->
+  <div class="modal-overlay" id="modalCheat">
+    <div class="modal cheat-modal">
+      <header class="cheat-modal-head">
+        <div>
+          <h2>🛠 CHEAT / DEBUG</h2>
+          <p class="cheat-kicker">dev/staging · <strong>WS 1999</strong> · fallback REST · next-spin: Send &amp; Spin
+          </p>
+        </div>
+        <div id="cheatSessionBadge">Session: —</div>
+      </header>
+
+      <div class="cheat-modal-body">
+        <aside class="cheat-modal-side" id="cheatPresets"></aside>
+
+        <div class="cheat-modal-main">
+          <div class="cheat-ctrl-row">
+            <div class="cheat-field">
+              <label>Transport</label>
+              <select id="cheatTransport">
+                <option value="auto">Auto (WS nếu online, else REST)</option>
+                <option value="ws">WebSocket cmd 1999 only</option>
+                <option value="rest">REST debug only</option>
+              </select>
+            </div>
+            <div class="cheat-field">
+              <label>Cheat code</label>
+              <select id="cheatCode"></select>
+            </div>
+          </div>
+          <label class="cheat-toggle" id="cheatEditFsWrap">
+            <input type="checkbox" id="cheatEditFsGrid">
+            <span>Sửa grid từng lượt Free Spin</span>
+            <small>— dừng auto-FS, FORCE_GRID rồi 1500</small>
+          </label>
+
+          <div class="cheat-workspace">
+            <div id="cheatGridEditor">
+              <div class="grid-head">
+                <span>FORCE_GRID — row × col (ids 1–12)</span>
+                <div class="grid-tools">
+                  <button type="button" id="cheatGridFillH" title="All H (8)">All H</button>
+                  <button type="button" id="cheatGridFillA" title="All A (1)">All A</button>
+                  <button type="button" id="cheatGridFromScreen" title="Copy current reels">From screen</button>
+                  <button type="button" id="cheatGridScatter3" title="3 scatters mid reels">3S mid</button>
+                  <button type="button" id="cheatGridSyncJson" title="Write grid → JSON">→ JSON</button>
                 </div>
               </div>
-              <div class="explain-label" id="vfxExplainLabelWhat">Feature sẽ làm gì?</div>
-              <div class="explain-body" id="vfxExplainBody">—</div>
-              <div class="explain-label" id="vfxExplainLabelHow">Ảnh hưởng thế nào?</div>
-              <div class="explain-how" id="vfxExplainHow">—</div>
-              <div class="explain-tip" id="vfxExplainTip"></div>
-              <button type="button" id="vfxExplainContinue">Tiếp tục ▶</button>
-              <div class="explain-foot">Bấm «Tiếp tục» hoặc đợi hết giờ · 📖 tắt chế độ này</div>
+              <table id="cheatGridTable">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>R1</th>
+                    <th>R2</th>
+                    <th>R3</th>
+                    <th>R4</th>
+                    <th>R5</th>
+                  </tr>
+                </thead>
+                <tbody id="cheatGridBody"></tbody>
+              </table>
+              <p style="font-size:.62rem;color:var(--dim);margin-top:8px;line-height:1.35">
+                1–10 pay · 11 Wild · 12 Scatter · row-major <code>grid[row][col]</code> · feature chỉ apply trên base
+                spin
+              </p>
+              <div class="cheat-feature-head">
+                <span>Features (optional)</span>
+                <div class="grid-tools">
+                  <button type="button" id="cheatFeatAll">All</button>
+                  <button type="button" id="cheatFeatNone">None</button>
+                </div>
+              </div>
+              <div class="cheat-feature-list" id="cheatFeatureList"></div>
             </div>
-            <div class="vfx-banner" id="vfxBanner"></div>
-            <div id="vfxCenterHud">
-              <div id="vfxBwBar"><div id="vfxBwFill"></div></div>
-              <div id="vfxBwLabel">×01</div>
-              <div id="vfxCpuBadge">⚡ OVERCLOCK</div>
+
+            <div id="cheatFeatureTune">
+              <div class="grid-head">
+                <span id="cheatTuneTitle">Feature tune</span>
+              </div>
+              <p id="cheatTuneHelp"></p>
+              <div id="cheatTuneFields"></div>
             </div>
-            <div id="vfxBypassArrows">
-              <span class="arr-l">◀ DATA</span>
-              <span class="flow-mid">⟷ BOTH WAYS ⟷</span>
-              <span class="arr-r">DATA ▶</span>
-            </div>
-            <div id="vfxFlash"></div>
-            <div id="vfxWhiteFlash"></div>
-            <div id="vfxSkipBar">
-              <button type="button" id="btnSkipVfx" title="Bỏ qua phần hiệu ứng còn lại">⏭ Bỏ qua VFX</button>
+
+            <details class="cheat-json" id="cheatJsonBox" open>
+              <summary>Value JSON <span style="opacity:.7">(tự sync từ editor)</span></summary>
+              <div class="cheat-field">
+                <textarea id="cheatValue" placeholder='{}  e.g. {"scatters":4}  {"multiplier":500}'>{}</textarea>
+              </div>
+            </details>
+          </div>
+
+          <div class="cheat-field" style="margin-top:10px">
+            <label>Target session <span style="color:var(--cyan);font-weight:400">(cmd 1998 · cheat user khác →
+                REST)</span></label>
+            <div style="display:flex;gap:8px">
+              <select id="cheatSessionSelect" style="flex:1;min-width:0">
+                <option value="">(self — current login)</option>
+              </select>
+              <button type="button" class="btn" id="cheatLoadSessions"
+                title="Load active sessions from Redis (cmd 1998)" style="white-space:nowrap">&#x21bb; Load</button>
             </div>
           </div>
-        </div>
-<img id="vfxFlyIcon" alt="" draggable="false">
 
-        <div class="spin-controls">
-          <button class="circle-btn turbo" id="btnFast" title="Fast Spin">⚡</button>
-          <button class="circle-btn" id="btnExplainFeat" title="Feature Explain Mode — pause & show what each feature does">📖</button>
-          <button class="spin-btn" id="btnSpin" title="SPIN (Space)">
-            <img src="assert/spin.webp" alt="SPIN">
-          </button>
-          <button class="circle-btn" id="btnAuto" title="Autospin"><img src="assert/auto-spin.webp" alt="Auto"></button>
-        </div>
-      </div>
-    </div>
-
-    <aside class="side-paytable" id="sidePaytable" aria-label="Paytable">
-      <div class="side-pt-head">PAYTABLE</div>
-      <div class="side-pt-cols" aria-hidden="true">
-        <span></span><span>ID</span><span>3×</span><span>4×</span><span>5×</span>
-      </div>
-      <div class="side-pt-body" id="sidePaytableBody"></div>
-      <div class="side-pt-foot">× bet · 243 ways · cap 19,693×</div>
-    </aside>
-
-    <div class="side-left">
-      <div class="side-stack">
-        <button class="circle-btn buy" id="btnBuyFeature" title="Execute Script / Buy Feature">★</button>
-        <button class="circle-btn" id="btnBuyFS" title="Buy Free Spin"><img src="assert/buy-free-spin.webp" alt="Buy FS"></button>
-        <button class="circle-btn" id="btnMenu" title="Menu">☰</button>
-      </div>
-      <div class="side-row">
-        <button class="circle-btn sound" id="btnSound" title="Sound">🔊</button>
-        <button class="circle-btn bet-coin" id="betDisplay" title="Change Bet">◎</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="bottom-bar">
-    <div><span class="label">BET</span><span class="val" id="betAmount">$1.00</span></div>
-    <div class="win-block" title="Bấm để xem cách tính win">
-      <span class="label">WIN</span>
-      <span class="val win-slot" id="headerWin">0.00</span>
-      <button type="button" class="win-explain-btn" id="btnWinExplain" title="Giải thích win spin vừa rồi">⌕</button>
-    </div>
-    <div><span class="label">BALANCE BEFORE</span><span class="val bal-before" id="balanceBeforeDisplay">10,000.00 ₫</span></div>
-    <div><span class="label">BALANCE</span><span class="val" id="balanceDisplay">10,000.00 ₫</span></div>
-  </div>
-</div>
-
-<!-- Modals -->
-<div class="modal-overlay" id="modalWinExplain">
-  <div class="modal">
-    <h2>WIN BREAKDOWN · từ IN SPIN gần nhất</h2>
-    <div class="wx-toolbar">
-      <button type="button" class="btn-sm" id="wxZoomOut" title="Thu nhỏ">−</button>
-      <span class="wx-zoom-label" id="wxZoomLabel">100%</span>
-      <button type="button" class="btn-sm" id="wxZoomIn" title="Phóng to">+</button>
-      <button type="button" class="btn-sm" id="wxZoomReset">Reset</button>
-      <button type="button" class="btn-sm" id="wxHighlightGrid" title="Highlight ô thắng trên lưới chính">Highlight lưới</button>
-    </div>
-    <div class="wx-scroll" id="wxScroll">
-      <div class="wx-zoom-stage" id="wxZoomStage">
-        <div id="winExplainBody" class="wx-empty">Chưa có spin — quay một ván rồi mở lại.</div>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn" id="closeWinExplain">Close</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalBet">
-  <div class="modal">
-    <h2>SELECT BET LEVEL</h2>
-    <div id="betOptions"></div>
-    <div class="modal-actions"><button class="btn" id="closeBet">Close</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalMenu">
-  <div class="modal">
-    <h2>MENU</h2>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="btn" id="menuPaytable">📋 Paytable</button>
-      <button class="btn" id="menuRules">📖 Game Rules</button>
-      <button class="btn" id="menuSymbolPack" title="Đổi bộ symbol art">🎨 Symbols: Art New</button>
-      <button class="btn" id="menuSound">🔊 Sound: ON</button>
-      <button class="btn" id="menuMusic">🎵 Music: ON</button>
-      <button class="btn" id="menuHistory">📜 History</button>
-      <button class="btn" id="menuJackpotHistory">🏆 Jackpot History</button>
-      <button class="btn" id="menuCheat" style="border-color:rgba(255,208,0,.4);color:var(--yellow)">🛠 Cheat / Debug</button>
-    </div>
-    <div class="modal-actions"><button class="btn" id="closeMenu">Close</button></div>
-  </div>
-</div>
-
-<!-- WS traffic inspector (send / recv) — floating, draggable, resizable -->
-<div id="wsTrafficDock" aria-label="WebSocket traffic inspector">
-  <div class="ws-traffic-head" id="wsTrafficHead" title="Kéo để di chuyển">
-    <span class="ws-traffic-title-text">WS TRAFFIC</span>
-    <span class="ws-traffic-count" id="wsTrafficCount">0</span>
-    <div class="ws-traffic-head-btns">
-      <button type="button" id="wsTrafficCollapse" title="Thu nhỏ / mở rộng">−</button>
-      <button type="button" id="wsTrafficHide" title="Ẩn panel">×</button>
-    </div>
-  </div>
-  <div class="ws-traffic-toolbar">
-    <label><input type="checkbox" id="wsTrafficHidePing" checked> Ẩn ping</label>
-    <label><input type="checkbox" id="wsTrafficAutoScroll" checked> Auto-scroll</label>
-    <button type="button" id="wsTrafficPause" title="Tạm dừng ghi log">❚❚</button>
-    <button type="button" id="wsTrafficClear" title="Xóa log">Clear</button>
-    <button type="button" id="wsTrafficCopy" title="Copy log JSON">Copy</button>
-  </div>
-  <div class="ws-traffic-body" id="wsTrafficBody">
-    <div class="ws-traffic-empty" id="wsTrafficEmpty">
-      Chưa có traffic.<br>Connect &amp; spin — OUT (gửi) / IN (nhận) hiện ở đây.
-    </div>
-  </div>
-</div>
-<button type="button" id="wsTrafficFab" title="Hiện WS Traffic (Ctrl+Shift+L)">📡</button>
-
-<!-- Cheat / Debug popup (dev-staging: WS cmd 1999 or REST /debug/cheat) -->
-<div class="modal-overlay" id="modalCheat">
-  <div class="modal cheat-modal">
-    <header class="cheat-modal-head">
-      <div>
-        <h2>🛠 CHEAT / DEBUG</h2>
-        <p class="cheat-kicker">dev/staging · <strong>WS 1999</strong> · fallback REST · next-spin: Send &amp; Spin</p>
-      </div>
-      <div id="cheatSessionBadge">Session: —</div>
-    </header>
-
-    <div class="cheat-modal-body">
-      <aside class="cheat-modal-side" id="cheatPresets"></aside>
-
-      <div class="cheat-modal-main">
-        <div class="cheat-ctrl-row">
-          <div class="cheat-field">
-            <label>Transport</label>
-            <select id="cheatTransport">
-              <option value="auto">Auto (WS nếu online, else REST)</option>
-              <option value="ws">WebSocket cmd 1999 only</option>
-              <option value="rest">REST debug only</option>
-            </select>
-          </div>
-          <div class="cheat-field">
-            <label>Cheat code</label>
-            <select id="cheatCode"></select>
-          </div>
-        </div>
-        <label class="cheat-toggle" id="cheatEditFsWrap">
-          <input type="checkbox" id="cheatEditFsGrid">
-          <span>Sửa grid từng lượt Free Spin</span>
-          <small>— dừng auto-FS, FORCE_GRID rồi 1500</small>
-        </label>
-
-        <div class="cheat-workspace">
-          <div id="cheatGridEditor">
-            <div class="grid-head">
-              <span>FORCE_GRID — row × col (ids 1–12)</span>
-              <div class="grid-tools">
-                <button type="button" id="cheatGridFillH" title="All H (8)">All H</button>
-                <button type="button" id="cheatGridFillA" title="All A (1)">All A</button>
-                <button type="button" id="cheatGridFromScreen" title="Copy current reels">From screen</button>
-                <button type="button" id="cheatGridScatter3" title="3 scatters mid reels">3S mid</button>
-                <button type="button" id="cheatGridSyncJson" title="Write grid → JSON">→ JSON</button>
+          <details class="cheat-rest">
+            <summary>REST options (local backend)</summary>
+            <div class="cheat-rest-grid">
+              <div class="cheat-field">
+                <label>Debug base URL</label>
+                <input id="cheatDebugBase" value="http://localhost:3000/api/game/zeroday" />
+              </div>
+              <div class="cheat-field">
+                <label>X-Debug-Token</label>
+                <input id="cheatDebugToken" value="zeroday-debug-2024" />
+              </div>
+              <div class="cheat-field">
+                <label>Agency ID <span style="color:var(--cyan);font-weight:400">(từ session)</span></label>
+                <input id="cheatAgencyId" value="" placeholder="auto from session / host" />
+              </div>
+              <div class="cheat-field">
+                <label>User ID <span style="color:var(--cyan);font-weight:400">(từ session)</span></label>
+                <input id="cheatUserId" value="" placeholder="auto from session / login" />
               </div>
             </div>
-            <table id="cheatGridTable">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th>
-                </tr>
-              </thead>
-              <tbody id="cheatGridBody"></tbody>
-            </table>
-            <p style="font-size:.62rem;color:var(--dim);margin-top:8px;line-height:1.35">
-              1–10 pay · 11 Wild · 12 Scatter · row-major <code>grid[row][col]</code> · feature chỉ apply trên base spin
-            </p>
-            <div class="cheat-feature-head">
-              <span>Features (optional)</span>
-              <div class="grid-tools">
-                <button type="button" id="cheatFeatAll">All</button>
-                <button type="button" id="cheatFeatNone">None</button>
-              </div>
-            </div>
-            <div class="cheat-feature-list" id="cheatFeatureList"></div>
-          </div>
-
-          <div id="cheatFeatureTune">
-            <div class="grid-head">
-              <span id="cheatTuneTitle">Feature tune</span>
-            </div>
-            <p id="cheatTuneHelp"></p>
-            <div id="cheatTuneFields"></div>
-          </div>
-
-          <details class="cheat-json" id="cheatJsonBox" open>
-            <summary>Value JSON <span style="opacity:.7">(tự sync từ editor)</span></summary>
-            <div class="cheat-field">
-              <textarea id="cheatValue" placeholder='{}  e.g. {"scatters":4}  {"multiplier":500}'>{}</textarea>
-            </div>
+            <button type="button" class="btn" id="cheatPullSession" style="width:100%;margin-top:10px;font-size:.75rem">
+              Pull agency/user from session
+            </button>
           </details>
         </div>
+      </div>
 
-        <div class="cheat-field" style="margin-top:10px">
-          <label>Target session <span style="color:var(--cyan);font-weight:400">(cmd 1998 · cheat user khác → REST)</span></label>
-          <div style="display:flex;gap:8px">
-            <select id="cheatSessionSelect" style="flex:1;min-width:0">
-              <option value="">(self — current login)</option>
-            </select>
-            <button type="button" class="btn" id="cheatLoadSessions" title="Load active sessions from Redis (cmd 1998)" style="white-space:nowrap">&#x21bb; Load</button>
-          </div>
+      <div class="cheat-modal-foot">
+        <div class="modal-actions" style="justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px">
+          <button type="button" class="btn" id="cheatClearLog" style="margin-right:auto">Clear log</button>
+          <button type="button" class="btn" id="closeCheat">Close</button>
+          <button type="button" class="btn cheat-btn-cyan" id="cheatSend">Send only</button>
+          <button type="button" class="btn cheat-btn-gold" id="cheatSendSpin" style="font-weight:700">Send &amp;
+            Spin</button>
         </div>
-
-        <details class="cheat-rest">
-          <summary>REST options (local backend)</summary>
-          <div class="cheat-rest-grid">
-            <div class="cheat-field">
-              <label>Debug base URL</label>
-              <input id="cheatDebugBase" value="http://localhost:3000/api/game/zeroday" />
-            </div>
-            <div class="cheat-field">
-              <label>X-Debug-Token</label>
-              <input id="cheatDebugToken" value="zeroday-debug-2024" />
-            </div>
-            <div class="cheat-field">
-              <label>Agency ID <span style="color:var(--cyan);font-weight:400">(từ session)</span></label>
-              <input id="cheatAgencyId" value="" placeholder="auto from session / host" />
-            </div>
-            <div class="cheat-field">
-              <label>User ID <span style="color:var(--cyan);font-weight:400">(từ session)</span></label>
-              <input id="cheatUserId" value="" placeholder="auto from session / login" />
-            </div>
-          </div>
-          <button type="button" class="btn" id="cheatPullSession" style="width:100%;margin-top:10px;font-size:.75rem">
-            Pull agency/user from session
-          </button>
-        </details>
+        <div id="cheatLog">Ready. Chọn preset hoặc code → Send / Send &amp; Spin.</div>
       </div>
-    </div>
-
-    <div class="cheat-modal-foot">
-      <div class="modal-actions" style="justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px">
-        <button type="button" class="btn" id="cheatClearLog" style="margin-right:auto">Clear log</button>
-        <button type="button" class="btn" id="closeCheat">Close</button>
-        <button type="button" class="btn cheat-btn-cyan" id="cheatSend">Send only</button>
-        <button type="button" class="btn cheat-btn-gold" id="cheatSendSpin" style="font-weight:700">Send &amp; Spin</button>
-      </div>
-      <div id="cheatLog">Ready. Chọn preset hoặc code → Send / Send &amp; Spin.</div>
     </div>
   </div>
-</div>
 
-<button type="button" id="btnCheatFab" title="Cheat panel (Ctrl+Shift+C)" aria-label="Open cheat panel">🛠</button>
+  <button type="button" id="btnCheatFab" title="Cheat panel (Ctrl+Shift+C)" aria-label="Open cheat panel">🛠</button>
 
-<!-- Per-FS grid editor (toggle in cheat panel) -->
-<div class="modal-overlay" id="modalFsGrid">
-  <div class="modal fs-grid-modal">
-    <h2>SỬA GRID FREE SPIN</h2>
-    <p class="fs-grid-hint" id="fsGridHint">Chọn symbol 5×3 rồi Apply &amp; Spin. Server nhận FORCE_GRID (cmd 1999) rồi spin 1500 — debit = 0, bet vẫn là mức session.</p>
-    <div class="grid-tools">
-      <button type="button" id="fsGridFillH">All H</button>
-      <button type="button" id="fsGridFillA">All A</button>
-      <button type="button" id="fsGridFromScreen">From screen</button>
-      <button type="button" id="fsGridScatter3">3S mid</button>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th></th>
-          <th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th>
-        </tr>
-      </thead>
-      <tbody id="fsGridBody"></tbody>
-    </table>
-    <div class="cheat-feature-head">
-      <span>Feature lượt này</span>
+  <!-- Per-FS grid editor (toggle in cheat panel) -->
+  <div class="modal-overlay" id="modalFsGrid">
+    <div class="modal fs-grid-modal">
+      <h2>SỬA GRID FREE SPIN</h2>
+      <p class="fs-grid-hint" id="fsGridHint">Chọn symbol 5×3 rồi Apply &amp; Spin. Server nhận FORCE_GRID (cmd 1999)
+        rồi spin 1500 — debit = 0, bet vẫn là mức session.</p>
       <div class="grid-tools">
-        <button type="button" id="fsFeatAll">All</button>
-        <button type="button" id="fsFeatNone">None</button>
+        <button type="button" id="fsGridFillH">All H</button>
+        <button type="button" id="fsGridFillA">All A</button>
+        <button type="button" id="fsGridFromScreen">From screen</button>
+        <button type="button" id="fsGridScatter3">3S mid</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>R1</th>
+            <th>R2</th>
+            <th>R3</th>
+            <th>R4</th>
+            <th>R5</th>
+          </tr>
+        </thead>
+        <tbody id="fsGridBody"></tbody>
+      </table>
+      <div class="cheat-feature-head">
+        <span>Feature lượt này</span>
+        <div class="grid-tools">
+          <button type="button" id="fsFeatAll">All</button>
+          <button type="button" id="fsFeatNone">None</button>
+        </div>
+      </div>
+      <div class="cheat-feature-list" id="fsFeatureList"></div>
+      <p class="fs-feat-note">Tick = feature chạy trên spin này (merge sticky). Không persist sang lượt sau. Không tick
+        = chỉ sticky / RNG.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="fsGridSkip">Bỏ qua (RNG)</button>
+        <button type="button" class="btn cheat-btn-gold" id="fsGridApply" style="font-weight:700">Apply &amp;
+          Spin</button>
       </div>
     </div>
-    <div class="cheat-feature-list" id="fsFeatureList"></div>
-    <p class="fs-feat-note">Tick = feature chạy trên spin này (merge sticky). Không persist sang lượt sau. Không tick = chỉ sticky / RNG.</p>
-    <div class="modal-actions">
-      <button type="button" class="btn" id="fsGridSkip">Bỏ qua (RNG)</button>
-      <button type="button" class="btn cheat-btn-gold" id="fsGridApply" style="font-weight:700">Apply &amp; Spin</button>
+  </div>
+
+  <div class="modal-overlay" id="modalPaytable">
+    <div class="modal" style="max-width:600px">
+      <h2>PAYTABLE</h2>
+      <div class="paytable-grid" id="paytableGrid"></div>
+      <p style="font-size:.75rem;color:var(--dim);margin-top:12px">W = Wild (substitutes all) &nbsp;|&nbsp; S = Scatter
+        (3+ triggers Free Spins) &nbsp;|&nbsp; Win Cap: 19,693× Bet</p>
+      <div class="modal-actions"><button class="btn" id="closePaytable">Close</button></div>
     </div>
   </div>
-</div>
 
-<div class="modal-overlay" id="modalPaytable">
-  <div class="modal" style="max-width:600px">
-    <h2>PAYTABLE</h2>
-    <div class="paytable-grid" id="paytableGrid"></div>
-    <p style="font-size:.75rem;color:var(--dim);margin-top:12px">W = Wild (substitutes all) &nbsp;|&nbsp; S = Scatter (3+ triggers Free Spins) &nbsp;|&nbsp; Win Cap: 19,693× Bet</p>
-    <div class="modal-actions"><button class="btn" id="closePaytable">Close</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalRules">
-  <div class="modal">
-    <h2>GAME RULES</h2>
-    <div style="font-size:.8rem;line-height:1.6;color:var(--dim)">
-      <p><strong style="color:var(--text)">243 Ways to Win</strong> — Wins start from Reel 1, consecutive reels, any row position.</p>
-      <p style="margin-top:8px"><strong style="color:var(--text)">Win Formula:</strong> Win Count × Cx × Bet × Multipliers. Capped at 19,693× Bet.</p>
-      <p style="margin-top:8px"><strong style="color:var(--text)">12 Features</strong> randomly trigger. Multiple features execute in fixed order.</p>
-      <p style="margin-top:8px"><strong style="color:var(--text)">Free Spins:</strong> 3/4/5 Scatters → 7 spins with 1/2/3 persistent features. +1 spin per new feature.</p>
+  <div class="modal-overlay" id="modalRules">
+    <div class="modal">
+      <h2>GAME RULES</h2>
+      <div style="font-size:.8rem;line-height:1.6;color:var(--dim)">
+        <p><strong style="color:var(--text)">243 Ways to Win</strong> — Wins start from Reel 1, consecutive reels, any
+          row position.</p>
+        <p style="margin-top:8px"><strong style="color:var(--text)">Win Formula:</strong> Win Count × Cx × Bet ×
+          Multipliers. Capped at 19,693× Bet.</p>
+        <p style="margin-top:8px"><strong style="color:var(--text)">12 Features</strong> randomly trigger. Multiple
+          features execute in fixed order.</p>
+        <p style="margin-top:8px"><strong style="color:var(--text)">Free Spins:</strong> 3/4/5 Scatters → 7 spins with
+          1/2/3 persistent features. +1 spin per new feature.</p>
+      </div>
+      <div class="modal-actions"><button class="btn" id="closeRules">Close</button></div>
     </div>
-    <div class="modal-actions"><button class="btn" id="closeRules">Close</button></div>
   </div>
-</div>
 
-<div class="modal-overlay" id="modalFeatureDetail">
-  <div class="modal" style="max-width:420px">
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-      <img id="featDetailImg" src="" alt="" style="width:72px;height:72px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 0 12px rgba(0,240,255,.45))">
-      <div style="min-width:0">
-        <h2 id="featDetailTitle" style="margin:0 0 6px;font-size:1.05rem;letter-spacing:1px"></h2>
-        <div id="featDetailTiming" style="font-size:.72rem;color:var(--dim);letter-spacing:.3px"></div>
+  <div class="modal-overlay" id="modalFeatureDetail">
+    <div class="modal" style="max-width:420px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <img id="featDetailImg" src="" alt=""
+          style="width:72px;height:72px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 0 12px rgba(0,240,255,.45))">
+        <div style="min-width:0">
+          <h2 id="featDetailTitle" style="margin:0 0 6px;font-size:1.05rem;letter-spacing:1px"></h2>
+          <div id="featDetailTiming" style="font-size:.72rem;color:var(--dim);letter-spacing:.3px"></div>
+        </div>
+      </div>
+      <div id="featDetailStatus"
+        style="display:none;margin-bottom:10px;padding:6px 10px;border-radius:8px;font-size:.75rem;font-weight:700;letter-spacing:.5px">
+      </div>
+      <p
+        style="font-size:.68rem;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:800">
+        Feature sẽ làm gì?</p>
+      <p id="featDetailDesc" style="font-size:.88rem;line-height:1.55;color:var(--text);margin-bottom:12px"></p>
+      <p
+        style="font-size:.68rem;color:rgba(0,255,136,.85);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:800">
+        Ảnh hưởng thế nào?</p>
+      <p id="featDetailHow"
+        style="font-size:.84rem;line-height:1.55;color:#c8e8d8;margin-bottom:12px;padding:10px 12px;border-radius:10px;background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.15)">
+      </p>
+      <p
+        style="font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:800">
+        Hiệu ứng trên màn</p>
+      <p id="featDetailVfx" style="font-size:.8rem;line-height:1.5;color:var(--dim);margin-bottom:0"></p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="btnReplayFeature" type="button" style="display:none"
+          title="Diễn lại VFX feature này trên lưới spin vừa rồi">▶ Replay</button>
+        <button class="btn" id="closeFeatureDetail">Đóng</button>
       </div>
     </div>
-    <div id="featDetailStatus" style="display:none;margin-bottom:10px;padding:6px 10px;border-radius:8px;font-size:.75rem;font-weight:700;letter-spacing:.5px"></div>
-    <p style="font-size:.68rem;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:800">Feature sẽ làm gì?</p>
-    <p id="featDetailDesc" style="font-size:.88rem;line-height:1.55;color:var(--text);margin-bottom:12px"></p>
-    <p style="font-size:.68rem;color:rgba(0,255,136,.85);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:800">Ảnh hưởng thế nào?</p>
-    <p id="featDetailHow" style="font-size:.84rem;line-height:1.55;color:#c8e8d8;margin-bottom:12px;padding:10px 12px;border-radius:10px;background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.15)"></p>
-    <p style="font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:800">Hiệu ứng trên màn</p>
-    <p id="featDetailVfx" style="font-size:.8rem;line-height:1.5;color:var(--dim);margin-bottom:0"></p>
-    <div class="modal-actions">
-      <button class="btn btn-primary" id="btnReplayFeature" type="button" style="display:none" title="Diễn lại VFX feature này trên lưới spin vừa rồi">▶ Replay</button>
-      <button class="btn" id="closeFeatureDetail">Đóng</button>
+  </div>
+
+  <div class="modal-overlay" id="modalHistory">
+    <div class="modal" style="max-width:920px;height:100%;max-height:100%;display:flex;flex-direction:column">
+      <h2 style="flex:0 0 auto">SPIN HISTORY <span style="font-size:.65rem;color:var(--dim)" id="historySubtitle">(30
+          days)</span></h2>
+      <div id="historyList" style="flex:1;min-height:0;overflow-y:auto"></div>
+      <div class="modal-actions" style="flex:0 0 auto"><button class="btn" id="closeHistory">Close</button></div>
     </div>
   </div>
-</div>
 
-<div class="modal-overlay" id="modalHistory">
-  <div class="modal" style="max-width:920px;height:100%;max-height:100%;display:flex;flex-direction:column">
-    <h2 style="flex:0 0 auto">SPIN HISTORY <span style="font-size:.65rem;color:var(--dim)" id="historySubtitle">(30 days)</span></h2>
-    <div id="historyList" style="flex:1;min-height:0;overflow-y:auto"></div>
-    <div class="modal-actions" style="flex:0 0 auto"><button class="btn" id="closeHistory">Close</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalSpinDetail">
-  <div class="modal" style="max-width:860px;height:100%;max-height:100%;display:flex;flex-direction:column">
-    <h2 style="flex:0 0 auto">SPIN DETAIL</h2>
-    <div id="spinDetailBody" style="flex:1;min-height:0;overflow:auto;font-size:.8rem;line-height:1.55;color:var(--dim)"></div>
-    <div class="modal-actions" style="flex:0 0 auto">
-      <button class="btn" id="btnSessionRounds" style="display:none">Package rounds</button>
-      <button class="btn" id="closeSpinDetail">Close</button>
+  <div class="modal-overlay" id="modalSpinDetail">
+    <div class="modal" style="max-width:860px;height:100%;max-height:100%;display:flex;flex-direction:column">
+      <h2 style="flex:0 0 auto">SPIN DETAIL</h2>
+      <div id="spinDetailBody"
+        style="flex:1;min-height:0;overflow:auto;font-size:.8rem;line-height:1.55;color:var(--dim)"></div>
+      <div class="modal-actions" style="flex:0 0 auto">
+        <button class="btn" id="btnSessionRounds" style="display:none">Package rounds</button>
+        <button class="btn" id="closeSpinDetail">Close</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="modal-overlay" id="modalJackpotHistory">
-  <div class="modal" style="max-width:920px;height:100%;max-height:100%;display:flex;flex-direction:column">
-    <h2 style="flex:0 0 auto">JACKPOT HISTORY</h2>
-    <div id="jackpotHistoryList" style="flex:1;min-height:0;overflow-y:auto"></div>
-    <div class="modal-actions" style="flex:0 0 auto"><button class="btn" id="closeJackpotHistory">Close</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalBuyFeature">
-  <div class="modal">
-    <h2>EXECUTE SCRIPT — BUY FEATURES</h2>
-    <p style="font-size:.75rem;color:var(--dim);margin:-8px 0 12px;line-height:1.45">
-      Online: WS <code style="color:var(--cyan)">cmd 1501</code> +
-      <code style="color:var(--cyan)">scatterBooster</code> /
-      <code style="color:var(--cyan)">3Features</code> /
-      <code style="color:var(--cyan)">12Features</code>
-      — server trừ phí và chạy 1 spin ngay.
-    </p>
-    <div id="buyFeatureOptions"></div>
-    <div class="modal-actions">
-      <button class="btn" id="cancelBuyFeature">Cancel</button>
-      <button class="btn btn-primary" id="confirmBuyFeature">Confirm</button>
+  <div class="modal-overlay" id="modalJackpotHistory">
+    <div class="modal" style="max-width:920px;height:100%;max-height:100%;display:flex;flex-direction:column">
+      <h2 style="flex:0 0 auto">JACKPOT HISTORY</h2>
+      <div id="jackpotHistoryList" style="flex:1;min-height:0;overflow-y:auto"></div>
+      <div class="modal-actions" style="flex:0 0 auto"><button class="btn" id="closeJackpotHistory">Close</button></div>
     </div>
   </div>
-</div>
 
-<div class="modal-overlay" id="modalBuyFS">
-  <div class="modal">
-    <h2>UNKNOWN PAYLOAD — BUY FREE SPIN</h2>
-    <p style="font-size:.75rem;color:var(--dim);margin:-8px 0 12px;line-height:1.45">
-      Online: WS <code style="color:var(--cyan)">cmd 1501</code> + <code style="color:var(--cyan)">feature: FS1–FS4</code>.
-      Server trừ phí (80× / 240× / 500× / 212× bet) và trả feature spin.
-    </p>
-    <div id="buyFSOptions"></div>
-    <div class="modal-actions">
-      <button class="btn" id="cancelBuyFS">Cancel</button>
-      <button class="btn btn-primary" id="confirmBuyFS">Confirm</button>
+  <div class="modal-overlay" id="modalBuyFeature">
+    <div class="modal">
+      <h2>EXECUTE SCRIPT — BUY FEATURES</h2>
+      <p style="font-size:.75rem;color:var(--dim);margin:-8px 0 12px;line-height:1.45">
+        Online: WS <code style="color:var(--cyan)">cmd 1501</code> +
+        <code style="color:var(--cyan)">scatterBooster</code> /
+        <code style="color:var(--cyan)">3Features</code> /
+        <code style="color:var(--cyan)">12Features</code>
+        — server trừ phí và chạy 1 spin ngay.
+      </p>
+      <div id="buyFeatureOptions"></div>
+      <div class="modal-actions">
+        <button class="btn" id="cancelBuyFeature">Cancel</button>
+        <button class="btn btn-primary" id="confirmBuyFeature">Confirm</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="modal-overlay" id="modalAuto">
-  <div class="modal">
-    <h2>AUTOSPIN</h2>
-    <div id="autoOptions"></div>
-    <div class="modal-actions"><button class="btn" id="closeAuto">Cancel</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalFS">
-  <div class="modal" style="text-align:center">
-    <h2 style="color:var(--purple)">⚡ SYSTEM COMPROMISED</h2>
-    <p style="font-size:1.1rem;margin:16px 0">Deep Web Infiltration Activated!</p>
-    <p id="fsTriggerInfo" style="color:var(--dim);font-size:.85rem;margin-bottom:20px"></p>
-    <button class="btn btn-primary" id="startFS">START</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalFSSummary">
-  <div class="modal" style="text-align:center">
-    <h2 style="color:var(--green)">MISSION COMPLETE</h2>
-    <p style="font-size:1.2rem;margin:16px 0">Total Win: <span id="fsTotalWin" style="color:var(--green)">$0.00</span></p>
-    <button class="btn btn-primary" id="closeFSSummary">CONTINUE</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalMaxWin">
-  <div class="modal" style="text-align:center">
-    <h2 style="color:var(--orange)">MAXIMUM WIN CAP REACHED</h2>
-    <p id="maxWinMsg" style="margin:16px 0;font-size:1rem"></p>
-    <button class="btn btn-primary" id="closeMaxWin">OK</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalJackpot">
-  <div class="modal" style="max-width:560px">
-    <h2 style="color:var(--red)">⚡ CORE HACK — MAINFRAME</h2>
-    <p style="font-size:.8rem;color:var(--dim);margin-bottom:12px">Decrypt nodes. Match 3 identical fragments to win.</p>
-    <div id="jackpotTimer" style="text-align:center;margin-bottom:8px;font-size:.9rem;color:var(--orange);font-weight:600"></div>
-    <div class="jackpot-grid" id="jackpotGrid"></div>
-    <div id="jackpotPicks" style="text-align:center;margin-top:10px;font-size:.85rem;color:var(--dim)"></div>
-  </div>
-</div>
-
-<div id="winOverlay">
-  <div class="win-fx-stage">
-    <div class="win-seq-sprite" id="winSeqSprite" aria-hidden="true"></div>
-    <div class="win-fx-copy">
-      <div class="win-text" id="winText">WIN</div>
-      <div class="win-amount-fx" id="winAmountFx">$0.00</div>
+  <div class="modal-overlay" id="modalBuyFS">
+    <div class="modal">
+      <h2>UNKNOWN PAYLOAD — BUY FREE SPIN</h2>
+      <p style="font-size:.75rem;color:var(--dim);margin:-8px 0 12px;line-height:1.45">
+        Online: WS <code style="color:var(--cyan)">cmd 1501</code> + <code
+          style="color:var(--cyan)">feature: FS1–FS4</code>.
+        Server trừ phí (80× / 240× / 500× / 212× bet) và trả feature spin.
+      </p>
+      <div id="buyFSOptions"></div>
+      <div class="modal-actions">
+        <button class="btn" id="cancelBuyFS">Cancel</button>
+        <button class="btn btn-primary" id="confirmBuyFS">Confirm</button>
+      </div>
     </div>
   </div>
-</div>
-<div id="featToast"></div>
-<div id="symTooltip"></div>
+
+  <div class="modal-overlay" id="modalAuto">
+    <div class="modal">
+      <h2>AUTOSPIN</h2>
+      <div id="autoOptions"></div>
+      <div class="modal-actions"><button class="btn" id="closeAuto">Cancel</button></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalFS">
+    <div class="modal" style="text-align:center">
+      <h2 style="color:var(--purple)">⚡ SYSTEM COMPROMISED</h2>
+      <p style="font-size:1.1rem;margin:16px 0">Deep Web Infiltration Activated!</p>
+      <p id="fsTriggerInfo" style="color:var(--dim);font-size:.85rem;margin-bottom:20px"></p>
+      <button class="btn btn-primary" id="startFS">START</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalFSSummary">
+    <div class="modal" style="text-align:center">
+      <h2 style="color:var(--green)">MISSION COMPLETE</h2>
+      <p style="font-size:1.2rem;margin:16px 0">Total Win: <span id="fsTotalWin" style="color:var(--green)">$0.00</span>
+      </p>
+      <button class="btn btn-primary" id="closeFSSummary">CONTINUE</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalMaxWin">
+    <div class="modal" style="text-align:center">
+      <h2 style="color:var(--orange)">MAXIMUM WIN CAP REACHED</h2>
+      <p id="maxWinMsg" style="margin:16px 0;font-size:1rem"></p>
+      <button class="btn btn-primary" id="closeMaxWin">OK</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalJackpot">
+    <div class="modal" style="max-width:560px">
+      <h2 style="color:var(--red)">⚡ CORE HACK — MAINFRAME</h2>
+      <p style="font-size:.8rem;color:var(--dim);margin-bottom:12px">Decrypt nodes. Match 3 identical fragments to win.
+      </p>
+      <div id="jackpotTimer"
+        style="text-align:center;margin-bottom:8px;font-size:.9rem;color:var(--orange);font-weight:600"></div>
+      <div class="jackpot-grid" id="jackpotGrid"></div>
+      <div id="jackpotPicks" style="text-align:center;margin-top:10px;font-size:.85rem;color:var(--dim)"></div>
+    </div>
+  </div>
+
+  <div id="winOverlay">
+    <div class="win-fx-stage">
+      <div class="win-seq-sprite" id="winSeqSprite" aria-hidden="true"></div>
+      <div class="win-fx-copy">
+        <div class="win-text" id="winText">WIN</div>
+        <div class="win-amount-fx" id="winAmountFx">$0.00</div>
+      </div>
+    </div>
+  </div>
+  <div id="featToast"></div>
+  <div id="symTooltip"></div>
 
 </body>
+
 </html>
