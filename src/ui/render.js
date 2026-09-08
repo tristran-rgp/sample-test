@@ -269,13 +269,11 @@ export function captureBalanceBefore() {
 
 export function setInfoBar(mode, text) {
   const bar = document.getElementById('infoBar');
-  if (mode === 'win') {
-    bar.className = 'info-bar win-result';
-    bar.innerHTML = text;
-  } else {
-    bar.className = 'info-bar';
-    bar.innerHTML = `<div class="marquee" id="infoMarquee">${text}</div>`;
-  }
+  if (!bar) return;
+  // Win amount lives on the grid HUD (#headerWin) — never put money here.
+  if (mode === 'win') return;
+  bar.className = 'info-bar';
+  bar.innerHTML = `<div class="marquee" id="infoMarquee">${text}</div>`;
 }
 
 export function showSymTooltip(sym, el) {

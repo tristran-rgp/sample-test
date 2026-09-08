@@ -105,7 +105,7 @@ export function initUI() {
     e.stopPropagation();
     openWinExplain();
   });
-  document.querySelector('.bottom-bar .win-block')?.addEventListener('click', () => openWinExplain());
+  document.querySelector('.grid-hud-win')?.addEventListener('click', () => openWinExplain());
   document.getElementById('closeWinExplain')?.addEventListener('click', () => closeModal('modalWinExplain'));
   document.getElementById('modalWinExplain')?.addEventListener('click', (e) => {
     if (e.target.id === 'modalWinExplain') closeModal('modalWinExplain');

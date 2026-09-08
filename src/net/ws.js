@@ -660,13 +660,6 @@ export async function doOnlineSpin(opts = {}) {
     // Không set headerWin = total trước ticker — để cộng tiền nhìn thấy
     document.getElementById('headerWin').textContent = totalWin > 0 ? '0.00' : '0.00';
 
-    if (spinId || roundId) {
-      setInfoBar(
-        'idle',
-        `spinId ${spinId || '—'} · roundId ${roundId || '—'}${isBuy ? ` · buy ${buyFeature}` : ''}`
-      );
-    }
-
     if (totalWin > 0) {
       if (wins.length > 0) {
         await animateWinWays(wins, totalWin);
@@ -679,9 +672,9 @@ export async function doOnlineSpin(opts = {}) {
       document.getElementById('headerWin').textContent = totalWin.toFixed(2);
     } else {
       renderGrid();
-      if (!state.inFreeSpins && !wasInFS) {
-        setInfoBar('idle', 'Win up to 19,693× Bet &nbsp;•&nbsp; 3 Scatters trigger Deep Web Infiltration &nbsp;•&nbsp; Good luck, hacker');
-      }
+    }
+    if (!state.inFreeSpins && !wasInFS) {
+      setInfoBar('idle', 'Win up to 19,693× Bet &nbsp;•&nbsp; 3 Scatters trigger Deep Web Infiltration &nbsp;•&nbsp; Good luck, hacker');
     }
   } finally {
     /* settle endFx */

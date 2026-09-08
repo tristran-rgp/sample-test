@@ -6,7 +6,7 @@ import { parseOnlineRound } from '../net/session.js';
 import { sfx } from '../sfx/sfx.js';
 import { imgTag } from './assets.js';
 import { closeModal, openModal, showToast } from './feedback.js';
-import { renderGrid, setInfoBar } from './render.js';
+import { renderGrid } from './render.js';
 import { boostSpritePack, useSpritePackAnim } from './sprites.js';
 import { cellRectInWrap, hideVfxBanner, prepVfxCanvas, runAnimFrame, showVfxBanner } from './vfx/core.js';
 import { cellsForWin, runMoneyTicker } from './winfx.js';
@@ -752,13 +752,11 @@ export async function animateWinWays(wins, total) {
     await runMoneyTicker(running, total, {
       durationMs: state.fastSpin ? 100 : 200,
       onTick: (val) => {
-        setInfoBar('win', `WIN ${fmt(val)}`);
         document.getElementById('headerWin').textContent = val.toFixed(2);
       },
     });
   } else {
     document.getElementById('headerWin').textContent = Number(total).toFixed(2);
-    setInfoBar('win', `WIN ${fmt(total)}`);
   }
   await sleepRaw(state.fastSpin ? 80 : 160);
   wrap?.classList.remove('dim-win');
