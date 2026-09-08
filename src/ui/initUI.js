@@ -177,7 +177,10 @@ export function initUI() {
   document.getElementById('closeAuto').addEventListener('click', () => closeModal('modalAuto'));
   document.getElementById('btnFast').addEventListener('click', () => {
     state.fastSpin = !state.fastSpin;
-    document.getElementById('btnFast').classList.toggle('active', state.fastSpin);
+    const fastBtn = document.getElementById('btnFast');
+    fastBtn.classList.toggle('active', state.fastSpin);
+    fastBtn.setAttribute('aria-pressed', state.fastSpin ? 'true' : 'false');
+    fastBtn.setAttribute('aria-label', state.fastSpin ? 'Fast spin on' : 'Fast spin');
   });
   document.getElementById('btnExplainFeat')?.addEventListener('click', () => {
     state.featureExplain = !state.featureExplain;
@@ -196,8 +199,11 @@ export function initUI() {
   });
   document.getElementById('btnSound').addEventListener('click', () => {
     state.sound = !state.sound;
-    document.getElementById('btnSound').textContent = state.sound ? '🔊' : '🔇';
-    document.getElementById('btnSound').classList.toggle('active', !state.sound);
+    const soundBtn = document.getElementById('btnSound');
+    soundBtn.textContent = state.sound ? '🔊' : '🔇';
+    soundBtn.classList.toggle('active', !state.sound);
+    soundBtn.setAttribute('aria-pressed', state.sound ? 'true' : 'false');
+    soundBtn.setAttribute('aria-label', state.sound ? 'Sound on' : 'Sound off');
     document.getElementById('menuSound').textContent = `🔊 Sound: ${state.sound ? 'ON' : 'OFF'}`;
     if (state.sound) {
       unlockAudio();
@@ -207,7 +213,11 @@ export function initUI() {
   document.getElementById('menuSound').addEventListener('click', () => {
     state.sound = !state.sound;
     document.getElementById('menuSound').textContent = `🔊 Sound: ${state.sound ? 'ON' : 'OFF'}`;
-    document.getElementById('btnSound').textContent = state.sound ? '🔊' : '🔇';
+    const soundBtn = document.getElementById('btnSound');
+    soundBtn.textContent = state.sound ? '🔊' : '🔇';
+    soundBtn.classList.toggle('active', !state.sound);
+    soundBtn.setAttribute('aria-pressed', state.sound ? 'true' : 'false');
+    soundBtn.setAttribute('aria-label', state.sound ? 'Sound on' : 'Sound off');
     if (state.sound) {
       unlockAudio();
       sfx('blip', { gain: 0.5 });

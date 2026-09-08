@@ -10,6 +10,7 @@ import { captureSessionIdentity, connectWS, deriveAgencyFromSrvUrl, doOnlineSpin
 import { sfx, unlockAudio } from './sfx/sfx.js';
 import { bindCheatPanelEvents } from './ui/cheat/events.js';
 import { initCheatPanel } from './ui/cheat/panel.js';
+import { bindHotkeys } from './ui/hotkeys.js';
 import { initUI } from './ui/initUI.js';
 import { startAssetPreload } from './ui/preload.js';
 import { updateUI } from './ui/render.js';
@@ -22,6 +23,45 @@ import { splash } from './ui/splash.js';
 
 // ─── Utilities ───────────────────────────────────────────────
 
+const LOGIN_PREF_FIELDS = [
+  ['srvUrl', 'zd_srvUrl'],
+  ['loginUser', 'zd_loginUser'],
+  ['wsUrl', 'zd_wsUrl'],
+  ['gameId', 'zd_gameId'],
+];
+
+function restoreLoginPrefs() {
+  for (const [id, key] of LOGIN_PREF_FIELDS) {
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved == null) continue;
+      const el = document.getElementById(id);
+      if (el) el.value = saved;
+    } catch (_) { /* private mode / denied */ }
+  }
+}
+
+function saveLoginPrefs() {
+  for (const [id, key] of LOGIN_PREF_FIELDS) {
+    try {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      localStorage.setItem(key, el.value || '');
+    } catch (_) { /* private mode / denied */ }
+  }
+}
+
+function bindLoginPrefPersistence() {
+  for (const [id] of LOGIN_PREF_FIELDS) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    el.addEventListener('change', saveLoginPrefs);
+    el.addEventListener('blur', saveLoginPrefs);
+  }
+}
+
+restoreLoginPrefs();
+bindLoginPrefPersistence();
 
 // ═══════════════════════════════════════════════════════════════
 // ONLINE MODE — WebSocket Integration
@@ -93,6 +133,9 @@ document.getElementById('btnPlayOnline').addEventListener('click', async () => {
     if (!sessionAgencyId) setSessionAgencyId(deriveAgencyFromSrvUrl());
     syncCheatSessionFields();
 
+    // Persist non-secret connection prefs (never password)
+    saveLoginPrefs();
+
     // 3) Start UI + connect WebSocket với accessToken
     setOnline(true);
     status.textContent = 'Play token OK — connecting WS...';
@@ -128,7 +171,8 @@ document.getElementById('btnDisconnect').addEventListener('click', () => {
 });
 
 // ─── Boot — preload while login is visible ───────────────────
-// Cheat panel + keyboard shortcuts (Enter/Space/C) — bound once, before Play
+// Hotkeys (Enter/Space) + cheat panel (C) — bound once, before Play
+bindHotkeys();
 bindCheatPanelEvents();
 initCheatPanel();
 startAssetPreload();

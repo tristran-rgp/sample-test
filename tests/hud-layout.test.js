@@ -3,6 +3,7 @@ import { state } from '../src/core/state.js';
 import { listPreloadUrls } from '../src/ui/preload.js';
 import { setInfoBar, updateUI } from '../src/ui/render.js';
 import { tickerWin } from '../src/ui/winfx.js';
+import { fmt, fmtBalance } from '../src/core/utils.js';
 
 describe('grid top HUD', () => {
   it('places win amount in the center neon and multi on the right pad', () => {
@@ -18,6 +19,22 @@ describe('grid top HUD', () => {
     expect(multi.closest('.mult-box')).toBeTruthy();
     expect(document.querySelector('.bottom-bar #headerWin')).toBeNull();
     expect(document.querySelector('.meter-shell .mult-box')).toBeNull();
+  });
+
+
+  it('formats bet and balance with consistent $ currency', () => {
+    expect(fmt(1)).toBe('$1.00');
+    expect(fmtBalance(12345.67)).toBe('$0012345.67');
+    expect(fmtBalance(1000)).toBe('$0001000.00');
+    state.balance = 12345.67;
+    state.balanceBefore = 1000;
+    state.bet = 1;
+    state.lastWin = 0;
+    state.globalMultiplier = 1;
+    updateUI();
+    expect(document.getElementById('balanceDisplay').textContent).toBe('$0012345.67');
+    expect(document.getElementById('balanceBeforeDisplay').textContent).toBe('$0001000.00');
+    expect(document.getElementById('betAmount').textContent).toBe('$1.00');
   });
 
   it('updateUI writes win and multiplier into the HUD', () => {

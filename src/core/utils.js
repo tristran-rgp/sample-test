@@ -7,13 +7,12 @@ export function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) +
 export function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 export function fmt(n) { return '$' + Number(n || 0).toFixed(2); }
 export function fmtBalance(n) {
-  // Định dạng VND: dấu phẩy hàng nghìn, giữ 2 số thập phân + ký hiệu ₫
-  const fixed = Number(n || 0).toFixed(2);
+  // GDD: $ + 7-digit padded integer + 2 decimals (same $ as fmt / bets)
+  const num = Number(n || 0);
+  const sign = num < 0 ? '-' : '';
+  const fixed = Math.abs(num).toFixed(2);
   const [intPart, decPart] = fixed.split('.');
-  const sign = intPart.startsWith('-') ? '-' : '';
-  const digits = sign ? intPart.slice(1) : intPart;
-  const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  return sign + grouped + '.' + decPart + ' ₫';
+  return sign + '$' + intPart.padStart(7, '0') + '.' + decPart;
 }
 /**
  * Pay mult theo of-a-kind (3/4/5).

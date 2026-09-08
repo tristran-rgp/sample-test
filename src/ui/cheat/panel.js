@@ -2,54 +2,9 @@
 import { online, sessionAgencyId, sessionUserId, sessionUsername, setSessionAgencyId, setSessionUserId, ws } from '../../core/state.js';
 import { deriveAgencyFromSrvUrl, resolveSessionAgencyId, resolveSessionUserId, syncCheatSessionFields } from '../../net/ws.js';
 import { buildCheatFeaturePicker, buildCheatGridEditor, onCheatCodeChanged, setCheatPresetActive } from './editor.js';
-import { applyFsGridAndSpin, isEditFsGridOn, isFsGridEditorOpen, setEditFsGridEnabled } from './fsEditor.js';
+import { isEditFsGridOn, setEditFsGridEnabled } from './fsEditor.js';
 import { loadActiveSessions } from './transport.js';
 import { openModal } from '../feedback.js';
-
-export function isLoginVisible() {
-  const el = document.getElementById('loginOverlay');
-  return !!(el && el.style.display !== 'none');
-}
-
-export function isTypingTarget(el) {
-  if (!el || el === document.body || el === document.documentElement) return false;
-  const tag = (el.tagName || '').toUpperCase();
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
-  if (el.isContentEditable) return true;
-  return false;
-}
-
-window.addEventListener('keydown', (e) => {
-  if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
-
-  if (e.key === 'Enter') {
-    if (!isLoginVisible()) return;
-    if (e.target && e.target.id === 'btnPlayOffline') return;
-    if (e.target && e.target.id === 'btnPlayOnline') return;
-    const btn = document.getElementById('btnPlayOnline');
-    if (!btn || btn.disabled) return;
-    e.preventDefault();
-    btn.click();
-    return;
-  }
-
-  if (e.key === ' ' || e.code === 'Space') {
-    if (isLoginVisible()) return;
-    if (isTypingTarget(e.target)) return;
-    const splash = document.getElementById('splash');
-    if (splash && !splash.classList.contains('hidden')) return;
-    if (isFsGridEditorOpen()) {
-      e.preventDefault();
-      applyFsGridAndSpin();
-      return;
-    }
-    if (document.querySelector('.modal-overlay.open')) return;
-    const btn = document.getElementById('btnSpin');
-    if (!btn || btn.disabled) return;
-    e.preventDefault();
-    btn.click();
-  }
-});
 
 // ═══════════════════════════════════════════════════════════════
 // CHEAT / DEBUG PANEL — WS cmd 1999 + REST /debug/cheat

@@ -20,8 +20,11 @@ export function updateAutoUI() {
   const btn = document.getElementById('btnAuto');
   if (!btn) return;
   const n = state.autoSpins || 0;
-  btn.classList.toggle('active', n > 0);
-  btn.title = n > 0 ? `Autospin: ${n} left — click to stop` : 'Autospin';
+  const on = n > 0;
+  btn.classList.toggle('active', on);
+  btn.title = on ? `Autospin: ${n} left — click to stop` : 'Autospin';
+  btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  btn.setAttribute('aria-label', on ? `Autospin on, ${n} left` : 'Autospin');
   // Optional badge text via aria
   btn.dataset.remaining = String(n);
 }

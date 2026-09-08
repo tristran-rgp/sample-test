@@ -79,28 +79,28 @@
       <p style="text-align:center;color:var(--dim);font-size:.8rem;margin-bottom:16px">Connect to server</p>
       <div class="form-group">
         <label>Server</label>
-        <input id="srvUrl" value="https://agency001.relaxwmestu.xyz"
-          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
+        <input id="srvUrl" value="" placeholder="https://your-server.example"
+          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit" autocomplete="url">
       </div>
       <div class="form-group">
         <label>Username</label>
-        <input id="loginUser" value="Tris12"
-          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
+        <input id="loginUser" value="" placeholder="Username"
+          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit" autocomplete="username">
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input id="loginPass" type="password" value="T12345678"
-          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
+        <input id="loginPass" type="password" value="" placeholder="Password"
+          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit" autocomplete="current-password">
       </div>
       <div class="form-group" style="margin-top:4px">
         <label>WS URL</label>
-        <input id="wsUrl" value="wss://gob02-ws.relaxwmestu.xyz/websocket"
-          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
+        <input id="wsUrl" value="" placeholder="wss://your-ws.example/websocket"
+          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit" autocomplete="off">
       </div>
       <div class="form-group" style="margin-top:4px">
         <label>Game ID</label>
-        <input id="gameId" value="yama_01023"
-          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit">
+        <input id="gameId" value="" placeholder="yama_01023"
+          style="width:100%;padding:10px 14px;background:#0a0a0f;border:1px solid #1e3a5f;border-radius:8px;color:var(--text);font-size:14px;font-family:inherit" autocomplete="off">
       </div>
       <div style="display:flex;gap:8px;margin-top:14px">
         <button id="btnPlayOnline" class="btn" title="Enter"
@@ -233,7 +233,7 @@
           <img id="vfxFlyIcon" alt="" draggable="false">
 
           <div class="spin-controls">
-            <button class="circle-btn turbo" id="btnFast" title="Fast Spin">
+            <button class="circle-btn turbo" id="btnFast" title="Fast Spin" aria-label="Fast spin" aria-pressed="false">
               <img class="img-art" src="assert/art-new/btn-fast-spin.webp" alt="Fast">
               <span class="turbo-fallback" aria-hidden="true">⚡</span>
             </button>
@@ -243,15 +243,15 @@
               <img class="img-classic" src="assert/spin.webp" alt="SPIN">
               <img class="img-art" src="assert/art-new/btn-spin.webp" alt="SPIN">
             </button>
-            <button class="circle-btn" id="btnAuto" title="Autospin">
+            <button class="circle-btn" id="btnAuto" title="Autospin" aria-label="Autospin" aria-pressed="false">
               <img class="img-art" src="assert/art-new/btn-auto-spin.webp" alt="Auto">
             </button>
           </div>
         </div>
         <div class="bottom-bar">
           <div class="bb-chip bb-bet"><span class="label">BET</span><span class="val" id="betAmount">$1.00</span></div>
-          <div class="bb-chip bb-before"><span class="label">BALANCE BEFORE</span><span class="val bal-before" id="balanceBeforeDisplay">10,000.00 ₫</span></div>
-          <div class="bb-chip bb-balance"><span class="label">BALANCE</span><span class="val" id="balanceDisplay">10,000.00 ₫</span></div>
+          <div class="bb-chip bb-before"><span class="label">BALANCE BEFORE</span><span class="val bal-before" id="balanceBeforeDisplay">$0010000.00</span></div>
+          <div class="bb-chip bb-balance"><span class="label">BALANCE</span><span class="val" id="balanceDisplay">$0010000.00</span></div>
         </div>
       </div>
 
@@ -272,7 +272,7 @@
           <button class="circle-btn" id="btnMenu" title="Menu">☰</button>
         </div>
         <div class="side-row">
-          <button class="circle-btn sound" id="btnSound" title="Sound">🔊</button>
+          <button class="circle-btn sound" id="btnSound" title="Sound" aria-label="Sound on" aria-pressed="true">🔊</button>
           <button class="circle-btn bet-coin" id="betDisplay" title="Change Bet">◎</button>
         </div>
       </div>
@@ -465,7 +465,7 @@
               </div>
               <div class="cheat-field">
                 <label>X-Debug-Token</label>
-                <input id="cheatDebugToken" value="zeroday-debug-2024" />
+                <input id="cheatDebugToken" value="" placeholder="X-Debug-Token" autocomplete="off" />
               </div>
               <div class="cheat-field">
                 <label>Agency ID <span style="color:var(--cyan);font-weight:400">(từ session)</span></label>
@@ -721,7 +721,7 @@
       </div>
     </div>
   </div>
-  <div id="featToast"></div>
+  <div id="featToast" role="status" aria-live="polite"></div>
   <div id="symTooltip"></div>
 
 </body>
