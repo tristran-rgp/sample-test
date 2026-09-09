@@ -47,10 +47,13 @@ function spinRowHtml(h, idx) {
   const spinId = h.spinId || '';
   const roundId = h.roundId || '';
   const jpTag = h.jackpotWonTier ? ` · JP ${h.jackpotWonTier}` : '';
+  // Server spinType (SPIN / FREE / FS1-4 / scatterBooster / 3Features / 12Features);
+  // legacy rows carry null → fall back to the old generic buy flag.
+  const typeTag = h.spinType ? ` · ${h.spinType}` : (h.buyFeatureTrigger ? ' · buy' : '');
   return `
     <div class="history-item" data-kind="spin" data-spin-id="${spinId}" data-round-id="${roundId}" style="cursor:pointer" title="Open detail">
       <div style="display:flex;justify-content:space-between">
-        <span>${mode} · #${h.spinIndex || idx + 1}${h.buyFeatureTrigger ? ' · buy' : ''}${h.maxWinReached ? ' · CAP' : ''}${jpTag}</span>
+        <span>${mode} · #${h.spinIndex || idx + 1}${typeTag}${h.maxWinReached ? ' · CAP' : ''}${jpTag}</span>
         <span class="${profit >= 0 ? 'history-profit-pos' : 'history-profit-neg'}">${profit >= 0 ? '+' : ''}${fmt(profit)}</span>
       </div>
       <div style="color:var(--dim);font-size:.7rem;margin-top:2px">
@@ -148,10 +151,17 @@ export async function openSpinDetailOnline(spinId, roundId) {  if (!spinId) retu
   const bet = Number(d.betAmount ?? d.totalBet ?? 0);
   const win = Number(d.totalWin ?? d.win ?? 0);
   const profit = Number(d.profit != null ? d.profit : win - bet);
+  // Server totalBet = cash actually charged (buy cost / 0 on free). Show it next to
+  // the stake when they differ so "BET $1 / PROFIT -$79" reads correctly.
+  const paid = d.totalBet != null ? Number(d.totalBet) : null;
+  const showPaid = paid != null && Number.isFinite(paid) && Math.abs(paid - bet) > 1e-9;
   const ts = d.timestamp ? String(d.timestamp).replace('T', ' ').slice(0, 19) : '—';
   const mode = String(d.thisMode || 'base').toLowerCase();
-  const spinType = (d.jackpotWonTier || d.jackpotWonAmount > 0) ? 'JACKPOT'
-    : mode.includes('free') || mode === 'fs' ? 'FREE SPIN' : 'NORMAL SPIN';
+  // Prefer server spinType (SPIN / FREE / FS1-4 / scatterBooster / 3Features / 12Features);
+  // legacy rows carry null → fall back to the mode-derived label.
+  const spinType = d.spinType
+    || ((d.jackpotWonTier || d.jackpotWonAmount > 0) ? 'JACKPOT'
+      : mode.includes('free') || mode === 'fs' ? 'FREE SPIN' : 'NORMAL SPIN');
 
   // Grid — support row-major (3×5) hoặc column-major (5×3)
   let matrix = null;
@@ -210,7 +220,7 @@ export async function openSpinDetailOnline(spinId, roundId) {  if (!spinId) retu
   body.innerHTML = `
     ${modeBadge}
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
-      <div style="background:rgba(0,0,0,.35);border:1px solid #1e3a5f;border-radius:8px;padding:8px;text-align:center"><div style="font-size:.65rem;color:var(--dim)">BET</div><div style="color:var(--text)">${fmt(bet)}</div></div>
+      <div style="background:rgba(0,0,0,.35);border:1px solid #1e3a5f;border-radius:8px;padding:8px;text-align:center"><div style="font-size:.65rem;color:var(--dim)">BET</div><div style="color:var(--text)">${fmt(bet)}${showPaid ? `<div style="font-size:.65rem;color:var(--dim)">paid ${fmt(paid)}</div>` : ''}</div></div>
       <div style="background:rgba(0,0,0,.35);border:1px solid #1e3a5f;border-radius:8px;padding:8px;text-align:center"><div style="font-size:.65rem;color:var(--dim)">WIN</div><div style="color:var(--green)">${fmt(win)}</div></div>
       <div style="background:rgba(0,0,0,.35);border:1px solid #1e3a5f;border-radius:8px;padding:8px;text-align:center"><div style="font-size:.65rem;color:var(--dim)">PROFIT</div><div class="${profit >= 0 ? 'history-profit-pos' : 'history-profit-neg'}">${profit >= 0 ? '+' : ''}${fmt(profit)}</div></div>
     </div>
