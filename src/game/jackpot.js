@@ -2,11 +2,18 @@
 //
 // Backend contract (be-zero-day, JackpotServiceImpl / JackpotRevealHandler):
 //  - Trigger (inside SPIN 1500 / BUY 1501 response): features.progressiveJackpot =
-//      { isTriggered:true, pending:true, winId, expiresAt?, opened?:[{index,tier}] }
+//      { isTriggered:true, pending:true, winId, expiresAt?, serverNow?, ttlMs?, ttlSeconds?,
+//        opened?:[{index,tier}] }
 //    NO prize tier / amount / full nodes — the 15-node grid stays server-side.
 //  - REVEAL cmd 1509: send { cmd:"1509", win_id, index } → response:
-//      { winId, index, tier, paid, matched, opened:[{index,tier}], expiresAt?, expired? }
+//      { winId, index, tier, paid, matched, opened:[{index,tier}],
+//        expiresAt?, serverNow?, ttlMs?, ttlSeconds?, expired? }
 //      when paid=true also: tier(prize), amount, balance.
+//  - Timer: FE counts down a RELATIVE ttlMs from receipt with performance.now()
+//    (deadline = now + ttlMs - rtt/2), never Date.now() vs server clock.
+//    expiresAt is kept only as backward-compat fallback. Every 1509 reveal
+//    re-arms the deadline from the fresh ttlMs. On expiry FE only locks the
+//    grid and waits for the server auto-pay push — never settles locally.
 //  - opened[] always carries tier for already-opened cells so a NEW TAB can redraw
 //    icons without relying on in-session FE cache (index→tier).
 //  - JACKPOT_WIN push 9000: { event:"JACKPOT_WIN", winner, jackpotType, totalWin }
@@ -33,6 +40,31 @@ import { playJackpotClimax } from '../ui/vfx/core.js';
 
 // Active claim controller (module-level so the 9000 push can resolve it).
 let activeClaim = null;
+
+/**
+ * Relative TTL (ms) remaining for a claim/reveal payload.
+ * Prefers BE ttlMs/ttlSeconds (no clock sync needed); falls back to the
+ * legacy absolute expiresAt; null when the server sent no timing at all.
+ */
+export function claimTtlMs(src) {
+  if (!src) return null;
+  const ttlMs = Number(src.ttlMs);
+  if (Number.isFinite(ttlMs) && ttlMs >= 0) return ttlMs;
+  const ttlS = Number(src.ttlSeconds ?? src.ttl);
+  if (Number.isFinite(ttlS) && ttlS >= 0) return ttlS * 1000;
+  if (src.expiresAt) {
+    const ms = new Date(src.expiresAt).getTime() - Date.now();
+    if (Number.isFinite(ms)) return Math.max(0, ms);
+  }
+  return null;
+}
+
+/** Arm (or re-arm) the monotonic countdown deadline on the controller. */
+function armDeadline(controller, ttlMs, rttMs = 0) {
+  if (!Number.isFinite(ttlMs) || ttlMs < 0) return;
+  const rtt = Number.isFinite(rttMs) && rttMs > 0 ? rttMs / 2 : 0;
+  controller.deadline = performance.now() + Math.max(0, ttlMs - rtt);
+}
 
 export function jackpotEmoji(tierName) {
   return JACKPOT_TIERS.find(t => t.name === tierName)?.emoji || '◆';
@@ -166,6 +198,9 @@ export function onJackpotWinPush(payload) {
   const resolve = activeClaim.done;
   activeClaim.finished = true;
   if (activeClaim.timer) clearInterval(activeClaim.timer);
+  if (activeClaim.visibilityHandler) {
+    document.removeEventListener('visibilitychange', activeClaim.visibilityHandler);
+  }
   activeClaim = null;
   state.lastJackpotActive = false;
   sfx('jackpot', { gain: 1 });
@@ -203,7 +238,7 @@ export function onJackpotAutoPayPush(payload) {
 
 /**
  * Open the Core Hack pick-and-click UI for a 2-phase claim.
- * @param {{winId:string, expiresAt?:string, opened?:Array<{index:number,tier?:string}>, _resumeOnly?:boolean}} claim
+ * @param {{winId:string, expiresAt?:string, serverNow?:string, ttlMs?:number, ttlSeconds?:number, opened?:Array<{index:number,tier?:string}>, _resumeOnly?:boolean}} claim
  * @returns {Promise<number>} resolves with the paid amount (0 if closed without pay)
  */
 export async function playCoreHack(claim) {
@@ -239,10 +274,13 @@ export async function playCoreHack(claim) {
       expired: false,
       done: resolve,
       timer: null,
+      visibilityHandler: null,
+      deadline: null,
       expiresAt: claim.expiresAt ? new Date(claim.expiresAt).getTime() : null,
       applyPaidReveal: null,
     };
     activeClaim = controller;
+    armDeadline(controller, claimTtlMs(claim));
 
     const grid = document.getElementById('jackpotGrid');
     grid.innerHTML = '';
@@ -287,6 +325,10 @@ export async function playCoreHack(claim) {
       if (controller.finished) return;
       controller.finished = true;
       if (controller.timer) clearInterval(controller.timer);
+      if (controller.visibilityHandler) {
+        document.removeEventListener('visibilitychange', controller.visibilityHandler);
+        controller.visibilityHandler = null;
+      }
       activeClaim = null;
       state.lastJackpotActive = false;
       sfx('jackpot', { gain: 1 });
@@ -344,7 +386,9 @@ export async function playCoreHack(claim) {
     const revealCell = async (idx, node) => {
       if (controller.finished || controller.expired) return;
       sfx('tick', { gain: 0.5 });
+      const t0 = performance.now();
       const resp = await sendReveal(winId, idx);
+      const rttMs = performance.now() - t0;
       if (!resp) {
         // No response (timeout/disconnect) — leave node clickable, let user retry.
         showToast('Reveal failed — try again', '#ff8800');
@@ -364,8 +408,14 @@ export async function playCoreHack(claim) {
         applyPaidBoard(resp);
         return;
       }
-      // Still open — refresh countdown if server sent a fresh expiresAt.
-      if (resp.expiresAt) controller.expiresAt = new Date(resp.expiresAt).getTime();
+      // Still open — re-arm the relative countdown from the fresh BE ttl.
+      const freshTtl = claimTtlMs(resp);
+      if (freshTtl != null) {
+        armDeadline(controller, freshTtl, rttMs);
+        tickCountdown();
+      } else if (resp.expiresAt) {
+        controller.expiresAt = new Date(resp.expiresAt).getTime();
+      }
     };
 
     const markClaimExpiredLocally = () => {
@@ -377,13 +427,20 @@ export async function playCoreHack(claim) {
       if (grid) grid.style.pointerEvents = 'none';
     };
 
-    // Countdown (TTL). On expiry: stop clicks and wait for server auto-pay — never force-reveal.
+    // Countdown (relative TTL, monotonic clock). On expiry: stop clicks and
+    // wait for server auto-pay — never force-reveal.
     const tickCountdown = () => {
-      if (!controller.expiresAt) {
+      if (controller.finished || controller.expired) return;
+      let remainMs = null;
+      if (controller.deadline != null) {
+        remainMs = controller.deadline - performance.now();
+      } else if (controller.expiresAt != null) {
+        // Legacy BE without ttlMs: absolute fallback (clock-skew prone).
+        remainMs = controller.expiresAt - Date.now();
+      } else {
         if (timerEl) timerEl.textContent = '⏳ no timer';
         return;
       }
-      const remainMs = controller.expiresAt - Date.now();
       if (remainMs <= 0) {
         markClaimExpiredLocally();
         return;
@@ -391,13 +448,18 @@ export async function playCoreHack(claim) {
       const s = Math.ceil(remainMs / 1000);
       if (timerEl) timerEl.textContent = `⏳ ${s}s`;
     };
-    tickCountdown();
-    controller.timer = setInterval(tickCountdown, 500);
-
     // If no timer from server, allow manual expiry fallback (still no FE force-reveal).
-    if (!controller.expiresAt) {
-      controller.expiresAt = Date.now() + JACKPOT_TTL_SECONDS * 1000;
+    if (controller.deadline == null && controller.expiresAt == null) {
+      armDeadline(controller, JACKPOT_TTL_SECONDS * 1000);
     }
+    tickCountdown();
+    controller.timer = setInterval(tickCountdown, 250);
+    // setInterval throttles in background tabs; performance.now() keeps running,
+    // so re-tick immediately when the tab becomes visible again.
+    controller.visibilityHandler = () => {
+      if (document.visibilityState === 'visible') tickCountdown();
+    };
+    document.addEventListener('visibilitychange', controller.visibilityHandler);
   });
 }
 
@@ -418,7 +480,7 @@ async function sendReveal(winId, index) {
 /**
  * Pick-and-click Core Hack entry. For 2-phase online the claim carries winId only.
  * Offline (no arg) keeps the legacy random behaviour.
- * @param {object|null} serverJp - online: progressiveJackpot {winId, expiresAt?, opened?}
+ * @param {object|null} serverJp - online: progressiveJackpot {winId, expiresAt?, serverNow?, ttlMs?, ttlSeconds?, opened?}
  */
 export async function playJackpot(serverJp = null) {
   // 2-phase online: backend only sends winId + pending (no tier/amount/nodes).
