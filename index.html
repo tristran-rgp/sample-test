@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>ZERO DAY — Cyberpunk Slot</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet" />
   <script type="module" src="/src/main.js"></script>
   <link rel="stylesheet" href="/src/style.css" />
 </head>
@@ -175,7 +178,7 @@
                 <div class="grid-top-hud" id="gridTopHud">
                   <div class="grid-hud-left" aria-hidden="true"></div>
                   <div class="grid-hud-win win-block" title="Bấm để xem cách tính win">
-                    <span class="val win-slot" id="headerWin">0.00</span>
+                    <span class="val win-slot" id="headerWin">0.00 ₫</span>
                     <button type="button" class="win-explain-btn" id="btnWinExplain"
                       title="Giải thích win spin vừa rồi">⌕</button>
                   </div>
@@ -241,7 +244,8 @@
               title="Feature Explain Mode — pause & show what each feature does">📖</button>
             <button class="spin-btn" id="btnSpin" title="SPIN (Space)">
               <img class="img-classic" src="assert/spin.webp" alt="SPIN">
-              <img class="img-art" src="assert/art-new/btn-spin.webp" alt="SPIN">
+              <img class="img-art" src="assert/art-new/btn-spin.webp" alt="" aria-hidden="true">
+              <span class="spin-btn-label">SPIN</span>
             </button>
             <button class="circle-btn" id="btnAuto" title="Autospin">
               <img class="img-art" src="assert/art-new/btn-auto-spin.webp" alt="Auto">
@@ -249,7 +253,7 @@
           </div>
         </div>
         <div class="bottom-bar">
-          <div class="bb-chip bb-bet"><span class="label">BET</span><span class="val" id="betAmount">$1.00</span></div>
+          <div class="bb-chip bb-bet"><span class="label">BET</span><span class="val" id="betAmount">1.00 ₫</span></div>
           <div class="bb-chip bb-before"><span class="label">BALANCE BEFORE</span><span class="val bal-before" id="balanceBeforeDisplay">10,000.00 ₫</span></div>
           <div class="bb-chip bb-balance"><span class="label">BALANCE</span><span class="val" id="balanceDisplay">10,000.00 ₫</span></div>
         </div>

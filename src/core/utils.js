@@ -5,9 +5,8 @@ import { SYMBOLS } from '../game/config.js';
 export function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 export function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
 export function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-export function fmt(n) { return '$' + Number(n || 0).toFixed(2); }
 export function fmtBalance(n) {
-  // Định dạng VND: dấu phẩy hàng nghìn, giữ 2 số thập phân + ký hiệu ₫
+  // VND: grouping hàng nghìn, luôn 2 số thập phân + ₫
   const fixed = Number(n || 0).toFixed(2);
   const [intPart, decPart] = fixed.split('.');
   const sign = intPart.startsWith('-') ? '-' : '';
@@ -15,6 +14,7 @@ export function fmtBalance(n) {
   const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return sign + grouped + '.' + decPart + ' ₫';
 }
+export function fmt(n) { return fmtBalance(n); }
 /**
  * Pay mult theo of-a-kind (3/4/5).
  * Client SYMBOLS[k].pays = [0, 0, p3, p4, p5]  → index = length - 1

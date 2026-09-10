@@ -15,6 +15,7 @@
       --glow-green: 0 0 20px rgba(0,255,136,.4);
       --glow-red: 0 0 20px rgba(255,42,58,.5);
       --glow-yellow: 0 0 16px rgba(255,208,0,.55);
+      --font-display: 'Orbitron', sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
@@ -649,7 +650,8 @@
       #bgScene *,
       .info-bar .marquee,
       .fx-aura-breathe,
-      .feat-badge.active { animation: none !important; }
+      .feat-badge.active,
+      .spin-btn .img-art { animation: none !important; }
     }
     /* Server rack towers */
     #bgScene .bg-towers {
@@ -732,13 +734,17 @@
     }
     #splash.hidden { opacity: 0; pointer-events: none; }
     .splash-logo {
+      font-family: var(--font-display);
       font-size: 3rem; font-weight: 900; letter-spacing: 8px;
       background: linear-gradient(135deg, var(--cyan), var(--yellow));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       filter: drop-shadow(0 0 30px rgba(0,240,255,.5));
       margin-bottom: 1rem;
     }
-    .splash-sub { color: var(--dim); font-size: .9rem; letter-spacing: 3px; margin-bottom: 3rem; }
+    .splash-sub {
+      font-family: var(--font-display);
+      color: var(--dim); font-size: .9rem; letter-spacing: 3px; margin-bottom: 3rem;
+    }
     .splash-bar { width: 200px; height: 3px; background: #1a1a2e; border-radius: 2px; overflow: hidden; }
     .splash-fill { height: 100%; background: var(--cyan); width: 0%; transition: width .1s; box-shadow: var(--glow-cyan); }
 
@@ -794,6 +800,7 @@
       border-radius: 10px;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
+      font-family: var(--font-display);
       font-weight: 900; line-height: 1.05;
       box-shadow: var(--glow-yellow), 0 4px 0 #b88600;
       text-align: center;
@@ -1352,6 +1359,19 @@
       user-select: none;
       overflow: hidden;
       padding: 0;
+    }
+    .cell.cell-loading .sym-load {
+      width: 36%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 240, 255, .18);
+      border-top-color: rgba(0, 255, 160, .95);
+      box-shadow: 0 0 10px rgba(0, 255, 160, .35);
+      animation: symLoadSpin .7s linear infinite;
+      animation-delay: calc((var(--reel, 0) * 3 + var(--row, 0)) * 70ms);
+    }
+    @keyframes symLoadSpin {
+      to { transform: rotate(360deg); }
     }
     /*
      * Symbol FX pipeline — keep raster PNG art, drive look via CSS vars:
@@ -2757,6 +2777,12 @@
     body.pack-art-new .spin-btn {
       filter: drop-shadow(0 0 12px rgba(0,255,140,.35));
     }
+    body.pack-art-new .spin-btn .img-art {
+      animation: spinBtnRing 6s linear infinite;
+    }
+    body.pack-art-new .spin-btn-label {
+      display: flex;
+    }
     .img-art { display: none; }
     body.pack-art-new .img-classic { display: none; }
     body.pack-art-new .img-art {
@@ -3170,8 +3196,31 @@
       padding: 0;
       transition: transform .12s, filter .12s;
       flex-shrink: 0;
+      position: relative;
     }
     .spin-btn img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .spin-btn-label {
+      display: none;
+      position: absolute;
+      inset: 0;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(.42rem, 1.7vh, .72rem);
+      letter-spacing: .12em;
+      line-height: 1;
+      color: #e8fff8;
+      text-shadow:
+        0 0 6px rgba(0, 255, 180, .95),
+        0 0 14px rgba(0, 240, 255, .55),
+        0 1px 0 #000;
+      z-index: 1;
+    }
+    @keyframes spinBtnRing {
+      to { transform: rotate(360deg); }
+    }
     .spin-btn:hover:not(:disabled) { transform: scale(1.06); filter: drop-shadow(0 0 10px rgba(0,240,255,.5)); }
     .spin-btn:active:not(:disabled) { transform: scale(.98); }
     .spin-btn:disabled { opacity: .4; cursor: not-allowed; filter: grayscale(.5); }
@@ -3221,8 +3270,14 @@
       z-index: 20;
       width: 100%;
     }
-    .bottom-bar .label { color: #888; font-weight: 600; margin-right: 6px; font-size: .75rem; }
-    .bottom-bar .val { color: #fff; font-variant-numeric: tabular-nums; }
+    .bottom-bar .label {
+      font-family: var(--font-display);
+      color: #888; font-weight: 600; margin-right: 6px; font-size: .75rem;
+    }
+    .bottom-bar .val {
+      font-family: var(--font-display);
+      color: #fff; font-variant-numeric: tabular-nums;
+    }
     .bottom-bar .win-slot { color: var(--green); }
     .bottom-bar .bal-before { color: #aab4c0; }
     /* ── Win explain panel (zoomable) ── */
@@ -3405,10 +3460,14 @@
     #modalWinExplain .wx-kv-grid dd { color: #def; margin: 0; font-variant-numeric: tabular-nums; }
 
     /* Shared modal / overlay styles */
+    h2, .top-chrome, .win-slot, .mult-box, .side-pt-head {
+      font-family: var(--font-display);
+    }
     .btn {
       background: #1a1a2e; border: 1px solid #1e3a5f;
       color: var(--text); padding: 8px 14px; border-radius: 8px;
       cursor: pointer; font-size: .8rem; font-weight: 600;
+      font-family: var(--font-display);
       transition: all .15s; letter-spacing: .5px; white-space: nowrap;
     }
     .btn:hover:not(:disabled) { border-color: var(--cyan); color: var(--cyan); }

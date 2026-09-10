@@ -5,8 +5,14 @@ import { PAYING, REELS, ROWS, WIN_CAP } from './config.js';
 import { setCellSplit } from '../ui/vfx/core.js';
 
 // ─── Grid helpers ────────────────────────────────────────────
+/** Ô chờ data (session screen / spin land) — render thành loading, không phải symbol. */
+export function isIdleSym(sym) {
+  return !PAYING.includes(sym) && sym !== 'W' && sym !== 'S' && sym !== 'M';
+}
+
 export function createEmptyGrid() {
-  state.grid = Array.from({ length: REELS }, () => Array(ROWS).fill('F'));
+  // null = chưa có reel data. Không fill 'F' (Bitcoin) — idle hiện loading.
+  state.grid = Array.from({ length: REELS }, () => Array(ROWS).fill(null));
   state.cellMeta = Array.from({ length: REELS }, () =>
     Array.from({ length: ROWS }, () => ({ split: 1, multiplier: 1, mystery: false }))
   );

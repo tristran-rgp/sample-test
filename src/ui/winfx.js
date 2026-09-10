@@ -178,7 +178,7 @@ export async function playWinEffect(total) {
   shakeScreen();
 
   // Header giữ total (đã ticker ở animateWinWays); overlay đếm lại 0 → total
-  document.getElementById('headerWin').textContent = amount.toFixed(2);
+  document.getElementById('headerWin').textContent = fmt(amount);
 
   // Đếm tiền 0→total (hơi chậm hơn để dễ đọc; vẫn song song animation sequence)
   const tickDur = state.fastSpin ? 380 : 820;
@@ -218,10 +218,10 @@ export async function tickerWin(from, to) {
   await runMoneyTicker(from, to, {
     durationMs: state.fastSpin ? 140 : 320,
     onTick: (val) => {
-      document.getElementById('headerWin').textContent = val.toFixed(2);
+      document.getElementById('headerWin').textContent = fmt(val);
     },
   });
-  document.getElementById('headerWin').textContent = Number(to).toFixed(2);
+  document.getElementById('headerWin').textContent = fmt(to);
 }
 
 /** Lấy danh sách cell "c,r" cho một way win (ưu tiên positions từ server) */

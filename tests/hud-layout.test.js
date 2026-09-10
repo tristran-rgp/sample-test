@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { state } from '../src/core/state.js';
 import { listPreloadUrls } from '../src/ui/preload.js';
@@ -27,7 +28,9 @@ describe('grid top HUD', () => {
     state.balanceBefore = 900;
     state.bet = 1;
     updateUI();
-    expect(document.getElementById('headerWin').textContent).toBe('12.50');
+    expect(document.getElementById('headerWin').textContent).toBe('12.50 ₫');
+    expect(document.getElementById('betAmount').textContent).toBe('1.00 ₫');
+    expect(document.getElementById('balanceDisplay').textContent).toBe('1,000.00 ₫');
     expect(document.getElementById('multDisplay').textContent).toBe('08');
   });
 
@@ -65,6 +68,19 @@ describe('grid top HUD', () => {
     expect(css).not.toMatch(/panel-bet\.png'\) center \/ 100% 140%/);
   });
 
+  it('art-new spin button keeps SPIN label still while the ring rotates', () => {
+    const btn = document.getElementById('btnSpin');
+    const label = btn?.querySelector('.spin-btn-label');
+    const ring = btn?.querySelector('img.img-art');
+    expect(btn).toBeTruthy();
+    expect(label?.textContent.trim()).toBe('SPIN');
+    expect(ring?.getAttribute('src')).toContain('btn-spin.webp');
+    const css = readFileSync('src/style.css', 'utf8');
+    expect(css).toMatch(/\.spin-btn \.img-art\s*\{[^}]*spinBtnRing/s);
+    expect(css).toMatch(/@keyframes spinBtnRing/);
+    expect(css).toMatch(/body\.pack-art-new \.spin-btn-label\s*\{\s*display:\s*flex/);
+  });
+
   it('does not put WIN $ amount into the info-bar', () => {
     const bar = document.getElementById('infoBar');
     setInfoBar('idle', 'Spinning...');
@@ -78,7 +94,7 @@ describe('grid top HUD', () => {
     const bar = document.getElementById('infoBar');
     setInfoBar('idle', 'Spinning...');
     await tickerWin(0, 20);
-    expect(document.getElementById('headerWin').textContent).toBe('20.00');
+    expect(document.getElementById('headerWin').textContent).toBe('20.00 ₫');
     expect(bar.classList.contains('win-result')).toBe(false);
     expect(bar.textContent).not.toMatch(/WIN\s*\$/);
   });

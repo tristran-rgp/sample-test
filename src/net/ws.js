@@ -658,7 +658,7 @@ export async function doOnlineSpin(opts = {}) {
     else buildWinExplainFromLastInSpin();
 
     // Không set headerWin = total trước ticker — để cộng tiền nhìn thấy
-    document.getElementById('headerWin').textContent = totalWin > 0 ? '0.00' : '0.00';
+    document.getElementById('headerWin').textContent = fmt(0);
 
     if (totalWin > 0) {
       if (wins.length > 0) {
@@ -669,7 +669,7 @@ export async function doOnlineSpin(opts = {}) {
       // Big/Mega/Legendary: ticker lại nhanh trên overlay (header đã = total)
       await playWinEffect(totalWin);
       await celebrateWinPro(totalWin);
-      document.getElementById('headerWin').textContent = totalWin.toFixed(2);
+      document.getElementById('headerWin').textContent = fmt(totalWin);
     } else {
       renderGrid();
     }

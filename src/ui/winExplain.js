@@ -698,7 +698,7 @@ export async function animateWinWays(wins, total) {
     showVfxBanner(`${wins.length} way(s) · ${fmt(total)}`, '');
   }
   // Bắt đầu từ 0 để ticker cộng tiền nhìn thấy
-  document.getElementById('headerWin').textContent = '0.00';
+  document.getElementById('headerWin').textContent = fmt(0);
   await sleepRaw(state.fastSpin ? 120 : 280);
 
   // LTR ways then RTL ways (Bypass semantic) — rút gọn, cộng dồn header WIN
@@ -736,7 +736,7 @@ export async function animateWinWays(wins, total) {
       runMoneyTicker(running, next, {
         durationMs: state.fastSpin ? 80 : 140,
         onTick: (val) => {
-          document.getElementById('headerWin').textContent = val.toFixed(2);
+          document.getElementById('headerWin').textContent = fmt(val);
         },
       }),
     ]);
@@ -752,11 +752,11 @@ export async function animateWinWays(wins, total) {
     await runMoneyTicker(running, total, {
       durationMs: state.fastSpin ? 100 : 200,
       onTick: (val) => {
-        document.getElementById('headerWin').textContent = val.toFixed(2);
+        document.getElementById('headerWin').textContent = fmt(val);
       },
     });
   } else {
-    document.getElementById('headerWin').textContent = Number(total).toFixed(2);
+    document.getElementById('headerWin').textContent = fmt(total);
   }
   await sleepRaw(state.fastSpin ? 80 : 160);
   wrap?.classList.remove('dim-win');

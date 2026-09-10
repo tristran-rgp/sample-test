@@ -2,7 +2,7 @@
 import { state } from '../core/state.js';
 import { fmt, fmtBalance } from '../core/utils.js';
 import { CORE_HACK, FEATURES, FEATURE_EXPLAIN_VI, REELS, ROWS, SYMBOLS } from '../game/config.js';
-import { splitCountOf } from '../game/grid.js';
+import { isIdleSym, splitCountOf } from '../game/grid.js';
 import { canReplayFeature, findReplayStepIndex, replayLastFeature } from '../game/replay.js';
 import { imgTag, setImgSrc } from './assets.js';
 import { openModal } from './feedback.js';
@@ -54,21 +54,34 @@ export function bindGridClicksOnce() {
 
 export function paintCell(cell, c, r, highlightSet) {
   const sym = state.grid[c][r];
+  const loading = isIdleSym(sym);
   const meta = state.cellMeta[c][r] || { split: 1, multiplier: 1, mystery: false };
   const splitCount = splitCountOf(meta);
   const split = splitCount > 1 && sym !== 'S';
   const win = highlightSet.has(`${c},${r}`);
-  const key = `${sym}|${splitCount}|${meta.multiplier || 1}|${win ? 1 : 0}|${meta.mystery || sym === 'M' ? 1 : 0}`;
+  const key = loading
+    ? `idle|${c}|${r}`
+    : `${sym}|${splitCount}|${meta.multiplier || 1}|${win ? 1 : 0}|${meta.mystery || sym === 'M' ? 1 : 0}`;
   if (cell.dataset.rk === key) return;
   cell.dataset.rk = key;
   cell.dataset.reel = String(c);
   cell.dataset.row = String(r);
   cell.className = 'cell';
+  cell.replaceChildren();
+  if (loading) {
+    cell.classList.add('cell-loading');
+    cell.style.setProperty('--reel', String(c));
+    cell.style.setProperty('--row', String(r));
+    const spin = document.createElement('span');
+    spin.className = 'sym-load';
+    spin.setAttribute('aria-hidden', 'true');
+    cell.appendChild(spin);
+    return;
+  }
   if (win) cell.classList.add('win');
   if (sym === 'S') cell.classList.add('scatter-win');
   if (meta.mystery || sym === 'M') cell.classList.add('mystery');
   if (split) cell.classList.add('split');
-  cell.replaceChildren();
   if (meta.multiplier > 1 && sym !== 'W') {
     const tag = document.createElement('span');
     tag.className = 'mult-tag';
@@ -256,7 +269,7 @@ export function updateUI() {
   if (beforeEl) beforeEl.textContent = fmtBalance(state.balanceBefore);
   document.getElementById('balanceDisplay').textContent = fmtBalance(state.balance);
   document.getElementById('betAmount').textContent = fmt(state.bet);
-  document.getElementById('headerWin').textContent = state.lastWin.toFixed(2);
+  document.getElementById('headerWin').textContent = fmt(state.lastWin);
   const mult = Math.max(1, state.globalMultiplier || 1);
   document.getElementById('multDisplay').textContent = String(mult).padStart(2, '0');
   syncPerfMode();
